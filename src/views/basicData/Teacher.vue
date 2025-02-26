@@ -8,7 +8,7 @@ import { usePersonnelStore } from '@/store/personnelStore';
 import { onBeforeMount } from 'vue';
 export default {
   name: "Teacher",
-  componments: {
+  components: {
     TeacherList,
   },
   setup() {

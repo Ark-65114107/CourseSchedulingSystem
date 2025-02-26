@@ -28,7 +28,7 @@ export const useAuthStore = defineStore('auth', {
                     name: this.routes.name,
                     meta: this.routes.meta,
                     redirect: this.routes.redirect,
-                    component: modules[`../../views${this.routes.componmentUrl}`],
+                    component: modules[`../../views${this.routes.componentUrl}`],
                     children: childrens
                 })
             })
@@ -41,7 +41,7 @@ export const useAuthStore = defineStore('auth', {
                         name: c.name,
                         path: c.path,
                         meta: c.meta,
-                        component: modules[`../../views${c.componmentUrl}`],
+                        component: modules[`../../views${c.componentUrl}`],
                     })
                 } else {
                     const childrens = []
@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', {
                             name: c2.name,
                             path: c2.path,
                             meta: c2.meta,
-                            component: modules[`../../views${c2.componmentUrl}`]
+                            component: modules[`../../views${c2.componentUrl}`]
                         })
                     })
                     res.push({
