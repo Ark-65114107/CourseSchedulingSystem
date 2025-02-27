@@ -236,7 +236,7 @@
 </template>
 
 <script>
-console.log(app);
+
 import { computed, reactive, ref, toRefs } from "vue";
 import { v1 as uuid } from "uuid";
 import bus from "@/bus/bus";

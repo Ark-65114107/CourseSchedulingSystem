@@ -16,9 +16,9 @@
       label-width="auto"
       ref="campusFormRef"
     >
-      <el-form-item label="校区名称:" prop="campusName">
+      <el-form-item label="角色名称:" prop="roleName">
         <el-input
-          v-model="formInput.campusName"
+          v-model="formInput.roleName"
           maxlength="50"
           class="campusName"
         />
@@ -46,7 +46,7 @@
 </template>
 
 <script>
-console.log(app);
+
 import { reactive, ref, toRefs } from "vue";
 import { v1 as uuid } from "uuid";
 import bus from "@/bus/bus";
@@ -55,16 +55,16 @@ import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
 export default {
   name: "roleEditDialog",
   mounted() {
-    bus.on("showCampusEdit", (value) => {
+    bus.on("showRoleEdit", (value) => {
       this.mode = false;
       this.isDialogFormVisible = true; //List中按下按钮弹窗
       this.$nextTick(() => {
         this.id = value.id;
-        this.formInput.campusName = value.name;
+        this.formInput.roleName = value.name;
       });
     });
 
-    bus.on("showCampusAdd", () => {
+    bus.on("showRoleAdd", () => {
       this.mode = true;
       this.isDialogFormVisible = true; //List中按下按钮弹窗
     });
@@ -79,16 +79,16 @@ export default {
     });
 
     const formInput = reactive({
-      campusName: "",
+      roleName: "",
     });
 
     const inputRule = {
-      campusName: [
+      roleName: [
         {
           required: true,
           validator: nonEmptyValidator,
           trigger: "change",
-          message: "请输入校区!",
+          message: "请输入角色名称!",
         },
       ],
     };

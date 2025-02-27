@@ -118,7 +118,7 @@
 </template>
 
 <script>
-console.log(app);
+
 import { reactive, ref, toRefs } from "vue";
 import bus from "@/bus/bus";
 import { useAcademicStore } from "@/store/academicStore/index.js"; //store

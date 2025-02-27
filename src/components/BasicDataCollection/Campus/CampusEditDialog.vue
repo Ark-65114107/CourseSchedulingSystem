@@ -46,7 +46,7 @@
 </template>
 
 <script>
-console.log(app);
+
 import { reactive, ref, toRefs } from "vue";
 import { v1 as uuid } from "uuid";
 import bus from "@/bus/bus";

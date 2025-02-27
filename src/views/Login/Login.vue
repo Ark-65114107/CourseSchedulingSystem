@@ -60,14 +60,14 @@
 import { reactive, ref, toRefs } from "vue";
 import { userLogin } from "@/api/user.api";
 import { ElMessage } from "element-plus";
-import { useAuthStore } from "@/store/authStore/index.js"
-import { setToken } from "@/utils/token/setToken.js" 
-import router from '@/router';
-import { getToken } from '@/utils/token/getToken';
+import { useAuthStore } from "@/store/authStore/index.js";
+import { setToken } from "@/utils/token/setToken.js";
+import router from "@/router";
+import { getToken } from "@/utils/token/getToken";
 export default {
   name: "Login",
   setup() {
-    const authStore = useAuthStore()
+    const authStore = useAuthStore();
     const loginFormRef = ref({});
     const data = reactive({
       username: "",
@@ -93,19 +93,19 @@ export default {
           })
             .then((res) => {
               if (res.meta.code == 200) {
-                sessionStorage.clear()
-                localStorage.clear()
-                setToken(res.data.token)
-                authStore.getUserInfo()
-                ElMessage.success("登录成功!")
-              }else{
-                if(res.meta.code == 402){
-                  ElMessage.error("请检查用户名或密码!")
-                }
+                sessionStorage.clear();
+                localStorage.clear();
+                setToken(res.data.token);
+                authStore.getUserInfo();
+                ElMessage.success("登录成功!");
               }
-            }).then(()=>{
-              if(getToken()){
-                router.push("/home/index")
+              if (res.meta.code == 402) {
+                ElMessage.error("请检查用户名或密码!");
+              }
+            })
+            .then(() => {
+              if (getToken()) {
+                router.push("/home/index");
               }
             })
             .catch((error) => {
@@ -132,7 +132,7 @@ export default {
   height: 100%;
   width: 100%;
   /* background-image: url("@/assets/Login_bk.jpg"); */
-  background: #F2F6FC;
+  background: #f2f6fc;
   background-repeat: no-repeat;
   background-size: cover;
   display: flex;
@@ -153,7 +153,7 @@ export default {
   flex-direction: column;
   align-items: center;
   border-radius: 8px;
-  box-shadow: 6px 6px 1px  #C0C4CC;
+  box-shadow: 6px 6px 1px #c0c4cc;
 }
 
 .LoginForm {

@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="isDialogFormVisible"
-    :title= 'mode ? "添加":"修改"'
+    title="修改权限"
     width="450"
     class="dialog"
     :close-on-click-modal="false"
@@ -16,25 +16,18 @@
       label-width="auto"
       ref="campusFormRef"
     >
-      <el-form-item label="校区名称:" prop="campusName">
-        <el-input
-          v-model="formInput.campusName"
-          maxlength="50"
-          class="campusName"
+      <el-form-item class="permissionTreeBack">
+        <el-tree
+          class="permissionTree"
+          :data="formInput.permissions"
+          style="max-width: 600px;"
+          show-checkbox
         />
       </el-form-item>
 
       <el-form-item class="btn">
-        <el-button
-          type="primary"
-          @click="editItem(campusFormRef)"
-          v-show="!mode"
-        >
+        <el-button type="primary" @click="editItem(campusFormRef)">
           <span>修改</span>
-        </el-button>
-
-        <el-button type="primary" @click="addItem(campusFormRef)" v-show="mode">
-          <span>添加</span>
         </el-button>
 
         <el-button @click="isDialogFormVisible = false">
@@ -46,49 +39,42 @@
 </template>
 
 <script>
-
 import { reactive, ref, toRefs } from "vue";
 import { v1 as uuid } from "uuid";
 import bus from "@/bus/bus";
-import { useLocationStore } from "@/store/locationStore/index.js";
+import { usePermissionStore } from "@/store/permissionStore/index.js";
 import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
 export default {
-  name: "scheduleTaskEditDialog",
+  name: "rolePermissionEditDialog",
   mounted() {
-    bus.on("showCampusEdit", (value) => {
+    bus.on("showRolePermissionEdit", (value) => {
       this.mode = false;
       this.isDialogFormVisible = true; //List中按下按钮弹窗
       this.$nextTick(() => {
         this.id = value.id;
-        this.formInput.campusName = value.name;
+        this.formInput.permissions = value.permissions;
+        console.log(this.formInput.permissions);
       });
-    });
-
-    bus.on("showCampusAdd", () => {
-      this.mode = true;
-      this.isDialogFormVisible = true; //List中按下按钮弹窗
     });
   },
   setup() {
-    const locationStore = useLocationStore();
     const campusFormRef = ref({});
     const data = reactive({
       isDialogFormVisible: false, //是否弹窗
       id: "",
-      mode: false,
     });
 
     const formInput = reactive({
-      campusName: "",
+      permissions: [],
     });
 
     const inputRule = {
-      campusName: [
+      roleName: [
         {
           required: true,
           validator: nonEmptyValidator,
           trigger: "change",
-          message: "请输入校区!",
+          message: "请输入角色名称!",
         },
       ],
     };
@@ -145,7 +131,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .form {
   margin: 20px;
 }
@@ -163,4 +149,21 @@ export default {
   display: inline-flex;
   flex-direction: column;
 }
+
+.permissionTree {
+  background: #f0f2f5;
+  white-space: nowrap;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  min-width: 100%;
+}
+.permissionTreeBack {
+  background: #f0f2f5;
+  border: solid 1px #dcdfe6;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
 </style>

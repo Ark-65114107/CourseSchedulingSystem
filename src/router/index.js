@@ -1,7 +1,6 @@
 
 import { useAuthStore } from '@/store/authStore'
 import { getToken } from '@/utils/token/getToken'
-import path from 'path'
 import { createRouter, createWebHistory } from 'vue-router'
 
 
