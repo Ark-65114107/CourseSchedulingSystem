@@ -4,22 +4,28 @@
   <div class="Table">
     <el-table
     :data="tableData"
-    height="600"
-    style="width: 100%"
+    height="590"
+    style="width: 1200px"
     :row-class-name="tableRowClassName"
   >
-    <el-table-column prop="date" label="Date" width="180" />
-    <el-table-column prop="name" label="Name" width="180" />
-    <el-table-column prop="address" label="Address" />
+    <el-table-column prop="ClassTime" label="节次/时间" width="200" />
+    <el-table-column prop="Monday" label="星期一" width="200" />
+    <el-table-column prop="Tuesday" label="星期二" width="200" />
+    <el-table-column prop="Wednesday" label="星期三" width="200" />
+    <el-table-column prop="Thursday" label="星期四" width="200" />
+    <el-table-column prop="Friday" label="星期五" width="200" />
   </el-table>
   </div>
 </template>
 
 <script lang="ts" setup name="ShowSchedule">
 interface User {
-  date: string
-  name: string
-  address: string
+  ClassTime: string
+  Monday: string
+  Tuesday: string
+  Wednesday: string
+  Thursday: string
+  Friday: string
 }
 
 const tableRowClassName = ({
@@ -39,24 +45,100 @@ const tableRowClassName = ({
 
 const tableData: User[] = [
   {
-    date: '2016-05-03',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
+    ClassTime:'第一节(08:10-08:50)',
+    Monday: '11',
+    Tuesday: '11',
+    Wednesday: '11',
+    Thursday: '',
+    Friday: '',
   },
   {
-    date: '2016-05-02',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
+    ClassTime:'第二节(08:55-09:35)',
+    Monday: '',
+    Tuesday: '',
+    Wednesday: '',
+    Thursday: '',
+    Friday: '',
   },
   {
-    date: '2016-05-04',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
+    ClassTime:'第三节(09:50-10:30)',
+    Monday: '',
+    Tuesday: '',
+    Wednesday: '',
+    Thursday: '',
+    Friday: '',
   },
   {
-    date: '2016-05-01',
-    name: 'Tom',
-    address: 'No. 189, Grove St, Los Angeles',
+    ClassTime:'第四节(10:35-11:15)',
+    Monday: '',
+    Tuesday: '',
+    Wednesday: '',
+    Thursday: '',
+    Friday: '',
+  },
+  {
+    ClassTime:'第五节(11:20-12:00)',
+    Monday: '',
+    Tuesday: '',
+    Wednesday: '',
+    Thursday: '',
+    Friday: '',
+  },
+  {
+    ClassTime:'第六节(13:30-14:10)',
+    Monday: '',
+    Tuesday: '',
+    Wednesday: '',
+    Thursday: '',
+    Friday: '',
+  },
+  {
+    ClassTime:'第七节(14:15-14:55)',
+    Monday: '',
+    Tuesday: '',
+    Wednesday: '',
+    Thursday: '',
+    Friday: '',
+  },
+  {
+    ClassTime:'第八节(15:05-15:45)',
+    Monday: '',
+    Tuesday: '',
+    Wednesday: '',
+    Thursday: '',
+    Friday: '',
+  },
+  {
+    ClassTime:'第九节(15:50-16:30)',
+    Monday: '',
+    Tuesday: '',
+    Wednesday: '',
+    Thursday: '',
+    Friday: '',
+  },
+  {
+    ClassTime:'第十节(18:00-18:40)',
+    Monday: '',
+    Tuesday: '',
+    Wednesday: '',
+    Thursday: '',
+    Friday: '',
+  },
+  {
+    ClassTime:'第十一节(18:45-19:25)',
+    Monday: '',
+    Tuesday: '',
+    Wednesday: '',
+    Thursday: '',
+    Friday: '',
+  },
+  {
+    ClassTime:'第十二节(19:30-20:10)',
+    Monday: '',
+    Tuesday: '',
+    Wednesday: '',
+    Thursday: '',
+    Friday: '',
   },
 ]
 </script>
@@ -75,5 +157,9 @@ const tableData: User[] = [
       border: 1px solid gray; /* 灰色边框 */
       padding: 8px;
       text-align: left;
+      height: 45px;
     }
+.el-table th{
+  
+}
 </style>
