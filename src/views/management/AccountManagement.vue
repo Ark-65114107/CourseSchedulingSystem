@@ -1,10 +1,14 @@
 <template>
-  <h1>账户管理</h1>
+  <accountList/>
 </template>
 
 <script>
+import accountList from '@/components/userManage/accountManagement/accountList.vue'
 export default {
-    name:'AccountManagement'
+    name:'AccountManagement',
+    component:{
+      accountList
+    }
     
 }
 </script>

@@ -8,25 +8,31 @@
     </div>
 
     <el-table
-      :data="permissionStore.roles"
+      :data="userManageStore.users"
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
       height="400"
     >
       <el-table-column type="selection" :selectable="selectable" width="40" />
-      <el-table-column prop="name" label="角色名称" min-width="155px" />
+      <el-table-column prop="username" label="账户名" min-width="155px" />
 
       <el-table-column
-        label="角色权限"
+        label="角色"
+        prop="roleId"
         v-slot="scope"
         min-width="220px"
         fixed="right"
       >
-        <div class="RowButtons">
-          <el-button type="primary" @click="HandlePermissionClick(scope.row)"
-            >修改权限</el-button
-          >
-        </div>
+      </el-table-column>
+
+      <el-table-column
+        label="是否启用"
+        prop="roleId"
+        v-slot="scope"
+        min-width="220px"
+        fixed="right"
+      >
+      <el-switch />
       </el-table-column>
 
       <el-table-column
@@ -45,9 +51,9 @@
         </div>
       </el-table-column>
     </el-table>
+    <el-pagination :total="100"  background/>
   </div>
-  <roleEditDialog />
-  <rolePermissionEditDialog/>
+  <accountEditDialog />
 </template>
 
 <script>
@@ -56,27 +62,23 @@ import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onMounted, reactive, toRefs } from "vue";
 import { ElMessageBox, imageProps } from "element-plus";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
-import { usePermissionStore } from "@/store/permissionStore/index.js";
-import roleEditDialog from "./roleEditDialog.vue";
-import rolePermissionEditDialog from './rolePermissionEditDialog.vue';
-
+import { useUserManageStore } from "@/store/userManageStore/index.js"
+import accountEditDialog from "./accountEditDialog.vue";
 
 export default {
-  name: "RoleList",
+  name: "AccountList",
   components: {
-    roleEditDialog,
-    rolePermissionEditDialog
+    accountEditDialog,
   },
   setup() {
-    const permissionStore = usePermissionStore();
-
+    const userManageStore = useUserManageStore();
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
     });
 
     onMounted(() => {
-      permissionStore.initRoles();
+      userManageStore.getUsers(1,1)
     });
 
     const HandleSelectChange = (value) => {
@@ -95,16 +97,12 @@ export default {
     };
 
     const HandleAddClick = () => {
-      bus.emit("showRoleAdd");
+      bus.emit("showAccountAdd");
     };
 
     const HandleEditClick = (value) => {
-      bus.emit("showRoleEdit", value);
+      bus.emit("showAccountEdit", value);
     };
-    const HandlePermissionClick = (value) => {
-      bus.emit("showRolePermissionEdit", value);
-    };
-
 
     const HandleArrayDelete = () => {
       ElMessageBox.confirm("确认删除吗?", "警告", {
@@ -142,8 +140,7 @@ export default {
       HandleAddClick,
       HandleEditClick,
       rowStyle,
-      permissionStore,
-      HandlePermissionClick
+      userManageStore
     };
   },
 };
@@ -189,5 +186,9 @@ tbody td .cell .RowButtons {
 
 .filterLabel {
   margin-left: 20px;
+}
+
+.el-pagination{
+  margin: 10px 20px 0px 20px;
 }
 </style>
