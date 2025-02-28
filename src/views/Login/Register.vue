@@ -1,16 +1,17 @@
 <template>
   <div class="background">
-    <div class="LoginContent">
-      <span class="LoginTitle">登录</span>
-      <div>
-        <el-form
-          class="LoginForm"
-          :model="data"
-          :rules="inputRule"
-          label-position="right"
-          label-width="auto"
-          ref="loginFormRef"
-        >
+    <div class="RegisterContent">
+      <span class="RegisterTitle">注册</span>
+
+      <el-form
+        class="RegisterForm"
+        :model="data"
+        :rules="inputRule"
+        label-position="right"
+        label-width="auto"
+        ref="registerFormRef"
+      >
+
           <el-form-item label="用户名" prop="username">
             <el-input
               v-model="username"
@@ -27,40 +28,39 @@
               show-password
             />
           </el-form-item>
-
-          <el-form-item prop="rememberme">
-            <el-checkbox v-model="rememberme"> 记住我 </el-checkbox>
+          <el-form-item label="确认密码" prop="comfirmPassword">
+            <el-input
+              v-model="comfirmPassword"
+              placeholder="请确认密码"
+              maxlength="25"
+              show-password
+            />
           </el-form-item>
 
-          <el-form-item>
-            <el-button
-              type="primary"
-              class="LoginButton"
-              @click="handleLogin(loginFormRef)"
-              >登录</el-button
-            >
-          </el-form-item>
-
-          
-
+        <el-form-item>
+          <el-button
+            type="primary"
+            class="RegisterButton"
+            @click="handleRegister(registerFormRef)"
+            >注册</el-button
+          >
           <el-row justify="space-between" class="bottomLink">
-            <el-link :underline="false">
-              忘记密码?
-            </el-link>
-
-            <el-link :underline="false"  @click="handleRegister">
-              注册
-            </el-link>
+            <span>
+              已经有账户了?返回
+              <el-link :underline="false" @click="handleLogin">
+                登录
+              </el-link></span
+            >
           </el-row>
-        </el-form>
-      </div>
+        </el-form-item>
+      </el-form>
     </div>
   </div>
 </template>
 
 <script>
 import { reactive, ref, toRefs } from "vue";
-import { userLogin } from "@/api/user.api";
+import { userRegister } from "@/api/user.api";
 import { ElMessage } from "element-plus";
 import { useAuthStore } from "@/store/authStore/index.js";
 import { setToken } from "@/utils/token/setToken.js";
@@ -70,62 +70,65 @@ export default {
   name: "Login",
   setup() {
     const authStore = useAuthStore();
-    const loginFormRef = ref({});
+    const registerFormRef = ref({});
     const data = reactive({
       username: "",
       password: "",
-      rememberme: false,
+      comfirmPassword: "",
     });
     const inputRule = reactive({
       username: [
         { required: true, message: "用户名不能为空!", trigger: "blur" },
       ],
       password: [{ required: true, message: "密码不能为空!", trigger: "blur" }],
-      rememberme: [{ required: false }],
+      comfirmPassword: [
+        { required: true, message: "请确认密码!", trigger: "blur" },
+        {
+          required: true,
+          message: "两次输入的密码不一致!",
+          trigger: "blur",
+          validator: (row, value, callback) => {
+            if (data.password === value) {
+              callback();
+            } else {
+              callback(new Error());
+            }
+          },
+        },
+      ],
     });
 
-    const handleLogin = (formEl) => {
-      if (!formEl) return;
+    const handleLogin = () => {
+      router.push("/login");
+    };
+
+    const handleRegister = (formEl) => {
       formEl.validate((valid) => {
         if (valid) {
-          userLogin({
-            username: data.username,
-            password: data.password,
-            rememberme: data.rememberme,
-          })
+          userRegister(
+            JSON.stringify({
+              username: data.username,
+              password: data.password,
+            })
+          )
             .then((res) => {
-              if (res.meta.code == 200) {
-                sessionStorage.clear();
-                localStorage.clear();
-                setToken(res.data.token);
-                authStore.getUserInfo();
-                ElMessage.success("登录成功!");
+              if (res.meta.code === 200) {
+                ElMessage.success("注册成功，请登录");
               }
-              if (res.meta.code == 402) {
-                ElMessage.error("请检查用户名或密码!");
-              }
+              router.push("/login");
             })
-            .then(() => {
-              if (getToken()) {
-                router.push("/home/index");
-              }
-            })
-            .catch((error) => {
-              console.log(error);
+            .catch((err) => {
+              console.log(err);
             });
         }
       });
-    };
-
-    const handleRegister = () => {
-      router.push("/register");
     };
 
     return {
       data,
       ...toRefs(data),
       inputRule,
-      loginFormRef,
+      registerFormRef,
       handleLogin,
       handleRegister,
     };
@@ -146,12 +149,12 @@ export default {
   justify-content: center;
 }
 
-.LoginTitle {
+.RegisterTitle {
   font-size: 160%;
   margin: 20px;
 }
 
-.LoginContent {
+.RegisterContent {
   height: 400px;
   width: 360px;
   background: white;
@@ -163,11 +166,16 @@ export default {
   box-shadow: 6px 6px 1px #c0c4cc;
 }
 
-.LoginForm {
+.RegisterForm {
+  height: 100%;
   min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
 }
 
-.LoginButton {
+.RegisterButton {
   width: 100%;
   margin: 10px 0px;
 }
@@ -176,11 +184,16 @@ a {
   all: unset;
 }
 
-.bottomLink{
+.bottomLink {
   position: relative;
   bottom: 0px;
 }
-.el-input{
+
+.el-form-item {
   width: 100%;
+}
+
+.el-input{
+    width: 100%;
 }
 </style>

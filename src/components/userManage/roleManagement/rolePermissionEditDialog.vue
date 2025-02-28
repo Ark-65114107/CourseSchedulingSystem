@@ -3,7 +3,6 @@
     v-model="isDialogFormVisible"
     title="修改权限"
     width="450"
-    class="dialog"
     :close-on-click-modal="false"
     :show-close="false"
     @close="ClearInput"
@@ -17,12 +16,15 @@
       ref="campusFormRef"
     >
       <el-form-item class="permissionTreeBack">
-        <el-tree
-          class="permissionTree"
-          :data="formInput.permissions"
-          style="max-width: 600px;"
-          show-checkbox
-        />
+        <el-scrollbar >
+            <el-tree
+              class="permissionTree"
+              :data="formInput.permissions"
+              style="max-width: 600px"
+              @check-change="handleCheckChange"
+              show-checkbox
+            />
+        </el-scrollbar>
       </el-form-item>
 
       <el-form-item class="btn">
@@ -43,7 +45,6 @@ import { reactive, ref, toRefs } from "vue";
 import { v1 as uuid } from "uuid";
 import bus from "@/bus/bus";
 import { usePermissionStore } from "@/store/permissionStore/index.js";
-import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
 export default {
   name: "rolePermissionEditDialog",
   mounted() {
@@ -68,15 +69,8 @@ export default {
       permissions: [],
     });
 
-    const inputRule = {
-      roleName: [
-        {
-          required: true,
-          validator: nonEmptyValidator,
-          trigger: "change",
-          message: "请输入角色名称!",
-        },
-      ],
+    const handleCheckChange = (data, bool, i) => {
+      console.log(data, bool, i);
     };
 
     const addItem = (formEl) => {
@@ -125,7 +119,7 @@ export default {
       editItem,
       addItem,
       campusFormRef,
-      inputRule,
+      handleCheckChange,
     };
   },
 };
@@ -154,16 +148,21 @@ export default {
   background: #f0f2f5;
   white-space: nowrap;
   display: flex;
-  justify-content: center;
   flex-direction: column;
-  min-width: 100%;
+  height: 100%;
 }
+
 .permissionTreeBack {
   background: #f0f2f5;
   border: solid 1px #dcdfe6;
   display: flex;
-  justify-content: center;
   padding: 20px;
+  margin: 10px;
+  height:500px;
 }
 
+.el-scrollbar{
+  width: 100%;
+  
+}
 </style>

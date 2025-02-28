@@ -3,6 +3,7 @@
   <hr>
   <div class="Table">
     <el-table
+    class="scheduleList"
     :data="tableData"
     height="600"
     style="width: 100%"
@@ -61,17 +62,17 @@ const tableData: User[] = [
 ]
 </script>
 
-<style>
-.el-table .warning-row {
+<style >
+.scheduleList .warning-row {
   --el-table-tr-bg-color: var(--el-color-warning-light-9);
 }
-.el-table .success-row {
+.scheduleList .success-row {
   --el-table-tr-bg-color: var(--el-color-success-light-9);
 }
-.el-table{
+.scheduleList{
   border: 3px solid black;
 }
-.el-table th, td {
+.scheduleList th,.scheduleList td {
       border: 1px solid gray; /* 灰色边框 */
       padding: 8px;
       text-align: left;

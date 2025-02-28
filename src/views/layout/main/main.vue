@@ -1,7 +1,7 @@
 <template>
     <el-main>
       <breadcrumbVue/>
-      <router-view />
+      <router-view :key="route.path" />
     </el-main>
 </template>
 

@@ -25,6 +25,16 @@ const routes = [
       requireLogin: false,
     }
   },
+  {
+    path: '/register',
+    name: 'register',
+    component: () => import("@/views/Login/Register.vue"),
+    meta: {
+      title: "注册",
+      requiresAuth: false,
+      requireLogin: false,
+    }
+  },
 
   {
     path: "/:pathMatch(.*)*",
@@ -41,7 +51,7 @@ const router = createRouter({
   routes
 })
 
-const whiteList = ['/login', '/404', '403', '/']
+const whiteList = ['/login','/register', '/404', '403', '/']
 
 
 router.beforeEach((to, from, next) => {

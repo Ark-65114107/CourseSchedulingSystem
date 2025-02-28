@@ -10,9 +10,13 @@ export const roles = [
                         label:"校区管理",
                         children:[
                             {
+                                label:"显示校区菜单"
+                            },
+                            {
                                 label:"修改校区"
                             },
                             {
+                                
                                 label:"添加校区"
                             },
                         ]
@@ -20,6 +24,9 @@ export const roles = [
                     {
                         label:"教学楼管理",
                         children:[
+                            {
+                                label:"显示教学楼菜单"
+                            },
                             {
                                 label:"修改教学楼"
                             },
@@ -32,6 +39,9 @@ export const roles = [
                         label:"教室管理",
                         children:[
                             {
+                                label:"显示教室菜单"
+                            },
+                            {
                                 label:"修改教室"
                             },
                             {
@@ -42,6 +52,9 @@ export const roles = [
                     {
                         label:"班级管理",
                         children:[
+                            {
+                                label:"显示班级菜单"
+                            },
                             {
                                 label:"修改班级"
                             },
@@ -54,6 +67,9 @@ export const roles = [
                         label:"课程管理", 
                         children:[
                             {
+                                label:"显示课程菜单"
+                            },
+                            {
                                 label:"修改课程"
                             },
                             {
@@ -64,6 +80,9 @@ export const roles = [
                     {
                         label:"部门管理", 
                         children:[
+                            {
+                                label:"显示部门菜单"
+                            },
                             {
                                 label:"修改课程"
                             },
@@ -76,6 +95,9 @@ export const roles = [
                         label:"年级管理", 
                         children:[
                             {
+                                label:"显示年级菜单"
+                            },
+                            {
                                 label:"修改年级"
                             },
                             {
@@ -86,6 +108,9 @@ export const roles = [
                     {
                         label:"专业管理", 
                         children:[
+                            {
+                                label:"显示专业菜单"
+                            },
                             {
                                 label:"修改专业"
                             },
@@ -98,6 +123,9 @@ export const roles = [
                         label:"学期管理", 
                         children:[
                             {
+                                label:"显示学期菜单"
+                            },
+                            {
                                 label:"修改学期"
                             },
                             {
@@ -109,7 +137,11 @@ export const roles = [
                         label:"教师管理", 
                         children:[
                             {
-                                label:"修改教师"
+                                label:"显示教师菜单"
+                            },
+                            {
+                                label:"修改教师",
+                                disabled:true
                             },
                             {
                                 label:"添加教师"

@@ -6,6 +6,11 @@ export const userLogin = (param)=>{
         ...param
     })
 }   
+export const userRegister = (param)=>{
+    return request.post('register',{
+        ...param
+    })
+}   
 export const getUserInfo = ()=>{
     return request.get('getUserInfo')
 }
