@@ -150,7 +150,6 @@ export default {
   mounted() {
     bus.on("showDepartmentEdit", (value) => {
       this.id = value.id;
-
       this.mode = false;
       this.isDialogFormVisible = true; //List中按下按钮弹窗
       this.$nextTick(() => {

@@ -10,15 +10,25 @@
     <el-table
       :data="grades"
       :row-style="rowStyle"
+      height="450px"
       @selection-change="HandleSelectChange"
+
     >
       <el-table-column type="selection" :selectable="selectable" width="55" />
       <el-table-column prop="name" label="年级名称" />
       <el-table-column prop="duration" label="学制" />
-      <el-table-column prop="educationalLevelId" :formatter="educationalLevelFormatter" label="学制类型" />
+      <el-table-column
+        prop="educationalLevelId"
+        :formatter="educationalLevelFormatter"
+        label="学制类型"
+      />
       <el-table-column prop="enrollmentYear" label="开始年份" />
       <el-table-column prop="graduationYear" label="结束年份" />
-      <el-table-column prop="isGraduated" :formatter="isGraduatedFormatter" label="是否毕业" />
+      <el-table-column
+        prop="isGraduated"
+        :formatter="isGraduatedFormatter"
+        label="是否毕业"
+      />
       <el-table-column label="操作" v-slot="scope">
         <div class="RowButtons">
           <el-button type="primary" @click="HandleEditClick(scope.row)"
@@ -30,13 +40,24 @@
         </div>
       </el-table-column>
     </el-table>
+    <el-pagination
+      @current-change="HandlePageChange"
+      @size-change="HandleSizeChange"
+      v-model:current-page="pageInfo.page"
+      v-model:page-size="pageInfo.size"
+      layout=" prev, pager, next,sizes,total"
+      style="margin: 10px 20px 0px 20px;"
+      :total="academicStore.gradeNum"
+      :size="pageInfo.size"
+      :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
+      :default-page-size="5"
+      background
+    />
   </div>
   <GradeEditDialog />
 </template>
 
 <script>
-
-
 import bus from "@/bus/bus.js";
 import { storeToRefs } from "pinia";
 import { onMounted, onBeforeMount, reactive, toRefs } from "vue";
@@ -44,12 +65,12 @@ import { ElMessageBox } from "element-plus";
 import { useLocationStore } from "@/store/locationStore/index.js";
 import { useAcademicStore } from "@/store/academicStore/index.js";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
-import GradeEditDialog from './GradeEditDialog.vue';
+import GradeEditDialog from "./GradeEditDialog.vue";
 
 export default {
   name: "gradesList",
   components: {
-    GradeEditDialog
+    GradeEditDialog,
   },
   setup() {
     const locationStore = useLocationStore();
@@ -60,6 +81,11 @@ export default {
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      pageInfo: {
+        page: 1,
+        size: 5,
+        total: 0,
+      },
     });
 
     const HandleSelectChange = (value) => {
@@ -69,6 +95,20 @@ export default {
       } else {
         data.isDeleteShow = true;
       }
+    };
+
+    const HandlePageChange = (page) => {
+      academicStore.getGrades({
+        page,
+        size: data.pageInfo.size,
+      });
+    };
+    const HandleSizeChange = (size) => {
+      data.pageInfo.page = 1
+      academicStore.getGrades({
+        page: data.pageInfo.page,
+        size
+      });
     };
 
     const rowStyle = ({ row, rowIndex }) => {
@@ -84,7 +124,6 @@ export default {
     const HandleEditClick = (value) => {
       bus.emit("showGradeEdit", value);
     };
- 
 
     const HandleArrayDelete = () => {
       ElMessageBox.confirm("确认删除吗?", "警告", {
@@ -114,14 +153,13 @@ export default {
         });
     };
 
-    const isGraduatedFormatter = (row)=>{
-      return row.isGraduated ? "是" : "否"
-    }
+    const isGraduatedFormatter = (row) => {
+      return row.isGraduated ? "是" : "否";
+    };
 
-    const educationalLevelFormatter = (row)=>{
-      return academicStore.educationalLevelNameMap.get(row.educationalLevelId)
-    }
-
+    const educationalLevelFormatter = (row) => {
+      return academicStore.educationalLevelNameMap.get(row.educationalLevelId);
+    };
 
     return {
       ...toRefs(data),
@@ -133,9 +171,12 @@ export default {
       HandleEditClick,
       rowStyle,
       locationStore,
+      academicStore,
       grades,
       isGraduatedFormatter,
-      educationalLevelFormatter
+      educationalLevelFormatter,
+      HandlePageChange,
+      HandleSizeChange,
     };
   },
 };
@@ -161,5 +202,8 @@ tbody td .cell .RowButtons {
 }
 .el-table {
   border: solid 2px #f0f2f5;
+}
+
+.el-pagination {
 }
 </style>

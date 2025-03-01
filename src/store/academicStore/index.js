@@ -3,7 +3,6 @@ import { defineStore } from "pinia";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
 import { EditArray } from "@/hooks/input/useEdit";
 import {
-    initialDepartments,
     initialDepartmentTypes,
     initialMajors,
     initialEducationalLevels,
@@ -15,15 +14,17 @@ import {
     initialCourseAttributes,
     initialCourseCategories,
     iniitialSpecializations,
-    iniitialGrades,
     iniitialSemesters,
 } from "@/data/academic"
 import getAcademicYears from "@/utils/getAcademicYears";
 import { useLocationStore } from "../locationStore";
+import { getGradeListApi } from "@/api/grade.api";
+import { getDepartmentListApi } from "@/api/departments.api";
 
 export const useAcademicStore = defineStore('academic', {
     state: () => ({
         departments: [],//部门
+        departmentNum:0,
         departmentTypes: [],//部门类别
 
         classes: [],//班级
@@ -39,6 +40,7 @@ export const useAcademicStore = defineStore('academic', {
         courseCategories: [],//课程类别
 
         grades: [],//年级
+        gradeNum:0,
         educationalLevels: [],//学段
 
         semesters: [],//学期
@@ -90,6 +92,19 @@ export const useAcademicStore = defineStore('academic', {
                 this.AcademicDatainitiate = true
             }
         },
+
+        getGrades(param){
+            getGradeListApi(param).then(res=>{
+                this.gradeNum = res.data.total
+                this.grades = res.data.grades
+            })
+        },
+        getDepartments(param){
+            getDepartmentListApi(param).then(res=>{
+                this.departmentNum = res.data.total
+                this.departments = res.data.departments
+            })
+        },
         // getClassroomsByCampus(campusId) {
         //     return this.classrooms.filter((classroom) => {
         //         return classroom.campusId == campusId
@@ -114,8 +129,8 @@ export const useAcademicStore = defineStore('academic', {
 
 
         initDepartments() {
+            this.getDepartments({page:1,size:5});
             this.initDepartmentTypes()
-            this.departments = initialDepartments;
             this.departmentMap = new Map(this.departments.map(c => [c.id, c]))
             this.departmentNameMap = new Map(this.departments.map(c => [c.id, c.name]))
         },
@@ -240,7 +255,7 @@ export const useAcademicStore = defineStore('academic', {
         },
 
         initGrades() {
-            this.grades = iniitialGrades;
+            this.getGrades({page:1,size:5})
             this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
         },
         AddGrade(value) {
@@ -261,32 +276,7 @@ export const useAcademicStore = defineStore('academic', {
             this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
             return true
         },
-        initGrades() {
-            this.grades = iniitialGrades;
-            this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
-            this.gradeMap = new Map(this.grades.map(c => [c.id, c]))
-        },
-        AddGrade(value) {
-            this.grades.push(value)
-
-            this.gradeMap = new Map(this.grades.map(c => [c.id, c]))
-            this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
-        },
-
-        EditGrade(obj) {
-            if (obj) {
-                for (const key of Object.keys(obj)) {
-                    if (key == "id") continue
-                    EditArray(this.grades, key, obj[key], obj.id)
-                }
-            }
-            else {
-                return false
-            }
-            this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
-            this.gradeMap = new Map(this.grades.map(c => [c.id, c]))
-            return true
-        },
+        
         initSemesters() {
             this.semesters = iniitialSemesters;
             this.semesterNameMap = new Map(this.semesters.map(c => [c.id, c.name]))
