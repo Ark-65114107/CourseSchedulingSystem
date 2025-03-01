@@ -71,7 +71,7 @@
       :data="filtedArray.filtedClassrooms"
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
-      height="400"
+      max-height="450px"
     >
       <el-table-column type="selection" :selectable="selectable" width="40" />
       <el-table-column prop="code" label="教室编号" min-width="155px" />
@@ -120,6 +120,19 @@
         </div>
       </el-table-column>
     </el-table>
+    <el-pagination
+      @current-change="HandlePageChange"
+      @size-change="HandleSizeChange"
+      v-model:current-page="pageInfo.page"
+      v-model:page-size="pageInfo.size"
+      layout=" prev, pager, next,sizes,total"
+      style="margin: 10px 20px 0px 20px;"
+      :total="locationStore.classroomNum"
+      :size="pageInfo.size"
+      :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
+      :default-page-size="5"
+      background
+    />
   </div>
   <ClassroomEditDialog />
   <ClassroomTypeListDrawer />
@@ -154,7 +167,19 @@ export default {
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      pageInfo: {
+        page:1,
+        size: 5,
+      },
     });
+
+    const HandlePageChange = (page) => {
+      locationStore.getClassroom({ page, size: data.pageInfo.size });
+    };
+    const HandleSizeChange = (size) => {
+      data.pageInfo.page = 1
+      locationStore.getClassroom({ page:data.pageInfo.page, size });
+    };
 
     const filterCriteria = reactive({
       campus: "*",
@@ -317,6 +342,9 @@ export default {
       campusFormatter,
       teachbuildingFormatter,
       typeIdFormatter,
+      HandlePageChange,
+      HandleSizeChange,
+      locationStore
     };
   },
 };

@@ -10,7 +10,7 @@
     <el-table
       :data="grades"
       :row-style="rowStyle"
-      height="450px"
+      max-height="450px"
       @selection-change="HandleSelectChange"
 
     >

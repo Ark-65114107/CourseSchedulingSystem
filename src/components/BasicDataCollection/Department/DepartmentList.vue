@@ -12,7 +12,7 @@
     <el-table
       :data="departments"
       :row-style="rowStyle"
-      height="450px"
+      max-height="450px"
       @selection-change="HandleSelectChange"
     >
       <el-table-column type="selection" :selectable="selectable" width="55" />

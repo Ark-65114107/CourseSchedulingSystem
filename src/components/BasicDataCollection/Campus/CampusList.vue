@@ -9,33 +9,35 @@
       >
     </div>
 
-      <el-table
-        :data="campuses"
-        :row-style="rowStyle"
-        @selection-change="HandleSelectChange"
-        height="450px"
-      >
-        <el-table-column type="selection" :selectable="selectable" width="55" />
-        <el-table-column prop="id" label="id" />
-        <el-table-column prop="name" label="校区" />
-        <el-table-column label="教学楼" v-slot="scope">
-          <div class="RowButtons">
-            <el-link type="primary" @click="HandleDrawerClick(scope.row)"
-              >教学楼管理</el-link
-            >
-          </div>
-        </el-table-column>
-        <el-table-column label="操作" v-slot="scope">
-          <div class="RowButtons">
-            <el-button type="primary" @click="HandleEditClick(scope.row)"
-              >编辑</el-button
-            >
-            <el-button type="danger" @click="HandleSingleDelete(scope.row)"
-              >删除</el-button
-            >
-          </div>
-        </el-table-column>
-      </el-table>
+    <el-table
+      :data="campuses"
+      :row-style="rowStyle"
+      @selection-change="HandleSelectChange"
+      max-height="450px"
+      v-loading="isLoading"
+      element-loading-text="正在加载.."
+    >
+      <el-table-column type="selection" :selectable="selectable" width="55" />
+      <el-table-column prop="id" label="id" />
+      <el-table-column prop="name" label="校区" />
+      <el-table-column label="教学楼" v-slot="scope">
+        <div class="RowButtons">
+          <el-link type="primary" @click="HandleDrawerClick(scope.row)"
+            >教学楼管理</el-link
+          >
+        </div>
+      </el-table-column>
+      <el-table-column label="操作" v-slot="scope">
+        <div class="RowButtons">
+          <el-button type="primary" @click="HandleEditClick(scope.row)"
+            >编辑</el-button
+          >
+          <el-button type="danger" @click="HandleSingleDelete(scope.row)"
+            >删除</el-button
+          >
+        </div>
+      </el-table-column>
+    </el-table>
 
     <el-pagination
       @current-change="HandlePageChange"
@@ -81,8 +83,9 @@ export default {
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      isLoading: false,
       pageInfo: {
-        page:1,
+        page: 1,
         size: 5,
       },
     });
@@ -97,11 +100,25 @@ export default {
     };
 
     const HandlePageChange = (page) => {
-      locationStore.getCampus({ page, size: data.pageInfo.size });
+      data.isLoading = true;
+      locationStore
+        .getCampus({ page, size: data.pageInfo.size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+          }
+        });
     };
     const HandleSizeChange = (size) => {
-      data.pageInfo.page = 1
-      locationStore.getCampus({ page:data.pageInfo.page, size });
+      data.isLoading = true;
+      data.pageInfo.page = 1;
+      locationStore
+        .getCampus({ page: data.pageInfo.page, size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+          }
+        });
     };
 
     const rowStyle = ({ row, rowIndex }) => {
@@ -124,7 +141,12 @@ export default {
       bus.emit("showCampusUploadDialog");
     };
     const HandleRefreshClick = () => {
-      locationStore.refreshCampus({ page: 1, size: data.pageInfo.size });
+      data.isLoading = true;
+      locationStore
+        .refreshCampus({ page: 1, size: data.pageInfo.size })
+        .finally(() => {
+          data.isLoading = false;
+        });
     };
 
     const HandleArrayDelete = () => {

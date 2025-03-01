@@ -43,6 +43,7 @@
       :data="classes"
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
+      max-height="450px"
     >
       <el-table-column type="selection" :selectable="selectable" width="50" />
       <el-table-column prop="facultyId" :formatter="facultyFormatter" label="所属院系" min-width="100px" />

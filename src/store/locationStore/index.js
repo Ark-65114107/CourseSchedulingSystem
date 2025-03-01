@@ -9,15 +9,17 @@ import {
 
 import { getCampusListApi } from "@/api/campus.api";
 import { ElMessage } from "element-plus";
+import { getClassroomListApi } from "@/api/classroom.api";
 
 
 
 export const useLocationStore = defineStore('location', {
     state: () => ({
         campuses: [],
-        campusNum:0,
+        campusNum: 0,
         teachingbuildings: [],
         classrooms: [],
+        classroomNum: 0,
         classroomtypes: [],
         classroomMap: new Map(),
         classroomNameMap: new Map(),
@@ -44,15 +46,24 @@ export const useLocationStore = defineStore('location', {
                 message: "刷新中...",
                 type: "info"
             })
-            getCampusListApi(parm).then(response => {
-                if (response.meta.code === 200) {
-                    this.campuses = response.data.campuses
-                    this.campusNum = response.data.total
-                    this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
-                    this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
+            return this.getCampus(parm).then(res => {
+                console.log(res);
+                if (res === 200){
                     ElMessage.success("刷新成功!")
                 }
-
+            })
+        },
+        getCampus(parm) {
+            return getCampusListApi(parm).then(response => {
+                console.log(response);
+                if (response.meta.code === 200) {
+                    this.campusNum = response.data.total
+                    this.campuses = response.data.campuses
+                    this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
+                    this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
+                    return 200
+                }
+                
             }).catch(error => {
                 ElMessage({
                     message: `刷新失败! 错误信息${error}`,
@@ -60,18 +71,17 @@ export const useLocationStore = defineStore('location', {
                 })
                 return error
             })
-
         },
-        getCampus(parm) {
-            getCampusListApi(parm).then(response => {
+        getClassroom(parm) {
+            return getClassroomListApi(parm).then(response => {
                 console.log(response);
                 if (response.meta.code === 200) {
-                    this.campusNum = response.data.total
-                    this.campuses = response.data.campuses
-                    this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
-                    this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
+                    this.classroomNum = response.data.total
+                    this.classrooms = response.data.classrooms
+                    this.classroomNameMap = new Map(this.classrooms.map(c => [c.id, c.name]))
+                    this.classroomMap = new Map(this.classrooms.map(c => [c.id, c]))
+                    return true
                 }
-
             }).catch(error => {
                 ElMessage({
                     message: `刷新失败! 错误信息${error}`,
@@ -115,7 +125,7 @@ export const useLocationStore = defineStore('location', {
 
         initCampuses() {
             this.initTeachingBuildings()
-            this.getCampus({page:1,size:5})
+            this.getCampus({ page: 1, size: 5 })
 
         },
         AddCampus(value) {
@@ -156,7 +166,7 @@ export const useLocationStore = defineStore('location', {
             return true
         },
         initClassrooms() {
-            this.classrooms = initialClassrooms;
+            this.getClassroom({ page: 1, size: 5 })
             this.classroomtypes = initialclassroomTypes;
             this.classroomNameMap = new Map(this.classrooms.map(c => [c.id, c.name]))
         },
