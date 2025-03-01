@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="isDialogFormVisible"
-    :title= 'mode ? "添加":"修改"'
+    :title="mode ? '添加' : '修改'"
     width="450"
     class="dialog"
     :close-on-click-modal="false"
@@ -21,6 +21,16 @@
           v-model="formInput.roleName"
           maxlength="50"
           class="campusName"
+        />
+      </el-form-item>
+
+      <el-form-item label="角色描述:" prop="description">
+        <el-input
+          v-model="formInput.description"
+          type="textarea"
+          maxlength="200"
+          class="campusName"
+          show-word-limit
         />
       </el-form-item>
 
@@ -46,7 +56,6 @@
 </template>
 
 <script>
-
 import { reactive, ref, toRefs } from "vue";
 import { v1 as uuid } from "uuid";
 import bus from "@/bus/bus";
@@ -80,6 +89,7 @@ export default {
 
     const formInput = reactive({
       roleName: "",
+      description: "",
     });
 
     const inputRule = {
@@ -89,6 +99,11 @@ export default {
           validator: nonEmptyValidator,
           trigger: "change",
           message: "请输入角色名称!",
+        },
+      ],
+      description: [
+        {
+          required: false,
         },
       ],
     };

@@ -1,10 +1,11 @@
 import request from "@/utils/request"
 
 //获取校区数据
-export const getCampusListApi = ()=>{
+export const getCampusListApi = (parm)=>{
     return request({
         url:"/campuses",
-        method:"get"
+        method:"get",
+        params:parm
     })
 }
 
