@@ -12,6 +12,7 @@
     <el-table
       :data="departments"
       :row-style="rowStyle"
+      height="450px"
       @selection-change="HandleSelectChange"
     >
       <el-table-column type="selection" :selectable="selectable" width="55" />
@@ -20,11 +21,31 @@
       <el-table-column prop="name" label="部门名称" />
       <el-table-column prop="type" label="单位类别" width="90" />
       <el-table-column prop="teachingbuildingName" label="固定教学楼" />
-      <el-table-column prop="isEntity" label="是否为实体" :formatter="isEntityToYesNo"/>
-      <el-table-column prop="isEnabled" label="是否启用" :formatter="isEnabledToYesNo"/>
-      <el-table-column prop="isCourseOffering" label="是否开课" :formatter="isCourseOfferingToYesNo"/>
-      <el-table-column prop="isTeaching" label="是否上课" :formatter="isTeachingToYesNo" />
-      <el-table-column prop="isTeachingResearchOffice" label="是否开课教研室" :formatter="isTeachingResearchOfficeToYesNo"/>
+      <el-table-column
+        prop="isEntity"
+        label="是否为实体"
+        :formatter="isEntityToYesNo"
+      />
+      <el-table-column
+        prop="isEnabled"
+        label="是否启用"
+        :formatter="isEnabledToYesNo"
+      />
+      <el-table-column
+        prop="isCourseOffering"
+        label="是否开课"
+        :formatter="isCourseOfferingToYesNo"
+      />
+      <el-table-column
+        prop="isTeaching"
+        label="是否上课"
+        :formatter="isTeachingToYesNo"
+      />
+      <el-table-column
+        prop="isTeachingResearchOffice"
+        label="是否开课教研室"
+        :formatter="isTeachingResearchOfficeToYesNo"
+      />
       <el-table-column label="操作" v-slot="scope" width="160">
         <div class="RowButtons">
           <el-button type="primary" @click="HandleEditClick(scope.row)"
@@ -36,6 +57,19 @@
         </div>
       </el-table-column>
     </el-table>
+    <el-pagination
+      @current-change="HandlePageChange"
+      @size-change="HandleSizeChange"
+      v-model:current-page="pageInfo.page"
+      v-model:page-size="pageInfo.size"
+      layout=" prev, pager, next,sizes,total"
+      style="margin: 10px 20px 0px 20px"
+      :total="academicStore.departmentNum"
+      :size="pageInfo.size"
+      :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
+      :default-page-size="5"
+      background
+    />
   </div>
 
   <DepartmentEditDialog />
@@ -57,10 +91,13 @@ export default {
     const academicStore = useAcademicStore();
     const { departments } = storeToRefs(academicStore);
 
-
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      pageInfo: {
+        page: 1,
+        size: 5,
+      },
     });
 
     const HandleSelectChange = (value) => {
@@ -70,6 +107,14 @@ export default {
       } else {
         data.isDeleteShow = true;
       }
+    };
+
+    const HandlePageChange = (page) => {
+      academicStore.getDepartments({ page, size: data.pageInfo.size });
+    };
+    const HandleSizeChange = (size) => {
+      data.pageInfo.page = 1;
+      academicStore.getDepartments({ page: data.pageInfo.page, size });
     };
 
     const rowStyle = ({ row, rowIndex }) => {
@@ -114,6 +159,9 @@ export default {
       HandleAddClick,
       HandleEditClick,
       rowStyle,
+      HandlePageChange,
+      HandleSizeChange,
+      academicStore
     };
   },
 };

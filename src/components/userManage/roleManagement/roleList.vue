@@ -8,13 +8,14 @@
     </div>
 
     <el-table
-      :data="permissionStore.roles"
+      :data="userManageStore.roles"
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
       height="400"
     >
       <el-table-column type="selection" :selectable="selectable" width="40" />
       <el-table-column prop="name" label="角色名称" min-width="155px" />
+      <el-table-column prop="description" label="角色描述" min-width="155px" />
 
       <el-table-column
         label="角色权限"
@@ -47,7 +48,7 @@
     </el-table>
   </div>
   <roleEditDialog />
-  <rolePermissionEditDialog/>
+  <rolePermissionEditDialog />
 </template>
 
 <script>
@@ -56,19 +57,18 @@ import { storeToRefs } from "pinia";
 import { computed, onBeforeMount, onMounted, reactive, toRefs } from "vue";
 import { ElMessageBox, imageProps } from "element-plus";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
-import { usePermissionStore } from "@/store/permissionStore/index.js";
 import roleEditDialog from "./roleEditDialog.vue";
+import { useUserManageStore } from "@/store/userManageStore";
 import rolePermissionEditDialog from './rolePermissionEditDialog.vue';
-
 
 export default {
   name: "RoleList",
   components: {
     roleEditDialog,
-    rolePermissionEditDialog
+    rolePermissionEditDialog,
   },
   setup() {
-    const permissionStore = usePermissionStore();
+    const userManageStore = useUserManageStore();
 
     const data = reactive({
       isDeleteShow: false,
@@ -76,7 +76,7 @@ export default {
     });
 
     onMounted(() => {
-      permissionStore.initRoles();
+      userManageStore.initRoles();
     });
 
     const HandleSelectChange = (value) => {
@@ -104,7 +104,6 @@ export default {
     const HandlePermissionClick = (value) => {
       bus.emit("showRolePermissionEdit", value);
     };
-
 
     const HandleArrayDelete = () => {
       ElMessageBox.confirm("确认删除吗?", "警告", {
@@ -142,8 +141,8 @@ export default {
       HandleAddClick,
       HandleEditClick,
       rowStyle,
-      permissionStore,
-      HandlePermissionClick
+      userManageStore,
+      HandlePermissionClick,
     };
   },
 };

@@ -1,10 +1,13 @@
 <template>
   <div class="List">
     <div class="buttonMenu">
+      
       <el-button type="primary" @click="HandleAddClick">添加</el-button>
       <el-button type="danger" v-show="isDeleteShow" @click="HandleArrayDelete"
         >删除选中</el-button
       >
+      <el-input v-model="keyWord" :prefix-icon="Search"/>
+      <el-button type="" @click="">搜索</el-button>
     </div>
 
     <el-table
@@ -64,6 +67,7 @@ import { ElMessageBox, imageProps } from "element-plus";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
 import { useUserManageStore } from "@/store/userManageStore/index.js"
 import accountEditDialog from "./accountEditDialog.vue";
+import { Search } from "@element-plus/icons-vue"
 
 export default {
   name: "AccountList",
@@ -75,6 +79,7 @@ export default {
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      keyWord:""
     });
 
     onMounted(() => {
@@ -140,7 +145,8 @@ export default {
       HandleAddClick,
       HandleEditClick,
       rowStyle,
-      userManageStore
+      userManageStore,
+      Search
     };
   },
 };
@@ -159,6 +165,11 @@ export default {
   justify-content: flex-start;
   margin: 0px 0px 10px 0px;
   flex-wrap: nowrap;
+}
+
+.buttonMenu .el-input{
+  width: 250px;
+  margin: 0px 10px;
 }
 
 tbody td .cell .RowButtons {

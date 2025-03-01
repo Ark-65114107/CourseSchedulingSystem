@@ -15,6 +15,7 @@ import { ElMessage } from "element-plus";
 export const useLocationStore = defineStore('location', {
     state: () => ({
         campuses: [],
+        campusNum:0,
         teachingbuildings: [],
         classrooms: [],
         classroomtypes: [],
@@ -46,6 +47,27 @@ export const useLocationStore = defineStore('location', {
             getCampusListApi(parm).then(response => {
                 if (response.meta.code === 200) {
                     this.campuses = response.data.campuses
+                    this.campusNum = response.data.total
+                    this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
+                    this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
+                    ElMessage.success("刷新成功!")
+                }
+
+            }).catch(error => {
+                ElMessage({
+                    message: `刷新失败! 错误信息${error}`,
+                    type: "error"
+                })
+                return error
+            })
+
+        },
+        getCampus(parm) {
+            getCampusListApi(parm).then(response => {
+                console.log(response);
+                if (response.meta.code === 200) {
+                    this.campusNum = response.data.total
+                    this.campuses = response.data.campuses
                     this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
                     this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
                 }
@@ -57,7 +79,6 @@ export const useLocationStore = defineStore('location', {
                 })
                 return error
             })
-
         },
         getClassroomsByCampus(campusId) {
             return this.classrooms.filter((classroom) => {
@@ -94,14 +115,7 @@ export const useLocationStore = defineStore('location', {
 
         initCampuses() {
             this.initTeachingBuildings()
-            getCampusListApi().then(response => {
-                this.campuses = response.data.campuses
-                this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
-                this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
-            }).catch(error => {
-                console.log(error);
-                return new Error(error)
-            })
+            this.getCampus({page:1,size:5})
 
         },
         AddCampus(value) {

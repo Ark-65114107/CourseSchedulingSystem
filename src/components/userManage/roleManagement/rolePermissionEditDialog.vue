@@ -44,7 +44,7 @@
 import { reactive, ref, toRefs } from "vue";
 import { v1 as uuid } from "uuid";
 import bus from "@/bus/bus";
-import { usePermissionStore } from "@/store/permissionStore/index.js";
+import { useUserManageStore } from '@/store/userManageStore';
 export default {
   name: "rolePermissionEditDialog",
   mounted() {
@@ -59,6 +59,7 @@ export default {
     });
   },
   setup() {
+    const userManageStore = useUserManageStore()
     const campusFormRef = ref({});
     const data = reactive({
       isDialogFormVisible: false, //是否弹窗
@@ -77,7 +78,7 @@ export default {
       if (!formEl) return;
       formEl.validate((validate) => {
         if (validate) {
-          locationStore.AddCampus({
+          userManageStore.AddRole({
             id: uuid(),
             name: formInput.campusName,
             remark: formInput.campusRemark,
@@ -95,7 +96,7 @@ export default {
         console.log(validate);
         if (validate) {
           if (
-            locationStore.EditCampus({
+            userManageStore.EditRole({
               id: data.id,
               name: formInput.campusName,
               remark: formInput.campusRemark,
@@ -158,7 +159,7 @@ export default {
   display: flex;
   padding: 20px;
   margin: 10px;
-  height:500px;
+  height:360px;
 }
 
 .el-scrollbar{

@@ -6,64 +6,7 @@ export const initialDepartmentTypes = ["院系", "行政类", "其它", "科研�
 
 
 
-export const initialDepartments = [
-    {
-        id: "fac11111",
-        code: "114514",
-        name: "计算机科学与技术学院",
-        ename: "School of Computer Science and Technology",
-        abbr: "计科",
-        type: "院系",
-        teachingbuildingId: "",
-        isEntity: true,
-        isCourseOffering: true,
-        isTeaching: true,
-        isEnabled: true,
-        isTeachingResearchOffice: true
-    },
-    {
-        id: "fac22222",
-        code: "222222",
-        name: "水利水电学院",
-        englishname: "slsdxy",
-        abbr: "水专",
-        isEntity: true,
-        type: "院系",
-        teachingbuildingId: "",
-        isCourseOffering: true,
-        isTeaching: true,
-        isEnabled: true,
-        isTeachingResearchOffice: false
-    },
-    {
-        id: "fac33333",
-        code: "12345",
-        name: "教务处",
-        englishname: "teachMe",
-        abbr: "教÷",
-        isEntity: true,
-        type: "行政类",
-        teachingbuildingId: "",
-        isCourseOffering: false,
-        isTeaching: false,
-        isEnabled: true,
-        isTeachingResearchOffice: false
-    },
-    {
-        id: "gggraet",
-        code: "114444",
-        name: "学校领导",
-        englishname: "boss",
-        abbr: "",
-        isEntity: true,
-        type: "行政类",
-        teachingbuildingId: "",
-        isCourseOffering: false,
-        isTeaching: false,
-        isEnabled: true,
-        isTeachingResearchOffice: false
-    },
-]
+// export const initialDepartments = 
 
 
 
@@ -478,54 +421,7 @@ export const iniitialCourses = [
 ]
 
 
-export const iniitialGrades = [
-    {
-        id: "21pt",
-        name: "2021级",
-        duration: 4,
-        enrollmentYear: "2021",
-        graduationYear: "2025",
-        isGraduated: true,
-        educationalLevelId: "4"
-    },
-    {
-        id: "22pt",
-        name: "2022级",
-        duration: 4,
-        enrollmentYear: "2022",
-        graduationYear: "2026",
-        isGraduated: false,
-        educationalLevelId: "4"
-    },
-    {
-        id: "23pt",
-        name: "2023级",
-        duration: 4,
-        enrollmentYear: "2023",
-        graduationYear: "2027",
-        isGraduated: false,
-        educationalLevelId: "4"
-    },
-    {
-        id: "24pt",
-        name: "2024级",
-        duration: 4,
-        enrollmentYear: "2024",
-        graduationYear: "2028",
-        isGraduated: false,
-        educationalLevelId: "4"
-    },
-    {
-        id: "23ptxswnz",
-        name: "2021级(5年制)",
-        duration: 5,
-        enrollmentYear: "2021",
-        graduationYear: "2026",
-        isGraduated: false,
-        educationalLevelId: "3"
-    },
-
-]
+// export const iniitialGrades = 
 
 
 export const initialEducationalLevels = [

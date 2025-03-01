@@ -1,34 +1,34 @@
 import request from "@/utils/request"
 
 //获取校区数据
-export const getCampusListApi = (parm)=>{
+export const getGradeListApi = (param)=>{
     return request({
-        url:"/campuses",
+        url:"/grades",
         method:"get",
-        params:parm
+        params:param
     })
 }
 
 //添加校区数据
-export const addCampusApi = (parm)=>{
+export const addGradeApi = (param)=>{
     return request({
-        url:"/campuses",
+        url:"/grades",
         method:"post",
         data:parm
     })
 }
 //修改校区数据
-export const editCampusApi = (parm)=>{
+export const editGradeApi = (param)=>{
     return request.put({
-        url:"/campuses",
+        url:"/grades",
         data:parm
     })
 }
 
 //删除校区数据
-export const deleteCampusApi = (parm)=>{
+export const deleteGradeApi = (param)=>{
     return request.delete({
-        url:"/campuses",
+        url:"/grades",
         data:parm
     })
 }
