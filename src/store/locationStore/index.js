@@ -80,7 +80,7 @@ export const useLocationStore = defineStore('location', {
                     this.classrooms = response.data.classrooms
                     this.classroomNameMap = new Map(this.classrooms.map(c => [c.id, c.name]))
                     this.classroomMap = new Map(this.classrooms.map(c => [c.id, c]))
-                    return true
+                    return 200
                 }
             }).catch(error => {
                 ElMessage({

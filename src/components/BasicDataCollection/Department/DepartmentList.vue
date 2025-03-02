@@ -14,6 +14,9 @@
       :row-style="rowStyle"
       max-height="450px"
       @selection-change="HandleSelectChange"
+      v-loading="isLoading"
+      element-loading-text="正在加载..."
+      ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="55" />
       <el-table-column prop="id" label="id" />
@@ -77,7 +80,7 @@
 
 <script>
 import bus from "@/bus/bus.js";
-import { onMounted, reactive, toRefs } from "vue";
+import { onMounted, reactive, toRefs, ref } from "vue";
 import DepartmentEditDialog from "./DepartmentEditDialog.vue";
 import { useAcademicStore } from "@/store/academicStore/index.js";
 import { storeToRefs } from "pinia";
@@ -90,10 +93,12 @@ export default {
   setup() {
     const academicStore = useAcademicStore();
     const { departments } = storeToRefs(academicStore);
+    const tableRef = ref();
 
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      isLoading: false,
       pageInfo: {
         page: 1,
         size: 5,
@@ -110,11 +115,27 @@ export default {
     };
 
     const HandlePageChange = (page) => {
-      academicStore.getDepartments({ page, size: data.pageInfo.size });
+      data.isLoading = true;
+      academicStore
+        .getDepartments({ page, size: data.pageInfo.size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
     };
     const HandleSizeChange = (size) => {
+      data.isLoading = true;
       data.pageInfo.page = 1;
-      academicStore.getDepartments({ page: data.pageInfo.page, size });
+      academicStore
+        .getDepartments({ page: data.pageInfo.page, size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
     };
 
     const rowStyle = ({ row, rowIndex }) => {
@@ -161,7 +182,8 @@ export default {
       rowStyle,
       HandlePageChange,
       HandleSizeChange,
-      academicStore
+      academicStore,
+      tableRef,
     };
   },
 };

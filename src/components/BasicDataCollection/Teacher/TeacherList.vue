@@ -9,40 +9,68 @@
         >删除选中</el-button
       >
     </div>
-     <div class="filters">
-        <el-text>院系:</el-text>
-        <el-select
-          v-model="faculty"
-          placeholder="搜索院系"
-          class="facultySelect"
-          value-key="id"
-          filterable
-        >
-          <el-option label="全部" value="*" />
-          <el-option
-            v-for="faculty of faculties"
-            :label="faculty.name"
-            :value="faculty"
-          />
-        </el-select>
-      </div>
+    <div class="filters">
+      <el-text>院系:</el-text>
+      <el-select
+        v-model="faculty"
+        placeholder="搜索院系"
+        class="facultySelect"
+        value-key="id"
+        filterable
+      >
+        <el-option label="全部" value="*" />
+        <el-option
+          v-for="faculty of faculties"
+          :label="faculty.name"
+          :value="faculty"
+        />
+      </el-select>
+    </div>
 
     <el-table
       :data="teachers"
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
+      max-height="400px"
+      v-loading="isLoading"
+      element-loading-text="正在加载..."
+      ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="55" />
       <el-table-column prop="id" label="id" min-width="80px" />
       <el-table-column prop="teacherId" label="工号" min-width="80px" />
-      <el-table-column prop="name" label="姓名"  min-width="80px"/>
-      <el-table-column prop="gender" label="性别" :formatter="genderFormatter" min-width="70px"/>
-      <el-table-column prop="ename" label="英文名" min-width="100px"/>
-      <el-table-column prop="ethnicityName" :formatter="ethnicityFormatter" label="民族" min-width="100px"/>
+      <el-table-column prop="name" label="姓名" min-width="80px" />
+      <el-table-column
+        prop="gender"
+        label="性别"
+        :formatter="genderFormatter"
+        min-width="70px"
+      />
+      <el-table-column prop="ename" label="英文名" min-width="100px" />
+      <el-table-column
+        prop="ethnicityName"
+        :formatter="ethnicityFormatter"
+        label="民族"
+        min-width="100px"
+      />
       <el-table-column prop="titleName" label="职称" min-width="100px" />
-      <el-table-column prop="departmentName" :formatter="departmentFormatter" label="单位" min-width="100px"/>
-      <el-table-column prop="isExternal" :formatter="externalFormatter" label="是否外聘" min-width="100px"/>
-      <el-table-column prop="facultyTypeId" label="教职工类别" min-width="90px" />
+      <el-table-column
+        prop="departmentName"
+        :formatter="departmentFormatter"
+        label="单位"
+        min-width="100px"
+      />
+      <el-table-column
+        prop="isExternal"
+        :formatter="externalFormatter"
+        label="是否外聘"
+        min-width="100px"
+      />
+      <el-table-column
+        prop="facultyTypeId"
+        label="教职工类别"
+        min-width="90px"
+      />
       <el-table-column label="操作" v-slot="scope" width="160">
         <div class="RowButtons">
           <el-button type="primary" @click="HandleEditClick(scope.row)"
@@ -54,17 +82,29 @@
         </div>
       </el-table-column>
     </el-table>
+    <el-pagination
+      @current-change="HandlePageChange"
+      @size-change="HandleSizeChange"
+      v-model:current-page="pageInfo.page"
+      v-model:page-size="pageInfo.size"
+      layout=" prev, pager, next,sizes,total"
+      :total="personnelStore.teacherNum"
+      :size="pageInfo.size"
+      :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
+      :default-page-size="5"
+      background
+    />
   </div>
   <TeacherEditDialog />
 </template>
 
 <script>
 import bus from "@/bus/bus.js";
-import { computed,reactive, toRefs,ref } from "vue";
+import { computed, reactive, toRefs, ref } from "vue";
 import TeacherEditDialog from "./TeacherEditDialog.vue";
-import { usePersonnelStore } from "@/store/personnelStore/index.js"
+import { usePersonnelStore } from "@/store/personnelStore/index.js";
 import { storeToRefs } from "pinia";
-import { useAcademicStore } from '@/store/academicStore';
+import { useAcademicStore } from "@/store/academicStore";
 
 export default {
   name: "TeacherList",
@@ -74,16 +114,20 @@ export default {
   setup() {
     const personnelStore = usePersonnelStore();
     const { teachers } = storeToRefs(personnelStore);
+    const tableRef = ref();
 
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      isLoading: false,
+      pageInfo: {
+        page: 1,
+        size: 5,
+      },
     });
-
 
     const faculty = ref("*");
     const filtedArray = computed(() => {
-      console.log("fffff:", faculty);
       if (faculty.value == "*") {
         return teachers.value;
       } else {
@@ -102,6 +146,30 @@ export default {
       }
     };
 
+    const HandlePageChange = (page) => {
+      data.isLoading = true;
+      personnelStore
+        .getTeachers({ page, size: data.pageInfo.size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
+    };
+    const HandleSizeChange = (size) => {
+      data.isLoading = true;
+      data.pageInfo.page = 1;
+      personnelStore
+        .getTeachers({ page: data.pageInfo.page, size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
+    };
+
     const rowStyle = ({ row, rowIndex }) => {
       return {
         height: "60px",
@@ -115,28 +183,26 @@ export default {
       bus.emit("showTeacherEdit", value);
     };
 
-    const genderFormatter = (row)=>{
-      switch(row.gender){
-        case "0":
+    const genderFormatter = (row) => {
+      switch (row.gender) {
+        case 0:
           return "女";
-        case "1":
+        case 1:
           return "男";
-        case "2":
+        default:
           return "未设置";
       }
-    }
+    };
 
-    const ethnicityFormatter = (row)=>{
-      return personnelStore.ethnicityNameMap.get(row.ethnicityId)
-    }
-    const departmentFormatter = (row)=>{
-      return useAcademicStore().departmentNameMap.get(row.departmentId)
-    }
-    const externalFormatter = (row)=>{
-      return row.isExternal ? "是" : "否"
-    }
-
-    
+    const ethnicityFormatter = (row) => {
+      return personnelStore.ethnicityNameMap.get(row.ethnicityId);
+    };
+    const departmentFormatter = (row) => {
+      return useAcademicStore().departmentNameMap.get(row.departmentId );
+    };
+    const externalFormatter = (row) => {
+      return row.isExternal ? "是" : "否";
+    };
 
     return {
       ...toRefs(data),
@@ -150,6 +216,10 @@ export default {
       ethnicityFormatter,
       externalFormatter,
       departmentFormatter,
+      HandlePageChange,
+      HandleSizeChange,
+      personnelStore,
+      tableRef
     };
   },
 };
@@ -183,9 +253,9 @@ tbody td .cell .RowButtons {
   margin-left: 10px;
 }
 
-.filters{
-    margin: 10px 0px 20px 20px ;
-    display: inline-flex;
-    flex-direction: row;
+.filters {
+  margin: 10px 0px 20px 20px;
+  display: inline-flex;
+  flex-direction: row;
 }
 </style>

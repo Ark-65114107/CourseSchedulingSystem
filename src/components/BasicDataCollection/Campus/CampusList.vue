@@ -15,7 +15,8 @@
       @selection-change="HandleSelectChange"
       max-height="450px"
       v-loading="isLoading"
-      element-loading-text="正在加载.."
+      element-loading-text="正在加载..."
+      ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="55" />
       <el-table-column prop="id" label="id" />
@@ -64,7 +65,7 @@ import CampusUploadDialog from "./CampusUploadDialog.vue";
 
 import bus from "@/bus/bus.js";
 import { storeToRefs } from "pinia";
-import { onMounted, onBeforeMount, reactive, toRefs } from "vue";
+import { onMounted, ref, reactive, toRefs } from "vue";
 import { ElMessageBox } from "element-plus";
 import { useLocationStore } from "@/store/locationStore/index.js";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
@@ -79,6 +80,7 @@ export default {
   setup() {
     const locationStore = useLocationStore();
     const { campuses } = storeToRefs(locationStore);
+    const tableRef = ref();
 
     const data = reactive({
       isDeleteShow: false,
@@ -106,6 +108,7 @@ export default {
         .then((res) => {
           if (res === 200) {
             data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
           }
         });
     };
@@ -117,6 +120,7 @@ export default {
         .then((res) => {
           if (res === 200) {
             data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
           }
         });
     };
@@ -192,6 +196,7 @@ export default {
       HandleRefreshClick,
       HandlePageChange,
       HandleSizeChange,
+      tableRef,
     };
   },
 };

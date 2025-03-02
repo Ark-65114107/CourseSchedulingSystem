@@ -23,7 +23,6 @@
         />
       </el-select>
 
-
       <el-text class="filterLabel">培养层次</el-text>
       <el-select
         v-model="filterCriteria.educationalLevel"
@@ -31,20 +30,18 @@
         class="filterSelector"
         filterable
       >
-       
         <el-option label="全部" value="*" />
-        <el-option
-          v-for="e of educationalLevels"
-          :label="e"
-          :value="e"
-        />
+        <el-option v-for="e of educationalLevels" :label="e" :value="e" />
       </el-select>
     </div>
     <el-table
       :data="filtedArray.filtedMajors"
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
-      height="400"
+      max-height="400"
+      v-loading="isLoading"
+      element-loading-text="正在加载..."
+      ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="40" />
       <el-table-column prop="id" label="专业编号" min-width="100px" />
@@ -52,18 +49,34 @@
       <el-table-column prop="abbr" label="简称" min-width="100px" />
       <el-table-column prop="ename" label="英文名" min-width="100px" />
       <el-table-column prop="duration" label="学制" min-width="100px" />
-      <el-table-column prop="isEnabled" :formatter="enabledFormatter" label="开办状态" min-width="100px" />
-      <el-table-column prop="facultyId" :formatter="facultyFormatter" label="所属院系" min-width="100px" />
+      <el-table-column
+        prop="isEnabled"
+        :formatter="enabledFormatter"
+        label="开办状态"
+        min-width="100px"
+      />
+      <el-table-column
+        prop="facultyId"
+        :formatter="facultyFormatter"
+        label="所属院系"
+        min-width="100px"
+      />
       <el-table-column
         prop="educationalLevel"
         label="培养层次"
         min-width="80px"
       />
 
-       
-      <el-table-column label="专业方向" min-width="120px" fixed="right"  v-slot="scope">
-          <el-link type="primary" @click="HandleDrawerClick(scope.row)">专业方向管理</el-link>
-      </el-table-column> 
+      <el-table-column
+        label="专业方向"
+        min-width="120px"
+        fixed="right"
+        v-slot="scope"
+      >
+        <el-link type="primary" @click="HandleDrawerClick(scope.row)"
+          >专业方向管理</el-link
+        >
+      </el-table-column>
 
       <el-table-column
         label="操作"
@@ -81,39 +94,55 @@
         </div>
       </el-table-column>
     </el-table>
+    <el-pagination
+      @current-change="HandlePageChange"
+      @size-change="HandleSizeChange"
+      v-model:current-page="pageInfo.page"
+      v-model:page-size="pageInfo.size"
+      layout=" prev, pager, next,sizes,total"
+      style="margin: 10px 20px 0px 20px"
+      :total="academicStore.majorNum"
+      :size="pageInfo.size"
+      :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
+      :default-page-size="5"
+      background
+    />
   </div>
   <MajorEditDialog />
-  <specializationListDrawer/>
+  <specializationListDrawer />
 </template>
 
 <script>
 import bus from "@/bus/bus.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, onMounted, reactive, toRefs } from "vue";
+import { computed, onBeforeMount, onMounted, reactive, ref, toRefs } from "vue";
 import { ElMessageBox } from "element-plus";
 import MajorEditDialog from "./MajorEditDialog.vue";
-import specializationListDrawer from './specializationListDrawer.vue';
+import specializationListDrawer from "./specializationListDrawer.vue";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
 import { useLocationStore } from "@/store/locationStore/index.js";
 import { useAcademicStore } from "@/store/academicStore/index.js"; //store
-
 
 export default {
   name: "MajorList",
   components: {
     MajorEditDialog,
-    specializationListDrawer
+    specializationListDrawer,
   },
   setup() {
     const locationStore = useLocationStore();
     const academicStore = useAcademicStore();
-    const { majors,faculties,educationalLevels } = storeToRefs(academicStore);
-
-
+    const { majors, faculties, educationalLevels } = storeToRefs(academicStore);
+    const tableRef = ref()
 
     const data = reactive({
       isDeleteShow: false,
+      isLoading: false,
       deleteValue: [],
+      pageInfo: {
+        page: 1,
+        size: 5,
+      },
     });
 
     const filterCriteria = reactive({
@@ -123,20 +152,21 @@ export default {
 
     const filtedArray = reactive({
       filtedMajors: computed(() => {
-          return majors.value.filter((major)=>{
-            if(filterCriteria.faculty == "*"){
-              return true
-            }else{
-              return major.facultyId == filterCriteria.faculty
-            }
-          }).filter((major)=>{
-            if(filterCriteria.educationalLevel == "*"){
-              return true
-            }else{
-              return major.educationalLevel == filterCriteria.educationalLevel
+        return majors.value
+          .filter((major) => {
+            if (filterCriteria.faculty == "*") {
+              return true;
+            } else {
+              return major.facultyId == filterCriteria.faculty;
             }
           })
-        
+          .filter((major) => {
+            if (filterCriteria.educationalLevel == "*") {
+              return true;
+            } else {
+              return major.educationalLevel == filterCriteria.educationalLevel;
+            }
+          });
       }),
     });
 
@@ -154,6 +184,28 @@ export default {
       } else {
         data.isDeleteShow = true;
       }
+    };
+
+    const HandlePageChange = (page) => {
+      data.isLoading = true;
+      academicStore.getMajors({ page, size: data.pageInfo.size }).then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
+    };
+    const HandleSizeChange = (size) => {
+      data.isLoading = true;
+      data.pageInfo.page = 1;
+      academicStore
+        .getMajors({ page: data.pageInfo.page, size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
     };
 
     const rowStyle = ({ row, rowIndex }) => {
@@ -201,17 +253,16 @@ export default {
         });
     };
 
-    const HandleDrawerClick = (row)=>{
-      bus.emit("showSpecializationListDrawer",row)
-    }
+    const HandleDrawerClick = (row) => {
+      bus.emit("showSpecializationListDrawer", row);
+    };
 
     const enabledFormatter = (row) => {
       return row.isEnabled ? "是" : "否";
     };
     const facultyFormatter = (row) => {
-      return academicStore.departmentNameMap.get(row.facultyId)
+      return academicStore.departmentNameMap.get(row.facultyId);
     };
-   
 
     return {
       ...toRefs(data),
@@ -229,7 +280,11 @@ export default {
       filtedArray,
       enabledFormatter,
       facultyFormatter,
-      educationalLevels
+      educationalLevels,
+      HandlePageChange,
+      HandleSizeChange,
+      academicStore,
+      tableRef
     };
   },
 };
