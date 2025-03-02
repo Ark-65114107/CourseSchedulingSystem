@@ -12,16 +12,7 @@ export const initialDepartmentTypes = ["院系", "行政类", "其它", "科研�
 
 
 export const initialMajors = [
-    {
-        id: "major1",
-        abbr: "软工",
-        duration: "3",
-        name: "软件工程",
-        ename: "",
-        isEnabled: true,
-        facultyId: "fac11111",
-        educationalLevel: "本科"
-    },
+    
     {
         id: "major2",
         abbr: "物联网",

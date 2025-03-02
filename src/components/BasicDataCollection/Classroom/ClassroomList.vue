@@ -71,7 +71,9 @@
       :data="filtedArray.filtedClassrooms"
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
-      max-height="450px"
+      max-height="418px"
+      v-loading="isLoading"
+      element-loading-text="正在加载.."
     >
       <el-table-column type="selection" :selectable="selectable" width="40" />
       <el-table-column prop="code" label="教室编号" min-width="155px" />
@@ -88,7 +90,12 @@
         label="教学楼"
         min-width="100px"
       />
-      <el-table-column prop="typeId" :formatter="typeIdFormatter" label="教室类型" min-width="100px" />
+      <el-table-column
+        prop="typeId"
+        :formatter="typeIdFormatter"
+        label="教室类型"
+        min-width="100px"
+      />
       <el-table-column prop="capacity" label="可容纳人数" min-width="100px" />
       <el-table-column
         prop="isAssigned"
@@ -100,7 +107,7 @@
         :formatter="availableToYesNo"
         label="是否启用"
       />
-      
+
       <el-table-column
         label="操作"
         v-slot="scope"
@@ -126,7 +133,7 @@
       v-model:current-page="pageInfo.page"
       v-model:page-size="pageInfo.size"
       layout=" prev, pager, next,sizes,total"
-      style="margin: 10px 20px 0px 20px;"
+      style="margin: 10px 20px 0px 20px"
       :total="locationStore.classroomNum"
       :size="pageInfo.size"
       :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
@@ -167,18 +174,29 @@ export default {
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      isLoading:false,
       pageInfo: {
-        page:1,
+        page: 1,
         size: 5,
       },
     });
 
     const HandlePageChange = (page) => {
-      locationStore.getClassroom({ page, size: data.pageInfo.size });
+      data.isLoading = true;
+      locationStore.getClassroom({ page, size: data.pageInfo.size }).then((res)=>{
+        if(res === 200){
+          data.isLoading = false
+        }
+      });
     };
     const HandleSizeChange = (size) => {
-      data.pageInfo.page = 1
-      locationStore.getClassroom({ page:data.pageInfo.page, size });
+      data.isLoading = true;
+      data.pageInfo.page = 1;
+      locationStore.getClassroom({ page: data.pageInfo.page, size }).then(res=>{
+        if(res===200){
+          data.isLoading = false
+        }
+      });
     };
 
     const filterCriteria = reactive({
@@ -344,7 +362,7 @@ export default {
       typeIdFormatter,
       HandlePageChange,
       HandleSizeChange,
-      locationStore
+      locationStore,
     };
   },
 };

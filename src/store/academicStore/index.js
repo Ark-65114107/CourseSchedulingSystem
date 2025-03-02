@@ -20,17 +20,19 @@ import getAcademicYears from "@/utils/getAcademicYears";
 import { useLocationStore } from "../locationStore";
 import { getGradeListApi } from "@/api/grade.api";
 import { getDepartmentListApi } from "@/api/departments.api";
+import { getMajorListApi } from "@/api/major.api";
 
 export const useAcademicStore = defineStore('academic', {
     state: () => ({
         departments: [],//部门
-        departmentNum:0,
+        departmentNum: 0,
         departmentTypes: [],//部门类别
 
         classes: [],//班级
         classTypies: [],//班级类型
 
         majors: [],//专业
+        majorNum:0,
         specializations: [],//专业方向
 
         courses: [],//课程
@@ -40,13 +42,12 @@ export const useAcademicStore = defineStore('academic', {
         courseCategories: [],//课程类别
 
         grades: [],//年级
-        gradeNum:0,
+        gradeNum: 0,
         educationalLevels: [],//学段
 
         semesters: [],//学期
 
         academicYears: [],//学年
-
 
         departmentMap: new Map(),
         departmentNameMap: new Map(),
@@ -93,16 +94,31 @@ export const useAcademicStore = defineStore('academic', {
             }
         },
 
-        getGrades(param){
-            getGradeListApi(param).then(res=>{
-                this.gradeNum = res.data.total
-                this.grades = res.data.grades
+        getGrades(param) {
+            return getGradeListApi(param).then(res => {
+                if (res.meta.code == 200) {
+                    this.gradeNum = res.data.total
+                    this.grades = res.data.grades
+                    return 200
+                }
             })
         },
-        getDepartments(param){
-            getDepartmentListApi(param).then(res=>{
-                this.departmentNum = res.data.total
-                this.departments = res.data.departments
+        getDepartments(param) {
+            return getDepartmentListApi(param).then(res => {
+                if (res.meta.code == 200) {
+                    this.departmentNum = res.data.total
+                    this.departments = res.data.departments
+                    return 200
+                }
+            })
+        },
+        getMajors(param){
+            return getMajorListApi(param).then(res => {
+                if (res.meta.code == 200) {
+                    this.majorNum = res.data.total
+                    this.majors = res.data.majors
+                    return 200
+                }
             })
         },
         // getClassroomsByCampus(campusId) {
@@ -129,7 +145,7 @@ export const useAcademicStore = defineStore('academic', {
 
 
         initDepartments() {
-            this.getDepartments({page:1,size:5});
+            this.getDepartments({ page: 1, size: 5 });
             this.initDepartmentTypes()
             this.departmentMap = new Map(this.departments.map(c => [c.id, c]))
             this.departmentNameMap = new Map(this.departments.map(c => [c.id, c.name]))
@@ -179,7 +195,7 @@ export const useAcademicStore = defineStore('academic', {
             return true
         },
         initMajors() {
-            this.majors = initialMajors;
+            this.getMajors({page:1,size:5})
             this.majorNameMap = new Map(this.majors.map(c => [c.id, c.name]))
             this.majorMap = new Map(this.majors.map(c => [c.id, c]))
         },
@@ -255,7 +271,7 @@ export const useAcademicStore = defineStore('academic', {
         },
 
         initGrades() {
-            this.getGrades({page:1,size:5})
+            this.getGrades({ page: 1, size: 5 })
             this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
         },
         AddGrade(value) {
@@ -276,7 +292,7 @@ export const useAcademicStore = defineStore('academic', {
             this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
             return true
         },
-        
+
         initSemesters() {
             this.semesters = iniitialSemesters;
             this.semesterNameMap = new Map(this.semesters.map(c => [c.id, c.name]))
@@ -311,7 +327,7 @@ export const useAcademicStore = defineStore('academic', {
 
 
 
-            
+
             this.classes = initialClassses;
             this.classNameMap = new Map(this.classes.map(c => [c.id, c.name]))
             this.classMap = new Map(this.classes.map(c => [c.id, c]))

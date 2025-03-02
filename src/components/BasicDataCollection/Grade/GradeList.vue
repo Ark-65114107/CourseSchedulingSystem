@@ -12,7 +12,9 @@
       :row-style="rowStyle"
       max-height="450px"
       @selection-change="HandleSelectChange"
-
+      v-loading="isLoading"
+      element-loading-text="正在加载..."
+      ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="55" />
       <el-table-column prop="name" label="年级名称" />
@@ -46,7 +48,7 @@
       v-model:current-page="pageInfo.page"
       v-model:page-size="pageInfo.size"
       layout=" prev, pager, next,sizes,total"
-      style="margin: 10px 20px 0px 20px;"
+      style="margin: 10px 20px 0px 20px"
       :total="academicStore.gradeNum"
       :size="pageInfo.size"
       :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
@@ -60,7 +62,7 @@
 <script>
 import bus from "@/bus/bus.js";
 import { storeToRefs } from "pinia";
-import { onMounted, onBeforeMount, reactive, toRefs } from "vue";
+import { onMounted, onBeforeMount, reactive, toRefs,ref } from "vue";
 import { ElMessageBox } from "element-plus";
 import { useLocationStore } from "@/store/locationStore/index.js";
 import { useAcademicStore } from "@/store/academicStore/index.js";
@@ -77,10 +79,12 @@ export default {
     const academicStore = useAcademicStore();
     const { campuses } = storeToRefs(locationStore);
     const { grades } = storeToRefs(academicStore);
+    const tableRef = ref()
 
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      isLoading: false,
       pageInfo: {
         page: 1,
         size: 5,
@@ -98,17 +102,33 @@ export default {
     };
 
     const HandlePageChange = (page) => {
-      academicStore.getGrades({
-        page,
-        size: data.pageInfo.size,
-      });
+      data.isLoading = true;
+      academicStore
+        .getGrades({
+          page,
+          size: data.pageInfo.size,
+        })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0,0)
+          }
+        });
     };
     const HandleSizeChange = (size) => {
-      data.pageInfo.page = 1
-      academicStore.getGrades({
-        page: data.pageInfo.page,
-        size
-      });
+      data.isLoading = true;
+      data.pageInfo.page = 1;
+      academicStore
+        .getGrades({
+          page: data.pageInfo.page,
+          size,
+        })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0,0)
+          }
+        });
     };
 
     const rowStyle = ({ row, rowIndex }) => {
@@ -177,6 +197,7 @@ export default {
       educationalLevelFormatter,
       HandlePageChange,
       HandleSizeChange,
+      tableRef,
     };
   },
 };
