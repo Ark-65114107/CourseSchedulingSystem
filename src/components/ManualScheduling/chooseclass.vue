@@ -8,56 +8,70 @@
     />
     <template #footer>
       <el-button v-if="!isAdding" text bg size="small" @click="onAddOption">
-        Add an option
+        增加班级
       </el-button>
       <template v-else>
         <el-input
           v-model="optionName"
           class="option-input"
-          placeholder="input option name"
+          placeholder="班级名"
           size="small"
         />
         <el-button type="primary" size="small" @click="onConfirm">
-          confirm
+          确认
         </el-button>
-        <el-button size="small" @click="clear">cancel</el-button>
+        <el-button size="small" @click="clear">取消</el-button>
       </template>
     </template>
   </el-select>
 </template>
 
 <script lang="ts" setup name="chooseclass">
-import { ref } from 'vue'
+import { ref, watch, defineProps, defineEmits } from 'vue'
 
-import type { CheckboxValueType } from 'element-plus'
+// 定义 props 和 emits
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: ""
+  }
+})
+const emit = defineEmits(["update:modelValue"])
+
+// 内部绑定的值
+const value = ref(props.modelValue)
+
+// 同步 v-model 的值
+watch(value, (newValue) => {
+  emit("update:modelValue", newValue)
+})
 
 const isAdding = ref(false)
-const value = ref<CheckboxValueType[]>([])
 const optionName = ref('')
 const cities = ref([
   {
-    value: 'Beijing',
-    label: 'Beijing',
+    value: '软工zb24-1',
+    label: '软工zb24-1',
   },
   {
-    value: 'Shanghai',
-    label: 'Shanghai',
+    value: '测绘24-1',
+    label: '测绘24-1',
   },
   {
-    value: 'Nanjing',
-    label: 'Nanjing',
+    value: '软工23-1',
+    label: '软工23-1',
   },
   {
-    value: 'Chengdu',
-    label: 'Chengdu',
+    value: '遥感23-2',
+    label: '遥感23-2',
   },
   {
-    value: 'Shenzhen',
-    label: 'Shenzhen',
+    value: '物联网23-3',
+    label: '物联网23-3',
   },
   {
-    value: 'Guangzhou',
-    label: 'Guangzhou',
+    value: '水工22-1',
+    label: '水工22-1',
   },
 ])
 
