@@ -4,7 +4,6 @@ import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
 import { EditArray } from "@/hooks/input/useEdit";
 import {
     initialDepartmentTypes,
-    initialMajors,
     initialEducationalLevels,
     initialClassses,
     iniitialclasstypies,
@@ -21,6 +20,9 @@ import { useLocationStore } from "../locationStore";
 import { getGradeListApi } from "@/api/grade.api";
 import { getDepartmentListApi } from "@/api/departments.api";
 import { getMajorListApi } from "@/api/major.api";
+import { getClassListApi } from "@/api/class.api";
+import { getSemesterListApi } from "@/api/semester.api";
+import { getCourseListApi } from "@/api/course.api";
 
 export const useAcademicStore = defineStore('academic', {
     state: () => ({
@@ -29,13 +31,15 @@ export const useAcademicStore = defineStore('academic', {
         departmentTypes: [],//部门类别
 
         classes: [],//班级
+        classNum:0,
         classTypies: [],//班级类型
 
         majors: [],//专业
-        majorNum:0,
+        majorNum: 0,
         specializations: [],//专业方向
 
         courses: [],//课程
+        courseNum:0,
         courseNatures: [],//课程属性
         courseTypes: [],//课程类型
         courseAttributes: [],//课程性质
@@ -46,6 +50,7 @@ export const useAcademicStore = defineStore('academic', {
         educationalLevels: [],//学段
 
         semesters: [],//学期
+        semesterNum:0,
 
         academicYears: [],//学年
 
@@ -99,6 +104,8 @@ export const useAcademicStore = defineStore('academic', {
                 if (res.meta.code == 200) {
                     this.gradeNum = res.data.total
                     this.grades = res.data.grades
+                    this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
+                    this.gradeMap = new Map(this.grades.map(c => [c.id, c]))
                     return 200
                 }
             })
@@ -112,11 +119,39 @@ export const useAcademicStore = defineStore('academic', {
                 }
             })
         },
-        getMajors(param){
+        getMajors(param) {
             return getMajorListApi(param).then(res => {
                 if (res.meta.code == 200) {
                     this.majorNum = res.data.total
                     this.majors = res.data.majors
+
+                    return 200
+                }
+            })
+        },
+        getClasses(param = {page:1,size:5}) {
+            return getClassListApi(param).then(res => {
+                if (res.meta.code == 200) {
+                    this.classNum = res.data.total
+                    this.classes = res.data.classes
+                    return 200
+                }
+            })
+        },
+        getSemesters(param = {page:1,size:5}) {
+            return getSemesterListApi(param).then(res => {
+                if (res.meta.code == 200) {
+                    this.semesterNum = res.data.total
+                    this.semesters = res.data.semesters
+                    return 200
+                }
+            })
+        },
+        getCourses(param = {page:1,size:5}) {
+            return getCourseListApi(param).then(res => {
+                if (res.meta.code == 200) {
+                    this.courseNum = res.data.total
+                    this.courses = res.data.courses
                     return 200
                 }
             })
@@ -195,7 +230,7 @@ export const useAcademicStore = defineStore('academic', {
             return true
         },
         initMajors() {
-            this.getMajors({page:1,size:5})
+            this.getMajors({ page: 1, size: 5 })
             this.majorNameMap = new Map(this.majors.map(c => [c.id, c.name]))
             this.majorMap = new Map(this.majors.map(c => [c.id, c]))
         },
@@ -272,7 +307,7 @@ export const useAcademicStore = defineStore('academic', {
 
         initGrades() {
             this.getGrades({ page: 1, size: 5 })
-            this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
+
         },
         AddGrade(value) {
             this.grades.push(value)
@@ -294,7 +329,7 @@ export const useAcademicStore = defineStore('academic', {
         },
 
         initSemesters() {
-            this.semesters = iniitialSemesters;
+            this.getSemesters()
             this.semesterNameMap = new Map(this.semesters.map(c => [c.id, c.name]))
         },
         AddSemester(value) {
@@ -320,6 +355,7 @@ export const useAcademicStore = defineStore('academic', {
             this.classTypies = iniitialclasstypies
             this.academicYears = getAcademicYears()
             this.AcademicDatainitiate = true
+            this.getClasses()
             this.initGrades()
             useLocationStore().initCampuses()
             this.initDepartments()
@@ -365,7 +401,7 @@ export const useAcademicStore = defineStore('academic', {
 
 
         initCourses() {
-            this.courses = iniitialCourses;
+            this.getCourses()
             this.courseAttributes = initialCourseAttributes
             this.courseCategories = initialCourseCategories
             this.courseNatures = initialCourseNatures

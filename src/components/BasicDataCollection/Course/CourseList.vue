@@ -50,7 +50,10 @@
       :data="courses"
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
-      height="400"
+      max-height="400px"
+      v-loading="isLoading"
+      element-loading-text="正在加载..."
+      ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="40" />
       <el-table-column prop="code" label="课程编号" min-width="100px" />
@@ -109,6 +112,19 @@
         </div>
       </el-table-column>
     </el-table>
+    <el-pagination
+      @current-change="HandlePageChange"
+      @size-change="HandleSizeChange"
+      v-model:current-page="pageInfo.page"
+      v-model:page-size="pageInfo.size"
+      layout=" prev, pager, next,sizes,total"
+      style="margin: 10px 20px 0px 20px;"
+      :total="academicStore.courseNum"
+      :size="pageInfo.size"
+      :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
+      :default-page-size="5"
+      background
+    />
   </div>
   <CourseEditDialog />
   <CourseInfoDrawer />
@@ -117,13 +133,13 @@
 <script>
 import bus from "@/bus/bus.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, onMounted, reactive, toRefs } from "vue";
+import { computed, onBeforeMount, onMounted, reactive, toRefs,ref } from "vue";
 import { ElMessageBox } from "element-plus";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
 import { useLocationStore } from "@/store/locationStore/index.js";
 import { useAcademicStore } from "@/store/academicStore/index.js"; //store
 import CourseInfoDrawer from "./CourseInfoDrawer.vue";
-import CourseEditDialog from './CourseEditDialog.vue';
+import CourseEditDialog from "./CourseEditDialog.vue";
 
 export default {
   name: "CourseList",
@@ -135,11 +151,16 @@ export default {
     const locationStore = useLocationStore();
     const academicStore = useAcademicStore();
     const { courses } = storeToRefs(academicStore);
+    const tableRef = ref();
 
-    
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      isLoading: false,
+      pageInfo: {
+        page: 1,
+        size: 5,
+      },
     });
 
     const filterCriteria = reactive({
@@ -162,6 +183,30 @@ export default {
       } else {
         data.isDeleteShow = true;
       }
+    };
+
+    const HandlePageChange = (page) => {
+      data.isLoading = true;
+      academicStore
+        .getCourses({ page, size: data.pageInfo.size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
+    };
+    const HandleSizeChange = (size) => {
+      data.isLoading = true;
+      data.pageInfo.page = 1;
+      academicStore
+        .getCourses({ page: data.pageInfo.page, size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
     };
 
     const rowStyle = ({ row, rowIndex }) => {
@@ -244,6 +289,10 @@ export default {
       courseAttributeFormatter,
       courseTypeFormatter,
       courseNatureFormatter,
+      HandlePageChange,
+      HandleSizeChange,
+      academicStore,
+      tableRef,
     };
   },
 };

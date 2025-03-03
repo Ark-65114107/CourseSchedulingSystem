@@ -88,6 +88,7 @@
       v-model:current-page="pageInfo.page"
       v-model:page-size="pageInfo.size"
       layout=" prev, pager, next,sizes,total"
+      style="margin: 10px 20px 0px 20px;"
       :total="personnelStore.teacherNum"
       :size="pageInfo.size"
       :page-sizes="[5, 10, 20, 50, 100, 200, 300]"

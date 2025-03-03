@@ -11,14 +11,30 @@
       :data="semesters"
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
-      height="400"
+      max-height="450px"
+      v-loading="isLoading"
+      element-loading-text="正在加载..."
+      ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="40" />
       <el-table-column prop="name" label="学期名称" min-width="155px" />
       <el-table-column prop="academicYear" label="学年" min-width="100px" />
-      <el-table-column prop="semester" :formatter="semesterFormatter" label="学期" min-width="100px" />
-      <el-table-column prop="startAndEndDates[0]" label="开始日期" min-width="155px" />
-      <el-table-column prop="startAndEndDates[1]" label="结束日期" min-width="155px" />
+      <el-table-column
+        prop="semester"
+        :formatter="semesterFormatter"
+        label="学期"
+        min-width="100px"
+      />
+      <el-table-column
+        prop="startAndEndDates[0]"
+        label="开始日期"
+        min-width="155px"
+      />
+      <el-table-column
+        prop="startAndEndDates[1]"
+        label="结束日期"
+        min-width="155px"
+      />
       <el-table-column
         label="操作"
         v-slot="scope"
@@ -35,6 +51,19 @@
         </div>
       </el-table-column>
     </el-table>
+    <el-pagination
+      @current-change="HandlePageChange"
+      @size-change="HandleSizeChange"
+      v-model:current-page="pageInfo.page"
+      v-model:page-size="pageInfo.size"
+      layout=" prev, pager, next,sizes,total"
+      style="margin: 10px 20px 0px 20px;"
+      :total="academicStore.semesterNum"
+      :size="pageInfo.size"
+      :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
+      :default-page-size="5"
+      background
+    />
   </div>
   <SemesterEditDialog />
 </template>
@@ -42,7 +71,7 @@
 <script>
 import bus from "@/bus/bus.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, onMounted, reactive, toRefs } from "vue";
+import { computed, onBeforeMount, onMounted, reactive, toRefs,ref } from "vue";
 import { ElMessageBox } from "element-plus";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
 import { useAcademicStore } from "@/store/academicStore/index.js"; //store
@@ -55,11 +84,16 @@ export default {
   setup() {
     const academicStore = useAcademicStore();
     const { semesters } = storeToRefs(academicStore);
+    const tableRef = ref();
 
-    
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      isLoading: false,
+      pageInfo: {
+        page: 1,
+        size: 5,
+      },
     });
 
     const filterCriteria = reactive({
@@ -84,6 +118,30 @@ export default {
       }
     };
 
+    const HandlePageChange = (page) => {
+      data.isLoading = true;
+      academicStore
+        .getSemesters({ page, size: data.pageInfo.size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
+    };
+    const HandleSizeChange = (size) => {
+      data.isLoading = true;
+      data.pageInfo.page = 1;
+      academicStore
+        .getSemesters({ page: data.pageInfo.page, size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
+    };
+
     const rowStyle = ({ row, rowIndex }) => {
       return {
         height: "60px",
@@ -96,7 +154,6 @@ export default {
     const HandleEditClick = (value) => {
       bus.emit("showSemesterEdit", value);
     };
-
 
     const HandleArrayDelete = () => {
       ElMessageBox.confirm("确认删除吗?", "警告", {
@@ -126,10 +183,9 @@ export default {
         });
     };
 
-    const semesterFormatter = (row)=>{
-      return `第${row.semester}学期`
-    }
-
+    const semesterFormatter = (row) => {
+      return `第${row.semester}学期`;
+    };
 
     return {
       ...toRefs(data),
@@ -141,6 +197,10 @@ export default {
       HandleEditClick,
       rowStyle,
       semesterFormatter,
+      HandlePageChange,
+      HandleSizeChange,
+      tableRef,
+      academicStore,
     };
   },
 };

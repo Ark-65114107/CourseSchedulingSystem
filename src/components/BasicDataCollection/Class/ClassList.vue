@@ -44,9 +44,17 @@
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
       max-height="450px"
+      v-loading="isLoading"
+      element-loading-text="正在加载..."
+      ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="50" />
-      <el-table-column prop="facultyId" :formatter="facultyFormatter" label="所属院系" min-width="100px" />
+      <el-table-column
+        prop="facultyId"
+        :formatter="facultyFormatter"
+        label="所属院系"
+        min-width="100px"
+      />
       <el-table-column
         prop="gradeId"
         label="年级"
@@ -93,6 +101,19 @@
         </div>
       </el-table-column>
     </el-table>
+    <el-pagination
+      @current-change="HandlePageChange"
+      @size-change="HandleSizeChange"
+      v-model:current-page="pageInfo.page"
+      v-model:page-size="pageInfo.size"
+      layout=" prev, pager, next,sizes,total"
+      style="margin: 10px 20px 0px 20px;"
+      :total="academicStore.classNum"
+      :size="pageInfo.size"
+      :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
+      :default-page-size="5"
+      background
+    />
   </div>
   <ClassEditDialog />
   <ClassInfoDrawerVue />
@@ -115,10 +136,16 @@ export default {
   setup() {
     const academicStore = useAcademicStore();
     const { classes } = storeToRefs(academicStore);
+    const tableRef = ref();
 
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
+      isLoading: false,
+      pageInfo: {
+        page: 1,
+        size: 5,
+      },
     });
 
     const faculty = ref("*");
@@ -143,6 +170,30 @@ export default {
       }
     };
 
+    const HandlePageChange = (page) => {
+      data.isLoading = true;
+      academicStore
+        .getClasses({ page, size: data.pageInfo.size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
+    };
+    const HandleSizeChange = (size) => {
+      data.isLoading = true;
+      data.pageInfo.page = 1;
+      academicStore
+        .getClasses({ page: data.pageInfo.page, size })
+        .then((res) => {
+          if (res === 200) {
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
+    };
+
     const rowStyle = ({ row, rowIndex }) => {
       return {
         height: "60px",
@@ -164,7 +215,10 @@ export default {
       return row.isExpanding ? "是" : "否";
     };
     const isGraduatedFormatter = (row) => {
-      return academicStore.gradeMap.get(row.gradeId).isGraduated ? "是" : "否";
+      return { ...academicStore.gradeMap.get(row.gradeId), isGraduated: 0 }
+        .isGraduated
+        ? "是"
+        : "否";
     };
     const facultyIdFormatter = (row) => {
       return academicStore.departmentNameMap.get(row.facultyId);
@@ -173,15 +227,17 @@ export default {
       return academicStore.gradeNameMap.get(row.gradeId);
     };
     const durationFormatter = (row) => {
-      return academicStore.gradeMap.get(row.gradeId).duration;
+      return { ...academicStore.gradeMap.get(row.gradeId), duration: "" }
+        .duration;
     };
     const educationalLevelFormatter = (row) => {
       return academicStore.educationalLevelNameMap.get(
-        academicStore.gradeMap.get(row.gradeId).educationalLevelId
+        { ...academicStore.gradeMap.get(row.gradeId), educationalLevelId: "" }
+          .educationalLevelId
       );
     };
     const facultyFormatter = (row) => {
-      return academicStore.departmentNameMap.get(row.facultyId)
+      return academicStore.departmentNameMap.get(row.facultyId);
     };
 
     return {
@@ -199,7 +255,11 @@ export default {
       gradeIdFormatter,
       durationFormatter,
       educationalLevelFormatter,
-      facultyFormatter
+      facultyFormatter,
+      tableRef,
+      HandlePageChange,
+      HandleSizeChange,
+      academicStore,
     };
   },
 };
