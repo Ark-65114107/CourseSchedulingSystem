@@ -2,6 +2,16 @@ import axios from "axios";
 import { ElMessage } from "element-plus";
 import { getToken } from "./token/getToken";
 
+const { isCancel } = axios
+const requestCache = {}
+
+function cancelRepeatCache(key){
+    if(requestCache[key]){
+        requestCache[key].abort()
+        delete requestCache[key]
+    }
+}
+
 
 const request = axios.create({
     baseURL: "https://mock.presstime.cn/mock/679a2d5fb365a6d86942118b/testapi",
@@ -17,7 +27,16 @@ request.interceptors.request.use(
                 ...config.headers,
                 token
             }   
-        }   
+        }
+        //删除重复请求
+        const { isAbort = false ,url,method } = config
+        if(isAbort){
+            const key = `${url}%%${method}`
+            cancelRepeatCache(key)
+            const controller = new AbortController()
+            config.signal = controller.signal
+            requestCache[key] = controller
+        }
         return config
     },
     error => {
@@ -35,8 +54,9 @@ request.interceptors.response.use(
         return response.data
     },
     error => {
-        if (error.response) {
-            console.log(error);
+
+        if(isCancel(error)){
+            console.log("重复请求!");
         }
         return Promise.reject(error)
     }

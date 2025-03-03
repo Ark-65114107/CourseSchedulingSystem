@@ -47,15 +47,14 @@ export const useLocationStore = defineStore('location', {
                 type: "info"
             })
             return this.getCampus(parm).then(res => {
-                console.log(res);
                 if (res === 200){
                     ElMessage.success("刷新成功!")
                 }
             })
         },
+
         getCampus(parm) {
             return getCampusListApi(parm).then(response => {
-                console.log(response);
                 if (response.meta.code === 200) {
                     this.campusNum = response.data.total
                     this.campuses = response.data.campuses
@@ -65,10 +64,6 @@ export const useLocationStore = defineStore('location', {
                 }
                 
             }).catch(error => {
-                ElMessage({
-                    message: `刷新失败! 错误信息${error}`,
-                    type: "error"
-                })
                 return error
             })
         },

@@ -5,7 +5,8 @@ export const getCampusListApi = (parm)=>{
     return request({
         url:"/campuses",
         method:"get",
-        params:parm
+        params:parm,
+        isAbort:true
     })
 }
 
