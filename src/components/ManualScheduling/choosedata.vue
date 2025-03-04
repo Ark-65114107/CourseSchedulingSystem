@@ -3,16 +3,20 @@
     <el-table
       ref="multipleTableRef"
       :data="tableData"
-      row-key="工号"
+      row-key="编号"
       style="width: 100%"
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column label="工号" width="120" prop="工号" />
-      <el-table-column property="姓名" label="姓名" width="120" />
-      <el-table-column property="性别" label="性别" width="120" />
+      <el-table-column label="编号" width="60" prop="选项编号" />
+      <el-table-column label="学年学期" width="120" prop="学年学期" />
+      <el-table-column label="课程编号" width="120" prop="课程编号" />
+      <el-table-column label="教师工号" width="120" prop="教师工号" />
+      <el-table-column label="任课教师" width="120" prop="任课教师" />
+      <el-table-column label="是否外聘" width="120" prop="是否外聘" />
       <el-table-column property="单位" label="单位" />
-      <el-table-column property="是否外聘" label="是否外聘" />
+      <el-table-column property="教学班组成" label="教学班组成" />
+      <el-table-column property="教学班名称" label="教学班名称" />
     </el-table>
     <div style="margin-top: 20px">
       <el-button @click="toggleSelection()">清空选项</el-button>
@@ -25,11 +29,15 @@ import { ref } from 'vue'
 import type { TableInstance } from 'element-plus'
 
 interface User {
-  工号: number;
-  姓名: string
-  性别: string
-  单位: string
+  编号:number
+  学年学期:string
+  课程编号:string
+  教师工号: string
+  任课教师: string
   是否外聘: string
+  单位: string
+  教学班组成: string
+  教学班名称: string
 }
 
 const multipleTableRef = ref<TableInstance>()
@@ -55,53 +63,81 @@ const handleSelectionChange = (val: User[]) => {
 
 const tableData: User[] = [
   {
-    工号: 1,
-    姓名: 'Tom',
-    性别: '男',
-    单位: '技术部',
-    是否外聘: '否',
+    编号:1,
+    学年学期:'2021-2022-1',
+    课程编号:'',
+    教师工号: '085',
+    任课教师: '',
+    是否外聘: '',
+    单位: '',
+    教学班组成: '',
+    教学班名称: '',
   },
   {
-    工号: 2,
-    姓名: 'Tom',
-    性别: '男',
-    单位: '技术部',
-    是否外聘: '否',
+    编号:2,
+    学年学期:'2021-2022-1',
+    课程编号:'',
+    教师工号: '085',
+    任课教师: '',
+    是否外聘: '',
+    单位: '',
+    教学班组成: '',
+    教学班名称: '',
   },
   {
-    工号: 3,
-    姓名: 'Tom',
-    性别: '男',
-    单位: '技术部',
-    是否外聘: '否',
+    编号:3,
+    学年学期:'2021-2022-1',
+    课程编号:'',
+    教师工号: '085',
+    任课教师: '',
+    是否外聘: '',
+    单位: '',
+    教学班组成: '',
+    教学班名称: '',
   },
   {
-    工号: 4,
-    姓名: 'Tom',
-    性别: '男',
-    单位: '技术部',
-    是否外聘: '否',
+    编号:4,
+    学年学期:'2021-2022-1',
+    课程编号:'',
+    教师工号: '085',
+    任课教师: '',
+    是否外聘: '',
+    单位: '',
+    教学班组成: '',
+    教学班名称: '',
   },
   {
-    工号: 5,
-    姓名: 'Tom',
-    性别: '男',
-    单位: '技术部',
-    是否外聘: '否',
+    编号:5,
+    学年学期:'2021-2022-1',
+    课程编号:'',
+    教师工号: '085',
+    任课教师: '',
+    是否外聘: '',
+    单位: '',
+    教学班组成: '',
+    教学班名称: '',
   },
   {
-    工号: 6,
-    姓名: 'Tom',
-    性别: '男',
-    单位: '技术部',
-    是否外聘: '否',
+    编号:6,
+    学年学期:'2021-2022-1',
+    课程编号:'',
+    教师工号: '085',
+    任课教师: '',
+    是否外聘: '',
+    单位: '',
+    教学班组成: '',
+    教学班名称: '',
   },
   {
-    工号: 7,
-    姓名: 'Tom',
-    性别: '男',
-    单位: '技术部',
-    是否外聘: '否',
+    编号:7,
+    学年学期:'2021-2022-1',
+    课程编号:'',
+    教师工号: '085',
+    任课教师: '',
+    是否外聘: '',
+    单位: '',
+    教学班组成: '',
+    教学班名称: '',
   },
 ]
 </script>

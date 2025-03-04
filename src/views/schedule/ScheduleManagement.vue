@@ -78,6 +78,14 @@
         <choosedata/>
         <el-button style="margin-top: 12px" @click="next">下一步</el-button>
       </div>
+
+      <div v-show="active === 2">
+        <el-button style="margin-top: 12px" @click="next">下一步</el-button>
+      </div>
+
+      <div v-show="active === 3">
+        <el-button style="margin-top: 12px" @click="next">下一步</el-button>
+      </div>
     </div>
   </div>
 </template>
