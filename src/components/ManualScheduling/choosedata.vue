@@ -14,16 +14,18 @@
       <el-table-column label="教师工号" width="120" prop="teacherId" />
       <el-table-column label="任课教师" width="120" prop="teacherName" />
       <el-table-column label="是否外聘" width="120" prop="isOutside" />
-      <el-table-column property="unit" label="单位"/>
+      <el-table-column property="unit" label="单位" />
       <el-table-column property="classComponent" label="教学班组成" />
       <el-table-column property="className" label="教学班名称" />
     </el-table>
-    <el-pagination background layout="prev, pager, next"
-     :total="total"
-     :current-page="currentPage"
-     :page-size="pageSize"
-     @current-change="handleCurrentChange"
-     />
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      :total="total"
+      :current-page="currentPage"
+      :page-size="pageSize"
+      @current-change="handleCurrentChange"
+    />
     <div style="margin-top: 20px">
       <el-button @click="toggleSelection()">清空选项</el-button>
     </div>
@@ -31,57 +33,56 @@
 </template>
 
 <script lang="ts" setup name="choosedata">
-import { ref,onMounted } from 'vue'
-import type { TableInstance } from 'element-plus'
-import { all } from 'axios'
-import { getTaskListApi } from '@/api/tabledata.api'
+import { ref, onMounted } from "vue";
+import type { TableInstance } from "element-plus";
+import { all } from "axios";
+import { getTaskListApi } from "@/api/tabledata.api";
+import { closeSync } from "fs";
 
-const total = ref(1000)
-const pageSize= ref(10)
-const currentPage = ref(1)
-const allData = ref<User[]>([])
-const currentPageData = ref<User[]>([])
+const total = ref(1000);
+const pageSize = ref(10);
+const currentPage = ref(1);
+const allData = ref<User[]>([]);
+const currentPageData = ref<User[]>([]);
 
-const fetchData = (page,size) =>{
+const fetchData = (page, size) => {
   //从后端获取数据
-  getTaskListApi({page,size}).then((res) => {
-    allData.value = res.data
-    total.value = res.data.length
-    currentPage.value = 1
-  })
-  const start = (currentPage.value - 1) * pageSize.value
-  const end = currentPage.value * pageSize.value
-  currentPageData.value = allData.value.slice(start, end)
-}
+  return getTaskListApi({ page, size }).then((res) => {
+    console.log("qwqw",res);
+    allData.value = res.data.users;
+    total.value = res.data.length;
+    currentPage.value = 1;
+    currentPageData.value = allData.value;
+  });
+};
 
 const handleCurrentChange = (newpage) => {
-  currentPage.value = newpage
-  fetchData(currentPage.value,pageSize.value)
-}
+  currentPage.value = newpage;
+  fetchData(currentPage.value, pageSize.value);
+};
 
 const getData = () => {
-  fetchData(currentPage.value,pageSize.value)
-}
+  fetchData(currentPage.value, pageSize.value);
+};
 
 onMounted(() => {
-  getData()
-})
+  getData();
+});
 
 interface User {
-  id:number
-  term:string
-  courseNumber:string
-  teacherId: string
-  teacherName: string
-  isOutside: string
-  unit: boolean
-  classComponent: string
-  className: string
+  id: number;
+  term: string;
+  courseNumber: string;
+  teacherId: string;
+  teacherName: string;
+  isOutside: string;
+  unit: boolean;
+  classComponent: string;
+  className: string;
 }
 
-const multipleTableRef = ref<TableInstance>()
-const multipleSelection = ref<User[]>([])
-
+const multipleTableRef = ref<TableInstance>();
+const multipleSelection = ref<User[]>([]);
 
 const toggleSelection = (rows?: User[], ignoreSelectable?: boolean) => {
   if (rows) {
@@ -90,19 +91,18 @@ const toggleSelection = (rows?: User[], ignoreSelectable?: boolean) => {
         row,
         undefined,
         ignoreSelectable
-      )
-    })
+      );
+    });
   } else {
-    multipleTableRef.value!.clearSelection()
+    multipleTableRef.value!.clearSelection();
   }
-}
+};
 const handleSelectionChange = (val: User[]) => {
-  multipleSelection.value = val
-}
+  multipleSelection.value = val;
+};
 </script>
 
 <style scoped>
-
 </style>
 
 

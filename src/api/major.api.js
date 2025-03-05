@@ -5,8 +5,10 @@ export const getMajorListApi = (param)=>{
     return request({
         url:"/majors",
         method:"get",
-        params:param
-    })
+        params:param,
+        isAbort:true
+
+    }).catch(()=>{})
 }
 
 //添加专业数据

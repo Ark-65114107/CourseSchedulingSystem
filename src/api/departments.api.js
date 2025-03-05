@@ -5,8 +5,10 @@ export const getDepartmentListApi = (parm)=>{
     return request({
         url:"/departments",
         method:"get",
-        params:parm
-    })
+        params:parm,
+        isAbort:true
+
+    }).catch(()=>{})
 }
 
 //添加校区数据

@@ -37,6 +37,8 @@ body {
 router-link {
   all: unset;
 }
-
+.el-message .el-message__badge{
+  display: none;
+}
 
 </style>

@@ -3,17 +3,30 @@
     <div class="buttonMenu">
       <el-button type="primary" @click="HandleAddClick">添加</el-button>
       <el-button type="primary" @click="HandleUploadClick">导入</el-button>
-      <el-button type="primary" @click="HandleRefreshClick">刷新</el-button>
+      <el-button
+        type="primary"
+        @click="HandleRefreshClick"
+        :loading="refreshLoading"
+        >刷新</el-button
+      >
       <el-button type="danger" v-show="isDeleteShow" @click="HandleArrayDelete"
         >删除选中</el-button
       >
+      <el-input
+        class="searchInput"
+        v-model="keyWordTemp"
+        :prefix-icon="Search"
+        @clear="HandleClear"
+        clearable
+      />
+      <el-button @click="HandleSearchClick">搜索</el-button>
     </div>
 
     <el-table
       :data="campuses"
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
-      max-height="450px"
+      max-height="400px"
       v-loading="isLoading"
       element-loading-text="正在加载..."
       ref="tableRef"
@@ -66,9 +79,10 @@ import CampusUploadDialog from "./CampusUploadDialog.vue";
 import bus from "@/bus/bus.js";
 import { storeToRefs } from "pinia";
 import { onMounted, ref, reactive, toRefs } from "vue";
-import { ElMessageBox } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { useLocationStore } from "@/store/locationStore/index.js";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
+import { Search } from "@element-plus/icons-vue";
 
 export default {
   name: "CampusList",
@@ -86,6 +100,9 @@ export default {
       isDeleteShow: false,
       deleteValue: [],
       isLoading: false,
+      refreshLoading: false,
+      keyWordTemp: "",
+      keyWord: "",
       pageInfo: {
         page: 1,
         size: 5,
@@ -107,8 +124,8 @@ export default {
         .getCampus({ page, size: data.pageInfo.size })
         .then((res) => {
           if (res === 200) {
-            data.isLoading = false;
             tableRef.value.scrollTo(0, 0);
+            data.isLoading = false;
           }
         });
     };
@@ -125,6 +142,21 @@ export default {
         });
     };
 
+    const HandleRefreshClick = () => {
+      data.isLoading = true;
+      data.refreshLoading = true;
+      locationStore
+        .getCampus({ page: 1, size: data.pageInfo.size })
+        .then((res) => {
+          if (res === 200) {
+            data.pageInfo.page = 1;
+            data.refreshLoading = false;
+            data.isLoading = false;
+            tableRef.value.scrollTo(0, 0);
+          }
+        });
+    };
+
     const rowStyle = ({ row, rowIndex }) => {
       return {
         height: "60px",
@@ -132,11 +164,11 @@ export default {
     };
 
     const HandleAddClick = () => {
-      bus.emit("showCampusAdd");
+      bus.emit("showCampusAdd", { pageInfo: data.pageInfo });
     };
 
     const HandleEditClick = (value) => {
-      bus.emit("showCampusEdit", value);
+      bus.emit("showCampusEdit", { ...value, pageInfo: data.pageInfo });
     };
     const HandleDrawerClick = (value) => {
       bus.emit("showTeachingBuildingListDrawer", value);
@@ -144,14 +176,18 @@ export default {
     const HandleUploadClick = () => {
       bus.emit("showCampusUploadDialog");
     };
-    const HandleRefreshClick = () => {
-      data.isLoading = true;
-      locationStore
-        .refreshCampus({ page: 1, size: data.pageInfo.size })
-        .finally(() => {
-          data.isLoading = false;
-        });
+
+    const HandleSearchClick = () => {
+      if (data.keyWordTemp) {
+        data.keyWord = data.keyWordTemp;
+      } else {
+        ElMessage.warning("请输入关键词!");
+      }
     };
+
+    const HandleClear = ()=>{
+      data.keyWord = ''
+    }
 
     const HandleArrayDelete = () => {
       ElMessageBox.confirm("确认删除吗?", "警告", {
@@ -174,10 +210,10 @@ export default {
         type: "warning",
       })
         .then(() => {
-          campuses.value = SingleDelete(campuses.value, value);
+          locationStore.DeleteCampus(value);
         })
         .catch(() => {
-          console("canceled...");
+          console.log("canceled...");
         });
     };
 
@@ -197,6 +233,9 @@ export default {
       HandlePageChange,
       HandleSizeChange,
       tableRef,
+      Search,
+      HandleSearchClick,
+      HandleClear,
     };
   },
 };
@@ -214,6 +253,12 @@ export default {
   display: flex;
   justify-content: flex-start;
   margin: 0px 0px 10px 0px;
+  flex-wrap: nowrap;
+}
+
+.searchInput {
+  max-width: 20%;
+  margin: 0px 10px;
 }
 
 tbody td .cell .RowButtons {

@@ -1,36 +1,58 @@
 import request from "@/utils/request"
 
-//获取校区数据
+//获取校区列表数据
 export const getCampusListApi = (parm)=>{
     return request({
-        url:"/campuses",
+        url:"/campuses/list",
         method:"get",
         params:parm,
         isAbort:true
-    })
+    }).catch(()=>{})
+}
+//获取单个校区数据
+export const getCampusApi = (parm)=>{
+    return request({
+        url:"/campuses/get",
+        method:"get",
+        params:parm,
+        isAbort:true
+    }).catch(()=>{})
+}
+//获取单个校区数据
+export const getCampusByQueryApi = (parm)=>{
+    return request({
+        url:"/campuses/search",
+        method:"get",
+        params:parm,
+        isAbort:true
+    }).catch(()=>{})
 }
 
 //添加校区数据
 export const addCampusApi = (parm)=>{
     return request({
-        url:"/campuses",
+        url:"/campuses/create",
+        method:"post",
+        data:parm,
+        isAbort:true
+    }).catch(()=>{})   
+}
+
+//修改校区数据
+export const updateCampusApi = (parm)=>{
+    return request({
+        url:"/campuses/update",
         method:"post",
         data:parm
-    })
-}
-//修改校区数据
-export const editCampusApi = (parm)=>{
-    return request.put({
-        url:"/campuses",
-        data:parm
-    })
+    }).catch(()=>{})
 }
 
 //删除校区数据
 export const deleteCampusApi = (parm)=>{
-    return request.delete({
-        url:"/campuses",
+    return request({
+        url:"/campuses/delete",
+        method:"post",
         data:parm
-    })
+    }).catch(()=>{})
 }
 

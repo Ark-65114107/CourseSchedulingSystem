@@ -5,8 +5,9 @@ export const getCourseListApi = (parm)=>{
     return request({
         url:"/courses",
         method:"get",
-        params:parm
-    })
+        params:parm,
+        isAbort:true
+    }).catch(()=>{})
 }
 
 //添加校区数据

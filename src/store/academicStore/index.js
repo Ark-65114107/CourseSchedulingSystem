@@ -108,6 +108,8 @@ export const useAcademicStore = defineStore('academic', {
                     this.gradeMap = new Map(this.grades.map(c => [c.id, c]))
                     return 200
                 }
+            }).catch(error => {
+                return error
             })
         },
         getDepartments(param) {
@@ -117,6 +119,8 @@ export const useAcademicStore = defineStore('academic', {
                     this.departments = res.data.departments
                     return 200
                 }
+            }).catch(error => {
+                return error
             })
         },
         getMajors(param) {
@@ -124,9 +128,10 @@ export const useAcademicStore = defineStore('academic', {
                 if (res.meta.code == 200) {
                     this.majorNum = res.data.total
                     this.majors = res.data.majors
-
                     return 200
                 }
+            }).catch(error => {
+                return error
             })
         },
         getClasses(param = {page:1,size:5}) {
@@ -136,6 +141,8 @@ export const useAcademicStore = defineStore('academic', {
                     this.classes = res.data.classes
                     return 200
                 }
+            }).catch(error => {
+                return error
             })
         },
         getSemesters(param = {page:1,size:5}) {
@@ -145,6 +152,8 @@ export const useAcademicStore = defineStore('academic', {
                     this.semesters = res.data.semesters
                     return 200
                 }
+            }).catch(error => {
+                return error
             })
         },
         getCourses(param = {page:1,size:5}) {
@@ -154,6 +163,8 @@ export const useAcademicStore = defineStore('academic', {
                     this.courses = res.data.courses
                     return 200
                 }
+            }).catch(error => {
+                return error
             })
         },
         // getClassroomsByCampus(campusId) {

@@ -5,8 +5,10 @@ export const getGradeListApi = (param)=>{
     return request({
         url:"/grades",
         method:"get",
-        params:param
-    })
+        params:param,
+        isAbort:true
+
+    }).catch(()=>{})
 }
 
 //添加校区数据

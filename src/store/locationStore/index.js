@@ -7,7 +7,7 @@ import {
     initialclassroomTypes
 } from "@/data/locations"
 
-import { getCampusListApi } from "@/api/campus.api";
+import { addCampusApi, deleteCampusApi, getCampusListApi, updateCampusApi } from "@/api/campus.api";
 import { ElMessage } from "element-plus";
 import { getClassroomListApi } from "@/api/classroom.api";
 
@@ -41,19 +41,10 @@ export const useLocationStore = defineStore('location', {
                 this.locationDataInitiate = true
             }
         },
-        refreshCampus(parm) {
-            ElMessage({
-                message: "刷新中...",
-                type: "info"
-            })
-            return this.getCampus(parm).then(res => {
-                if (res === 200){
-                    ElMessage.success("刷新成功!")
-                }
-            })
-        },
 
-        getCampus(parm) {
+
+        getCampus(parm = { page: 1, size: 5 }) {
+            console.log(parm);
             return getCampusListApi(parm).then(response => {
                 if (response.meta.code === 200) {
                     this.campusNum = response.data.total
@@ -62,12 +53,15 @@ export const useLocationStore = defineStore('location', {
                     this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
                     return 200
                 }
-                
             }).catch(error => {
                 return error
             })
         },
-        getClassroom(parm) {
+        //查询keyword应该输入对象数组,如[{keyName1:keyValue1},{keyName2:keyValue2}...]
+        getCampusByQuery(keywords, page = 1, size = 5) {
+            
+        },
+        getClassroom(parm = { page: 1, size: 5 }) {
             return getClassroomListApi(parm).then(response => {
                 console.log(response);
                 if (response.meta.code === 200) {
@@ -78,10 +72,6 @@ export const useLocationStore = defineStore('location', {
                     return 200
                 }
             }).catch(error => {
-                ElMessage({
-                    message: `刷新失败! 错误信息${error}`,
-                    type: "error"
-                })
                 return error
             })
         },
@@ -120,25 +110,58 @@ export const useLocationStore = defineStore('location', {
 
         initCampuses() {
             this.initTeachingBuildings()
-            this.getCampus({ page: 1, size: 5 })
-
+            this.getCampus()
         },
-        AddCampus(value) {
-            this.campuses.push(value)
-        },
-
-        EditCampus(obj) {
-            if (obj) {
-                for (const key of Object.keys(obj)) {
-                    if (key == "id") continue
-                    EditArray(this.campuses, key, obj[key], obj.id)
+        AddCampus(value, pageInfo) {
+            return addCampusApi(value).then(res => {
+                if (res.meta.code === 200) {
+                    console.log(res);
+                    if (pageInfo.page) {
+                        pageInfo.page = 1
+                    }
+                    this.getCampus(pageInfo)
+                    ElMessage.success(res.data.msg)
+                    return true
                 }
-            }
-            else {
                 return false
-            }
-            return true
+            }).catch(error => {
+                console.log(error);
+                ElMessage.error(error)
+                return false
+            })
         },
+
+        EditCampus(obj, pageInfo) {
+            return updateCampusApi(obj).then(res => {
+                if (res.meta.code === 200) {
+                    console.log(res);
+                    this.getCampus(pageInfo)
+                    ElMessage.success(res.data.msg)
+                    return true
+                }
+                return false
+            }, error => {
+                console.log(error);
+                return false
+            })
+        },
+        DeleteCampus(value) {
+            return deleteCampusApi(value).then(res => {
+                if (res.meta.code === 200) {
+                    console.log(res);
+                    this.getCampus()
+                    ElMessage.success(res.data.msg)
+                    return true
+                }
+                return false
+            }, error => {
+                console.log(error);
+                return false
+            })
+        },
+
+
+
         initTeachingBuildings() {
             this.teachingbuildings = initialTeachingBuildings;
             this.teachingbuildingMap = new Map(this.teachingbuildings.map(t => [t.id, t]))

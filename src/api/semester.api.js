@@ -5,8 +5,9 @@ export const getSemesterListApi = (param)=>{
     return request({
         url:"/semesters",
         method:"get",
-        params:param
-    })
+        params:param,
+        isAbort:true
+    }).catch(()=>{})
 }
 
 //添加专业数据

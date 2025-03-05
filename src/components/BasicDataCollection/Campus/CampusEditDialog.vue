@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="isDialogFormVisible"
-    :title= 'mode ? "添加":"修改"'
+    :title="mode ? '添加' : '修改'"
     width="450"
     class="dialog"
     :close-on-click-modal="false"
@@ -29,11 +29,17 @@
           type="primary"
           @click="editItem(campusFormRef)"
           v-show="!mode"
+          :loading="isLoading"
         >
           <span>修改</span>
         </el-button>
 
-        <el-button type="primary" @click="addItem(campusFormRef)" v-show="mode">
+        <el-button
+          type="primary"
+          @click="addItem(campusFormRef)"
+          v-show="mode"
+          :loading="isLoading"
+        >
           <span>添加</span>
         </el-button>
 
@@ -46,7 +52,6 @@
 </template>
 
 <script>
-
 import { reactive, ref, toRefs } from "vue";
 import { v1 as uuid } from "uuid";
 import bus from "@/bus/bus";
@@ -58,15 +63,17 @@ export default {
     bus.on("showCampusEdit", (value) => {
       this.mode = false;
       this.isDialogFormVisible = true; //List中按下按钮弹窗
+      this.pageInfo = value.pageInfo
       this.$nextTick(() => {
         this.id = value.id;
         this.formInput.campusName = value.name;
       });
     });
 
-    bus.on("showCampusAdd", () => {
+    bus.on("showCampusAdd", (value) => {
       this.mode = true;
       this.isDialogFormVisible = true; //List中按下按钮弹窗
+      this.pageInfo = value.pageInfo
     });
   },
   setup() {
@@ -76,6 +83,8 @@ export default {
       isDialogFormVisible: false, //是否弹窗
       id: "",
       mode: false,
+      isLoading: false,
+      pageInfo:{}
     });
 
     const formInput = reactive({
@@ -97,14 +106,21 @@ export default {
       if (!formEl) return;
       formEl.validate((validate) => {
         if (validate) {
-          locationStore.AddCampus({
-            id: uuid(),
-            name: formInput.campusName,
-            remark: formInput.campusRemark,
-            teachingbuildings: [],
-          });
-          data.isDialogFormVisible = false; //确认后关闭弹窗
-          formEl.resetFields();
+          data.isLoading = true;
+          locationStore
+            .AddCampus({
+              id: uuid(),
+              name: formInput.campusName,
+              remark: formInput.campusRemark,
+              teachingbuildings: [],
+            },data.pageInfo)
+            .then((res) => {
+              if (res) {
+                data.isLoading = false;
+                data.isDialogFormVisible = false; //确认后关闭弹窗
+                formEl.resetFields();
+              }
+            });
         }
       });
     };
@@ -112,18 +128,21 @@ export default {
     const editItem = (formEl) => {
       if (!formEl) return;
       formEl.validate((validate) => {
-        console.log(validate);
         if (validate) {
-          if (
-            locationStore.EditCampus({
+          data.isLoading = true;
+          locationStore
+            .EditCampus({
               id: data.id,
               name: formInput.campusName,
               remark: formInput.campusRemark,
-            })
-          ) {
-            data.isDialogFormVisible = false; //确认后关闭弹窗
-            formEl.resetFields();
-          }
+            },data.pageInfo)
+            .then((res) => {
+              if (res) {
+                data.isLoading = false;
+                data.isDialogFormVisible = false; //确认后关闭弹窗
+                formEl.resetFields();
+              }
+            });
         }
       });
     };

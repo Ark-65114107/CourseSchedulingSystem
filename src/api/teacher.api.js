@@ -5,8 +5,9 @@ export const getTeacherListApi = (parm)=>{
     return request({
         url:"/teachers",
         method:"get",
-        params:parm
-    })
+        params:parm,
+        isAbort:true
+    }).catch(()=>{})
 }
 
 //添加教师数据
