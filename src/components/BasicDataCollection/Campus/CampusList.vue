@@ -27,6 +27,7 @@
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
       max-height="400px"
+      height="400px"
       v-loading="isLoading"
       element-loading-text="正在加载..."
       ref="tableRef"
@@ -120,31 +121,83 @@ export default {
 
     const HandlePageChange = (page) => {
       data.isLoading = true;
-      locationStore
-        .getCampus({ page, size: data.pageInfo.size })
-        .then((res) => {
-          if (res === 200) {
-            tableRef.value.scrollTo(0, 0);
-            data.isLoading = false;
-          }
-        });
+      if (data.keyWord) {
+        locationStore
+          .getCampusByQuery(data.keyWord, page, data.pageInfo.size)
+          .then((res) => {
+            if (res === 200) {
+              data.refreshLoading = false;
+              data.isLoading = false;
+              tableRef.value.scrollTo(0, 0);
+            }
+          });
+      } else {
+        locationStore
+          .getCampus({ page, size: data.pageInfo.size })
+          .then((res) => {
+            if (res === 200) {
+              tableRef.value.scrollTo(0, 0);
+              data.isLoading = false;
+            }
+          });
+      }
     };
     const HandleSizeChange = (size) => {
       data.isLoading = true;
       data.pageInfo.page = 1;
-      locationStore
-        .getCampus({ page: data.pageInfo.page, size })
-        .then((res) => {
-          if (res === 200) {
-            data.isLoading = false;
-            tableRef.value.scrollTo(0, 0);
-          }
-        });
+      data.refreshLoading = true;
+      if (data.keyWord) {
+        locationStore
+          .getCampusByQuery(data.keyWord, data.pageInfo.page, size)
+          .then((res) => {
+            if (res === 200) {
+              data.pageInfo.page = 1;
+              data.refreshLoading = false;
+              data.isLoading = false;
+              tableRef.value.scrollTo(0, 0);
+            }
+          });
+      } else {
+        locationStore
+          .getCampus({ page: data.pageInfo.page, size })
+          .then((res) => {
+            if (res === 200) {
+              data.isLoading = false;
+              tableRef.value.scrollTo(0, 0);
+            }
+          });
+      }
     };
 
-    const HandleRefreshClick = () => {
-      data.isLoading = true;
-      data.refreshLoading = true;
+    const HandleSearchClick = () => {
+      if (data.keyWordTemp) {
+        data.pageInfo.page = 1;
+        data.isLoading = true;
+        data.keyWord = data.keyWordTemp;
+        locationStore
+          .getCampusByQuery(
+            data.keyWord,
+            data.pageInfo.page,
+            data.pageInfo.size
+          )
+          .then((res) => {
+            if (res === 200) {
+              data.pageInfo.page = 1;
+              data.isLoading = false;
+              tableRef.value.scrollTo(0, 0);
+            }
+            if (res === 400) {
+              data.isLoading = false;
+            }
+          });
+      } else {
+        ElMessage.warning("请输入关键词!");
+      }
+    };
+
+    const HandleClear = () => {
+      data.keyWord = "";
+      (data.pageInfo.page = 1), (data.isLoading = true);
       locationStore
         .getCampus({ page: 1, size: data.pageInfo.size })
         .then((res) => {
@@ -155,6 +208,39 @@ export default {
             tableRef.value.scrollTo(0, 0);
           }
         });
+    };
+
+    const HandleRefreshClick = () => {
+      data.pageInfo.page = 1;
+      data.isLoading = true;
+      data.refreshLoading = true;
+      if (data.keyWord) {
+        locationStore
+          .getCampusByQuery(
+            data.keyWord,
+            data.pageInfo.page,
+            data.pageInfo.size
+          )
+          .then((res) => {
+            if (res === 200) {
+              data.pageInfo.page = 1;
+              data.refreshLoading = false;
+              data.isLoading = false;
+              tableRef.value.scrollTo(0, 0);
+            }
+          });
+      } else {
+        locationStore
+          .getCampus({ page: 1, size: data.pageInfo.size })
+          .then((res) => {
+            if (res === 200) {
+              data.pageInfo.page = 1;
+              data.refreshLoading = false;
+              data.isLoading = false;
+              tableRef.value.scrollTo(0, 0);
+            }
+          });
+      }
     };
 
     const rowStyle = ({ row, rowIndex }) => {
@@ -176,18 +262,6 @@ export default {
     const HandleUploadClick = () => {
       bus.emit("showCampusUploadDialog");
     };
-
-    const HandleSearchClick = () => {
-      if (data.keyWordTemp) {
-        data.keyWord = data.keyWordTemp;
-      } else {
-        ElMessage.warning("请输入关键词!");
-      }
-    };
-
-    const HandleClear = ()=>{
-      data.keyWord = ''
-    }
 
     const HandleArrayDelete = () => {
       ElMessageBox.confirm("确认删除吗?", "警告", {

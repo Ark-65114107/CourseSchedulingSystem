@@ -9,21 +9,13 @@ export const getCampusListApi = (parm)=>{
         isAbort:true
     }).catch(()=>{})
 }
-//获取单个校区数据
-export const getCampusApi = (parm)=>{
-    return request({
-        url:"/campuses/get",
-        method:"get",
-        params:parm,
-        isAbort:true
-    }).catch(()=>{})
-}
+
 //获取单个校区数据
 export const getCampusByQueryApi = (parm)=>{
     return request({
         url:"/campuses/search",
-        method:"get",
-        params:parm,
+        method:"post",
+        data:parm,
         isAbort:true
     }).catch(()=>{})
 }
