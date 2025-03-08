@@ -7,7 +7,7 @@ import {
     initialclassroomTypes
 } from "@/data/locations"
 
-import { addCampusApi, deleteCampusApi, getCampusListApi, updateCampusApi } from "@/api/campus.api";
+import { addCampusApi, deleteCampusApi, getCampusByQueryApi, getCampusListApi, updateCampusApi } from "@/api/campus.api";
 import { ElMessage } from "element-plus";
 import { getClassroomListApi } from "@/api/classroom.api";
 
@@ -57,9 +57,27 @@ export const useLocationStore = defineStore('location', {
                 return error
             })
         },
-        //查询keyword应该输入对象数组,如[{keyName1:keyValue1},{keyName2:keyValue2}...]
-        getCampusByQuery(keywords, page = 1, size = 5) {
-            
+        //查询keyword对象,如{keyName1:keyValue1,keyName2:keyValue2}...]
+        getCampusByQuery(keyword, page = 1, size = 5) {
+            return getCampusByQueryApi({keyword, page, size }).then(res => {
+                if(res.meta.code == 200){
+                    this.campuses = res.data.res
+                    this.campusNum = res.data.total
+                    this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
+                    this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
+                    return 200
+                }
+                if(res.meta.code == 400){
+                    this.campuses = res.data.res
+                    this.campusNum = res.data.total
+                    this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
+                    this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
+                    return 400
+                }
+                
+            }).catch(error => {
+                return error
+            })
         },
         getClassroom(parm = { page: 1, size: 5 }) {
             return getClassroomListApi(parm).then(response => {
