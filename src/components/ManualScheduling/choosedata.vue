@@ -50,8 +50,6 @@ const fetchData = (page, size) => {
   return getTaskListApi({ page, size }).then((res) => {
     console.log("qwqw",res);
     allData.value = res.data.users;
-    total.value = res.data.length;
-    currentPage.value = 1;
     currentPageData.value = allData.value;
   });
 };
@@ -75,8 +73,8 @@ interface User {
   courseNumber: string;
   teacherId: string;
   teacherName: string;
-  isOutside: string;
-  unit: boolean;
+  isOutside: Boolean;
+  unit: string;
   classComponent: string;
   className: string;
 }
