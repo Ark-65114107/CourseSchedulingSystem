@@ -80,6 +80,7 @@
       </div>
 
       <div v-show="active === 2">
+        <aiScheduling/>
         <el-button style="margin-top: 12px" @click="next">下一步</el-button>
       </div>
 
@@ -103,6 +104,7 @@ import {
 } from '@element-plus/icons-vue'
 import chooseclass from '@/components/ManualScheduling/chooseclass.vue'
 import choosedata from '@/components/ManualScheduling/choosedata.vue'
+import aiScheduling from '@/components/ManualScheduling/aiScheduling.vue'
 
 const active = ref(0)
 const loading = ref(false)
