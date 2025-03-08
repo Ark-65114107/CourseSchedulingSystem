@@ -37,7 +37,14 @@
       <el-table-column prop="semester" label="学期" />
       <el-table-column prop="creater" label="创建者" />
       <el-table-column prop="createTime" label="创建时间" />
-      <el-table-column prop="isEnabled" label="是否启用" />
+      <el-table-column label="是否启用">
+        <el-switch v-model="isEnabled" />
+      </el-table-column>
+      <el-table-column label="排课操作" v-slot="scope">
+        <el-link type="primary" @click="HandleScheduleClick(scope.row)"
+          >开始排课</el-link
+        ></el-table-column
+      >
       <el-table-column label="操作" v-slot="scope">
         <div class="RowButtons">
           <el-button type="primary" @click="HandleEditClick(scope.row)"
@@ -74,21 +81,22 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import { useScheduleStore } from "@/store/scheduleStore/index.js";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
 import { Search } from "@element-plus/icons-vue";
-import scheduleTaskEditDialog from './scheduleTaskEditDialog.vue';
+import scheduleTaskEditDialog from "./scheduleTaskEditDialog.vue";
+import router from '@/router';
 
 export default {
   name: "CampusList",
   components: {
-    scheduleTaskEditDialog
+    scheduleTaskEditDialog,
   },
   setup() {
     const scheduleStore = useScheduleStore();
     const { tasks } = storeToRefs(scheduleStore);
     const tableRef = ref();
 
-    onMounted(()=>{
-      scheduleStore.getTask({page:1,size:5})
-    })
+    onMounted(() => {
+      scheduleStore.getTask({ page: 1, size: 5 });
+    });
 
     const data = reactive({
       isDeleteShow: false,
@@ -116,7 +124,7 @@ export default {
       data.isLoading = true;
       if (data.keyWord) {
         scheduleStore
-          .getTask(data.keyWord, page, data.pageInfo.size)
+          .getTaskByQuery(data.keyWord, page, data.pageInfo.size)
           .then((res) => {
             if (res === 200) {
               data.refreshLoading = false;
@@ -131,6 +139,7 @@ export default {
             if (res === 200) {
               tableRef.value.scrollTo(0, 0);
               data.isLoading = false;
+              data.refreshLoading = false;
             }
           });
       }
@@ -138,10 +147,9 @@ export default {
     const HandleSizeChange = (size) => {
       data.isLoading = true;
       data.pageInfo.page = 1;
-      data.refreshLoading = true;
       if (data.keyWord) {
         scheduleStore
-          .getCampusByQuery(data.keyWord, data.pageInfo.page, size)
+          .getTaskByQuery(data.keyWord, data.pageInfo.page, size)
           .then((res) => {
             if (res === 200) {
               data.pageInfo.page = 1;
@@ -154,8 +162,8 @@ export default {
             }
           });
       } else {
-        locationStore
-          .getCampus({ page: data.pageInfo.page, size })
+        scheduleStore
+          .getTask({ page: data.pageInfo.page, size })
           .then((res) => {
             if (res === 200) {
               data.isLoading = false;
@@ -173,12 +181,8 @@ export default {
         data.pageInfo.page = 1;
         data.isLoading = true;
         data.keyWord = data.keyWordTemp;
-        locationStore
-          .getCampusByQuery(
-            data.keyWord,
-            data.pageInfo.page,
-            data.pageInfo.size
-          )
+        scheduleStore
+          .getTaskByQuery(data.keyWord, data.pageInfo.page, data.pageInfo.size)
           .then((res) => {
             if (res === 200) {
               data.pageInfo.page = 1;
@@ -197,8 +201,8 @@ export default {
     const HandleClear = () => {
       data.keyWord = "";
       (data.pageInfo.page = 1), (data.isLoading = true);
-      locationStore
-        .getCampus({ page: 1, size: data.pageInfo.size })
+      scheduleStore
+        .getTask({ page: 1, size: data.pageInfo.size })
         .then((res) => {
           if (res === 200) {
             data.pageInfo.page = 1;
@@ -214,12 +218,8 @@ export default {
       data.isLoading = true;
       data.refreshLoading = true;
       if (data.keyWord) {
-        locationStore
-          .getCampusByQuery(
-            data.keyWord,
-            data.pageInfo.page,
-            data.pageInfo.size
-          )
+        scheduleStore
+          .getTaskByQuery(data.keyWord, data.pageInfo.page, data.pageInfo.size)
           .then((res) => {
             if (res === 200) {
               data.pageInfo.page = 1;
@@ -233,8 +233,8 @@ export default {
             }
           });
       } else {
-        locationStore
-          .getCampus({ page: 1, size: data.pageInfo.size })
+        scheduleStore
+          .getTask({ page: 1, size: data.pageInfo.size })
           .then((res) => {
             if (res === 200) {
               data.pageInfo.page = 1;
@@ -253,17 +253,22 @@ export default {
     };
 
     const HandleAddClick = () => {
-      bus.emit("showCampusAdd", { pageInfo: data.pageInfo });
+      bus.emit("showTaskAdd", { pageInfo: data.pageInfo });
     };
 
     const HandleEditClick = (value) => {
-      bus.emit("showCampusEdit", { ...value, pageInfo: data.pageInfo });
+      bus.emit("showTaskEdit", { ...value, pageInfo: data.pageInfo });
     };
-    const HandleDrawerClick = (value) => {
-      bus.emit("showTeachingBuildingListDrawer", value);
-    };
+
     const HandleUploadClick = () => {
       bus.emit("showCampusUploadDialog");
+    };
+
+    const HandleScheduleClick = (value) => {
+      console.log(value);
+      router.push({name:"scheduleBuilder",query:{
+        id:value.id
+      }})
     };
 
     const HandleArrayDelete = () => {
@@ -302,7 +307,6 @@ export default {
       HandleSelectChange,
       HandleAddClick,
       HandleEditClick,
-      HandleDrawerClick,
       HandleUploadClick,
       rowStyle,
       scheduleStore,
@@ -313,6 +317,7 @@ export default {
       Search,
       HandleSearchClick,
       HandleClear,
+      HandleScheduleClick,
     };
   },
 };
