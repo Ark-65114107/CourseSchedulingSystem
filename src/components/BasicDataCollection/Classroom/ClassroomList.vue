@@ -74,6 +74,7 @@
       max-height="418px"
       v-loading="isLoading"
       element-loading-text="正在加载.."
+      ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="40" />
       <el-table-column prop="code" label="教室编号" min-width="155px" />
@@ -132,7 +133,7 @@
       @size-change="HandleSizeChange"
       v-model:current-page="pageInfo.page"
       v-model:page-size="pageInfo.size"
-      layout=" prev, pager, next,sizes,total"
+      layout=" prev, pager, next,sizes,jumper,total"
       style="margin: 10px 20px 0px 20px"
       :total="locationStore.classroomNum"
       :size="pageInfo.size"
@@ -149,7 +150,7 @@
 <script>
 import bus from "@/bus/bus.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, onMounted, reactive, toRefs } from "vue";
+import { computed,reactive, toRefs ,ref} from "vue";
 import { ElMessageBox } from "element-plus";
 import ClassroomEditDialog from "./ClassroomEditDialog.vue";
 import ClassroomTypeListDrawer from "./ClassroomTypeListDrawer.vue";
@@ -168,13 +169,14 @@ export default {
   setup() {
     const locationStore = useLocationStore();
     const academicStore = useAcademicStore();
+    const tableRef = ref();
     const { classrooms, teachingbuildings, campuses, classroomtypes } =
       storeToRefs(locationStore);
 
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
-      isLoading:false,
+      isLoading: false,
       pageInfo: {
         page: 1,
         size: 5,
@@ -183,20 +185,26 @@ export default {
 
     const HandlePageChange = (page) => {
       data.isLoading = true;
-      locationStore.getClassroom({ page, size: data.pageInfo.size }).then((res)=>{
-        if(res === 200){
-          data.isLoading = false
-        }
-      });
+      locationStore
+        .getClassroom({ page, size: data.pageInfo.size })
+        .then((res) => {
+          if (res === 200) {
+            tableRef.value.scrollTo(0, 0);
+            data.isLoading = false;
+          }
+        });
     };
     const HandleSizeChange = (size) => {
       data.isLoading = true;
       data.pageInfo.page = 1;
-      locationStore.getClassroom({ page: data.pageInfo.page, size }).then(res=>{
-        if(res===200){
-          data.isLoading = false
-        }
-      });
+      locationStore
+        .getClassroom({ page: data.pageInfo.page, size })
+        .then((res) => {
+          if (res === 200) {
+            tableRef.value.scrollTo(0, 0);
+            data.isLoading = false;
+          }
+        });
     };
 
     const filterCriteria = reactive({
@@ -363,6 +371,7 @@ export default {
       HandlePageChange,
       HandleSizeChange,
       locationStore,
+      tableRef
     };
   },
 };

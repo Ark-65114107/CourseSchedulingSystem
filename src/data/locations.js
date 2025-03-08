@@ -20,8 +20,8 @@ export const initialClassrooms = [
 ]
 
 export const initialclassroomTypes = [
-    {id:"type1",name:"普通教室"},
-    {id:"type2",name:"机房"},
-    {id:"type3",name:"阶梯教室"},
-    {id:"type4",name:"多媒体教室"},
+    { id: "type1", name: "普通教室" },
+    { id: "type2", name: "机房" },
+    { id: "type3", name: "阶梯教室" },
+    { id: "type4", name: "多媒体教室" },
 ]

@@ -1,13 +1,22 @@
 import request from "@/utils/request"
 
-//获取校区数据
+//获取院系数据
 export const getDepartmentListApi = (parm)=>{
     return request({
-        url:"/departments",
+        url:"/departments/list",
         method:"get",
         params:parm,
         isAbort:true
 
+    }).catch(()=>{})
+}
+
+export const getDepartmentByQueryApi = (parm)=>{
+    return request({
+        url:"/departments/search",
+        method:"post",
+        data:parm,
+        isAbort:true
     }).catch(()=>{})
 }
 

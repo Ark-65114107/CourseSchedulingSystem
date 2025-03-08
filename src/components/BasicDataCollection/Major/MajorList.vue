@@ -99,7 +99,7 @@
       @size-change="HandleSizeChange"
       v-model:current-page="pageInfo.page"
       v-model:page-size="pageInfo.size"
-      layout=" prev, pager, next,sizes,total"
+      layout=" prev, pager, next,sizes,jumper,total"
       style="margin: 10px 20px 0px 20px"
       :total="academicStore.majorNum"
       :size="pageInfo.size"

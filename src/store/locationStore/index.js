@@ -10,6 +10,7 @@ import {
 import { addCampusApi, deleteCampusApi, getCampusByQueryApi, getCampusListApi, updateCampusApi } from "@/api/campus.api";
 import { ElMessage } from "element-plus";
 import { getClassroomListApi } from "@/api/classroom.api";
+import { getGradeByQueryApi } from "@/api/grade.api";
 
 
 
@@ -44,7 +45,19 @@ export const useLocationStore = defineStore('location', {
 
 
         getCampus(parm = { page: 1, size: 5 }) {
-            console.log(parm);
+            return getCampusListApi(parm).then(response => {
+                if (response.meta.code === 200) {
+                    this.campusNum = response.data.total
+                    this.campuses = response.data.campuses
+                    this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
+                    this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
+                    return 200
+                }
+            }).catch(error => {
+                return error
+            })
+        },
+        getTeachingBuilding(parm = { page: 1, size: 5 }) {
             return getCampusListApi(parm).then(response => {
                 if (response.meta.code === 200) {
                     this.campusNum = response.data.total
@@ -79,6 +92,8 @@ export const useLocationStore = defineStore('location', {
                 return error
             })
         },
+
+
         getClassroom(parm = { page: 1, size: 5 }) {
             return getClassroomListApi(parm).then(response => {
                 console.log(response);
