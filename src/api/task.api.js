@@ -11,9 +11,9 @@ export const getTaskListApi = (parm)=>{
 }
 
 //获取单个校区数据
-export const getCampusByQueryApi = (parm)=>{
+export const getTaskByQueryApi = (parm)=>{
     return request({
-        url:"/campuses/search",
+        url:"/task/search",
         method:"post",
         data:parm,
         isAbort:true
