@@ -106,7 +106,7 @@
       @size-change="HandleSizeChange"
       v-model:current-page="pageInfo.page"
       v-model:page-size="pageInfo.size"
-      layout=" prev, pager, next,sizes,total"
+      layout=" prev, pager, next,sizes,jumper,total"
       style="margin: 10px 20px 0px 20px;"
       :total="academicStore.classNum"
       :size="pageInfo.size"
@@ -126,6 +126,8 @@ import ClassEditDialog from "./ClassEditDialog.vue";
 import { storeToRefs } from "pinia";
 import { useAcademicStore } from "@/store/academicStore";
 import ClassInfoDrawerVue from "./ClassInfoDrawer.vue";
+import { Search } from "@element-plus/icons-vue";
+
 
 export default {
   name: "ClassList",
@@ -260,6 +262,7 @@ export default {
       HandlePageChange,
       HandleSizeChange,
       academicStore,
+      Search
     };
   },
 };

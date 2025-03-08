@@ -59,7 +59,7 @@
       @size-change="HandleSizeChange"
       v-model:current-page="pageInfo.page"
       v-model:page-size="pageInfo.size"
-      layout=" prev, pager, next,sizes,total"
+      layout=" prev, pager, next,sizes,jumper,total"
       :total="locationStore.campusNum"
       :size="pageInfo.size"
       :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
@@ -156,6 +156,9 @@ export default {
               data.isLoading = false;
               tableRef.value.scrollTo(0, 0);
             }
+            if (res === 400) {
+              data.isLoading = false;
+            }
           });
       } else {
         locationStore
@@ -164,6 +167,9 @@ export default {
             if (res === 200) {
               data.isLoading = false;
               tableRef.value.scrollTo(0, 0);
+            }
+            if (res === 400) {
+              data.isLoading = false;
             }
           });
       }
@@ -227,6 +233,10 @@ export default {
               data.refreshLoading = false;
               data.isLoading = false;
               tableRef.value.scrollTo(0, 0);
+            }
+            if (res === 400) {
+              data.isLoading = false;
+              data.refreshLoading = false;
             }
           });
       } else {

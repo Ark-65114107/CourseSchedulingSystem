@@ -11,6 +11,15 @@ export const getGradeListApi = (param)=>{
     }).catch(()=>{})
 }
 
+export const getGradeByQueryApi = (parm)=>{
+    return request({
+        url:"/grades/search",
+        method:"post",
+        data:parm,
+        isAbort:true
+    }).catch(()=>{})
+}
+
 //添加校区数据
 export const addGradeApi = (param)=>{
     return request({

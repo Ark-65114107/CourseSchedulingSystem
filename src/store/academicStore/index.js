@@ -17,8 +17,8 @@ import {
 } from "@/data/academic"
 import getAcademicYears from "@/utils/getAcademicYears";
 import { useLocationStore } from "../locationStore";
-import { getGradeListApi } from "@/api/grade.api";
-import { getDepartmentListApi } from "@/api/departments.api";
+import { getGradeByQueryApi, getGradeListApi } from "@/api/grade.api";
+import { getDepartmentByQueryApi, getDepartmentListApi } from "@/api/departments.api";
 import { getMajorListApi } from "@/api/major.api";
 import { getClassListApi } from "@/api/class.api";
 import { getSemesterListApi } from "@/api/semester.api";
@@ -31,7 +31,7 @@ export const useAcademicStore = defineStore('academic', {
         departmentTypes: [],//部门类别
 
         classes: [],//班级
-        classNum:0,
+        classNum: 0,
         classTypies: [],//班级类型
 
         majors: [],//专业
@@ -39,7 +39,7 @@ export const useAcademicStore = defineStore('academic', {
         specializations: [],//专业方向
 
         courses: [],//课程
-        courseNum:0,
+        courseNum: 0,
         courseNatures: [],//课程属性
         courseTypes: [],//课程类型
         courseAttributes: [],//课程性质
@@ -50,7 +50,7 @@ export const useAcademicStore = defineStore('academic', {
         educationalLevels: [],//学段
 
         semesters: [],//学期
-        semesterNum:0,
+        semesterNum: 0,
 
         academicYears: [],//学年
 
@@ -112,6 +112,46 @@ export const useAcademicStore = defineStore('academic', {
                 return error
             })
         },
+        getGradeByQuery(keyword, page = 1, size = 5) {
+            return getGradeByQueryApi({ keyword, page, size }).then(res => {
+                if (res.meta.code == 200) {
+                    this.grades = res.data
+                    this.gradeNum = res.total
+                    this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
+                    this.gradeMap = new Map(this.grades.map(c => [c.id, c]))
+                    return 200
+                }
+                if (res.meta.code == 400) {
+                    this.grades = res.data
+                    this.gradeNum = res.total
+                    this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
+                    this.gradeMap = new Map(this.grades.map(c => [c.id, c]))
+                    return 400
+                }
+            }).catch(error => {
+                return error
+            })
+        },
+        getGradeByQuery(keyword, page = 1, size = 5) {
+            return getDepartmentByQueryApi({ keyword, page, size }).then(res => {
+                if (res.meta.code == 200) {
+                    this.departments = res.data
+                    this.departmentNum = res.total
+                    this.departmentNameMap = new Map(this.departments.map(c => [c.id, c.name]))
+                    this.departmentMap = new Map(this.departments.map(c => [c.id, c]))
+                    return 200
+                }
+                if (res.meta.code == 400) {
+                    this.departments = res.data
+                    this.departmentNum = res.total
+                    this.departmentNameMap = new Map(this.departments.map(c => [c.id, c.name]))
+                    this.departmentMap = new Map(this.departments.map(c => [c.id, c]))
+                    return 400
+                }
+            }).catch(error => {
+                return error
+            })
+        },
         getDepartments(param) {
             return getDepartmentListApi(param).then(res => {
                 if (res.meta.code == 200) {
@@ -134,7 +174,7 @@ export const useAcademicStore = defineStore('academic', {
                 return error
             })
         },
-        getClasses(param = {page:1,size:5}) {
+        getClasses(param = { page: 1, size: 5 }) {
             return getClassListApi(param).then(res => {
                 if (res.meta.code == 200) {
                     this.classNum = res.data.total
@@ -145,7 +185,7 @@ export const useAcademicStore = defineStore('academic', {
                 return error
             })
         },
-        getSemesters(param = {page:1,size:5}) {
+        getSemesters(param = { page: 1, size: 5 }) {
             return getSemesterListApi(param).then(res => {
                 if (res.meta.code == 200) {
                     this.semesterNum = res.data.total
@@ -156,7 +196,7 @@ export const useAcademicStore = defineStore('academic', {
                 return error
             })
         },
-        getCourses(param = {page:1,size:5}) {
+        getCourses(param = { page: 1, size: 5 }) {
             return getCourseListApi(param).then(res => {
                 if (res.meta.code == 200) {
                     this.courseNum = res.data.total
