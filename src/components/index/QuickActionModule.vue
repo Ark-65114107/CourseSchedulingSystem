@@ -25,23 +25,28 @@
   
   <script lang="ts" setup>
   import { Calendar, List, Edit, Refresh } from '@element-plus/icons-vue'
-  
+  import { RouterView,RouterLink,useRouter } from 'vue-router';
+
+  const router = useRouter()
   // 查看课表
   function viewSchedule() {
     console.log('查看课表')
     // 这里可以添加查看课表的逻辑，例如跳转到课表详情页
+    router.push('/home/task/showSchedule')
   }
   
   // 管理排课任务
   function manageScheduleTasks() {
     console.log('管理排课任务')
     // 这里可以添加管理排课任务的逻辑，例如跳转到排课任务管理页面
+    router.push('/home/task/scheduleManagement')
   }
   
   // 填写信息
   function fillInformation() {
     console.log('填写信息')
     // 这里可以添加填写信息的逻辑，例如打开信息填写表单
+    router.push({name:'fillInformation'})
   }
   </script>
   
