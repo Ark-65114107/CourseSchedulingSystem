@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
-import { getRoutes } from "@/api/routes.api";
+import { getRoutes } from "@/api/auth/routes.api";
 import router from "@/router";
-import { getUserInfo,getNavs } from "@/api/user.api";
+import { getUserInfo, getNavs } from "@/api/user/user.api";
 import { getToken } from "@/utils/token/getToken";
 const modules = import.meta.glob('../../views/**/**')
 
@@ -9,8 +9,8 @@ export const useAuthStore = defineStore('auth', {
     state: () => ({
         routes: {},
         userInfo: {},
-        navs:[],
-        
+        navs: [],
+
     }),
     actions: {
         Logout() {
@@ -47,18 +47,38 @@ export const useAuthStore = defineStore('auth', {
                     const childrens = []
                     c.children.forEach((c2) => {
 
-                        childrens.push({
-                            name: c2.name,
-                            path: c2.path,
-                            meta: c2.meta,
-                            component: modules[`../../views${c2.componentUrl}`]
-                        })
+                        if (c2.name == "scheduleBuilder") {
+                            let children3 = []
+                            c2.children.forEach((c3) => {
+                                children3.push({
+                                    name: c3.name,
+                                    path: c3.path,
+                                    meta: c3.meta,
+                                    component: modules[`../../views${c3.componentUrl}`],
+                                })
+                            })
+                            childrens.push({
+                                name: c2.name,
+                                path: c2.path,
+                                meta: c2.meta,
+                                component: modules[`../../views${c2.componentUrl}`],
+                                children:children3
+                            })
+                        } else {
+                            childrens.push({
+                                name: c2.name,
+                                path: c2.path,
+                                meta: c2.meta,
+                                component: modules[`../../views${c2.componentUrl}`]
+                            })
+                        }
+
                     })
                     res.push({
                         path: c.path,
                         name: c.name,
                         meta: c.meta,
-                        redirect: c.redirect,   
+                        redirect: c.redirect,
                         children: childrens
                     })
                 }
@@ -72,8 +92,8 @@ export const useAuthStore = defineStore('auth', {
                 this.userInfo = res.data
             })
         },
-        getNavs(){
-            return getNavs().then(res=>{
+        getNavs() {
+            return getNavs().then(res => {
                 this.navs = res.data.navs
             })
         }

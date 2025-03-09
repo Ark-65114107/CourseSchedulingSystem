@@ -7,7 +7,7 @@ import {
     initialTeachers,
     initialFacultyTypes
 } from "@/data/personnel.js"
-import { getTeacherListApi } from "@/api/teacher.api";
+import { getTeacherListApi } from "@/api/basicData/teacher.api";
 
 
 export const usePersonnelStore = defineStore('personnel', {

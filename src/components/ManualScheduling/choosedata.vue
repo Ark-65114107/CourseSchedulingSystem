@@ -36,7 +36,7 @@
 import { ref, onMounted } from "vue";
 import type { TableInstance } from "element-plus";
 import { all } from "axios";
-import { getTaskListApi } from "@/api/tabledata.api";
+import { getTaskListApi } from "@/api/schedule/tabledata.api";
 import { closeSync } from "fs";
 
 const total = ref(1000);

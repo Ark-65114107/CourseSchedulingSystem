@@ -60,7 +60,7 @@
 
 <script>
 import { reactive, ref, toRefs } from "vue";
-import { userRegister } from "@/api/user.api";
+import { userRegister } from "@/api/user/user.api";
 import { ElMessage } from "element-plus";
 import { useAuthStore } from "@/store/authStore/index.js";
 import { setToken } from "@/utils/token/setToken.js";

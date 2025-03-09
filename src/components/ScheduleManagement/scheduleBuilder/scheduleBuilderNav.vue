@@ -1,38 +1,37 @@
 <template>
-  <div class="index">
-    <div class="guide">
-      <div class="header">
-        <el-tooltip
-          content="在这里您可以为班级进行排课管理，请按步骤操作"
-          placement="right"
-        >
-          <el-icon class="help-icon"><QuestionFilled /></el-icon>
-        </el-tooltip>
-      </div>
-      <div class="steps-container">
-        <el-steps
-          :active="active"
-          finish-status="success"
-          process-status="process"
-          class="custom-steps"
-        >
-          <el-step title="选择班级" :icon="School">
-            <template #description> 选择需要排课的班级 </template>
-          </el-step>
-          <el-step title="数据选择" :icon="Files">
-            <template #description> 选择课程和教师数据 </template>
-          </el-step>
-          <el-step title="排课进行中" :icon="Loading">
-            <template #description> 系统正在生成课表 </template>
-          </el-step>
-          <el-step title="排课结果" :icon="CircleCheck">
-            <template #description> 查看和导出课表 </template>
-          </el-step>
-        </el-steps>
-      </div>
+  <div class="guide">
+    <div class="header">
+      <el-tooltip
+        content="在这里您可以为班级进行排课管理，请按步骤操作"
+        placement="right"
+      >
+        <el-icon class="help-icon"><QuestionFilled /></el-icon>
+      </el-tooltip>
     </div>
+    <div class="steps-container">
+      <el-steps
+        :active="step"
+        finish-status="success"
+        process-status="process"
+        class="custom-steps"
+      >
+        <el-step title="选择班级" :icon="School" @click="HandleNavClick('addClass')">
+          <template #description> 选择需要排课的班级 </template>
+        </el-step>
+        <el-step title="数据选择" :icon="Files"  @click="HandleNavClick('setCourse')" >
+          <template #description> 选择课程和教师数据 </template>
+        </el-step>
+        <el-step title="排课进行中" :icon="Loading"  @click="HandleNavClick('addClass')">
+          <template #description> 系统正在生成课表 </template>
+        </el-step>
+        <el-step title="排课结果" :icon="CircleCheck" @click="HandleNavClick('addClass')">
+          <template #description> 查看和导出课表 </template>
+        </el-step>
+      </el-steps>
+    </div>
+  </div>
 
-    <div class="content-container">
+  <!-- <div class="content-container">
       <el-card
         v-show="active === 0"
         class="main-card"
@@ -50,7 +49,7 @@
         <div class="chooseclass-container">
           <div class="chooseclass">
             <!-- 使用 v-model 绑定 -->
-            <chooseclass v-model="selectedValue" />
+  <!-- <chooseclass v-model="selectedValue" />
           </div>
         </div>
 
@@ -80,12 +79,60 @@
         <el-button style="margin-top: 12px" @click="next">下一步</el-button>
       </div>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script>
+import {
+  School,
+  Files,
+  Loading,
+  CircleCheck,
+  QuestionFilled,
+  ArrowRight,
+} from "@element-plus/icons-vue";
+import { computed, reactive, toRefs } from "vue";
+import router from '@/router';
+import { useRoute, useRouter } from 'vue-router';
 export default {
   name: "scheduleBuilderNav",
+  setup() {
+    const router = useRouter()
+    const route = useRoute()
+    const data = reactive({
+      id: ""
+    });
+    const step = computed(()=>{
+       switch(router.currentRoute.value.name){
+        case "addClass":
+          return 0;
+        case "setCourse":
+          return 1;
+        default:
+          return -1;
+       }
+    })
+
+    
+
+    const HandleNavClick = (value)=>{
+      router.push({name:value,query:{
+        id:route.query.id
+      }})
+    }
+
+    return {
+      ...toRefs(data),
+      step,
+      School,
+      Files,
+      Loading,
+      CircleCheck,
+      QuestionFilled,
+      ArrowRight,
+      HandleNavClick,
+    };
+  },
 };
 </script>
 
@@ -109,7 +156,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .header h1 {
@@ -130,7 +177,7 @@ export default {
 }
 
 .steps-container {
-  padding: 20px 60px;
+  padding: 0px 20px;
 }
 
 .custom-steps :deep(.el-step__title) {

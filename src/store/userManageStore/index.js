@@ -1,4 +1,4 @@
-import { getUserList } from "@/api/userManage.api";
+import { getUserList } from "@/api/user/userManage.api";
 import { defineStore } from "pinia";
 import { roles } from "@/data/auth.js"
 
