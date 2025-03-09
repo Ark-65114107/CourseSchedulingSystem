@@ -36,17 +36,17 @@ export const useAuthStore = defineStore('auth', {
         setRouterList(data) {
             let res = []
             data.forEach((c) => {
-                if (c.path == "/home/index" || c.path == "/home/user") {
+                if (c.path == "/home/user") {
                     res.push({
                         name: c.name,
                         path: c.path,
                         meta: c.meta,
                         component: modules[`../../views${c.componentUrl}`],
                     })
-                } else {
+                }
+                else {
                     const childrens = []
                     c.children.forEach((c2) => {
-
                         if (c2.name == "scheduleBuilder") {
                             let children3 = []
                             c2.children.forEach((c3) => {
@@ -62,7 +62,7 @@ export const useAuthStore = defineStore('auth', {
                                 path: c2.path,
                                 meta: c2.meta,
                                 component: modules[`../../views${c2.componentUrl}`],
-                                children:children3
+                                children: children3
                             })
                         } else {
                             childrens.push({
@@ -74,13 +74,26 @@ export const useAuthStore = defineStore('auth', {
                         }
 
                     })
-                    res.push({
-                        path: c.path,
-                        name: c.name,
-                        meta: c.meta,
-                        redirect: c.redirect,
-                        children: childrens
-                    })
+                    if (c.path == "/home/index") {
+                        res.push({
+                            path: c.path,
+                            name: c.name,
+                            meta: c.meta,
+                            redirect: c.redirect,
+                            component: modules[`../../views${c.componentUrl}`],
+                            children: childrens
+                        })
+                    } else {
+                        res.push({
+                            path: c.path,
+                            name: c.name,
+                            meta: c.meta,
+                            redirect: c.redirect,
+                            children: childrens
+                        })
+                    }
+
+
                 }
             })
             return res
