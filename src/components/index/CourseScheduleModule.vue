@@ -38,7 +38,7 @@
   import { ref, computed, onMounted } from 'vue'
   import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
   import CourseSchedule from '@/components/CourseSchedule.vue'
-  import { fetchCourseData } from '@/api/courses.index.ts'
+  import { fetchCourseData } from '@/api/courses.index'
   
   // 视图类型
   const viewType = ref('week')
@@ -47,7 +47,7 @@
   const currentWeek = ref(new Date())
   
   // 课程数据
-  const courses = ref([])
+  const courses = ref()
   
   // 当前日期范围
   const currentDateRange = computed(() => {
