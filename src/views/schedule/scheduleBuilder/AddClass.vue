@@ -6,15 +6,29 @@
         v-model="keyWord"
         :prefix-icon="Search"
       />
-      <el-button type="primary">完成</el-button>
+      <div>
+        <el-button
+          type="primary"
+          @click="HandleSaveClick"
+          :disabled="isResEmpty"
+          >保存</el-button
+        >
+        <el-button
+          type="primary"
+          @click="HandleDoneClick"
+          :disabled="isResEmpty"
+          >完成</el-button
+        >
+      </div>
     </div>
-    <el-scrollbar height="300px">
+    <el-scrollbar height="300px" v-loading="isLoading">
       <el-tree
         :data="data"
         :filter-node-method="treeFilter"
         @check-change="HandleCheckChange"
         show-checkbox
         default-expand-all
+        :default-checked-keys="['21rgzb']"  
         ref="treeRef"
       />
     </el-scrollbar>
@@ -23,17 +37,57 @@
 </template>
 
 <script>
-import { reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { Search } from "@element-plus/icons-vue";
+import {
+  getClassTreeApi,
+  setClassTreeApi,
+} from "@/api/schedule/classTree.api.js";
+
+import { getClassListApi } from "@/api/schedule/classList.api.js";
+import { useRoute } from "vue-router";
+import router from "@/router";
 
 export default {
   name: "AddClass",
   setup() {
+    const route = useRoute();
     const keyWord = ref();
     const treeRef = ref();
     let res = ref([]);
-    const data = reactive([
-    ]);
+    const data = ref([]);
+    const isLoading = ref(false);
+    let defaultChecked = ref([]);
+
+    onMounted(() => {
+      isLoading.value = true;
+      getClassTreeApi()
+        .then((res) => {
+          if (res.meta.code === 200) {
+            isLoading.value = false;
+            data.value = res.data;
+          }
+        })
+        .finally(() => {
+          isLoading.value = false;
+        });
+
+      getClassList()
+    });
+
+    const setClassTree = () => {
+      let id = route.query.id;
+      setClassTreeApi({ id, data: res.value }).then((res) => {
+        console.log(res);
+      });
+    };
+
+    const getClassList = () => {
+      getClassListApi(route.query.id).then(res=>{
+        defaultChecked.value = res.data
+        console.log(defaultChecked.value);
+      })
+    };
 
     watch(keyWord, (value) => {
       treeRef.value.filter(value);
@@ -45,7 +99,6 @@ export default {
     };
 
     const HandleCheckChange = (obj, value, isChildrenChecked) => {
-      console.log(obj, value);
       if (obj.select) {
         if (value) {
           res.value.push(obj.id);
@@ -59,14 +112,31 @@ export default {
       }
     };
 
+    let isResEmpty = computed(() => {
+      return res.value.length <= 0;
+    });
+
+    const HandleDoneClick = () => {
+      setClassTree();
+      router.push({ name: "setCourse" });
+    };
+    const HandleSaveClick = () => {
+      setClassTree();
+    };
+
     return {
       keyWord,
       treeRef,
-      treeFilter,
       data,
       Search,
+      treeFilter,
       HandleCheckChange,
+      HandleDoneClick,
+      HandleSaveClick,
       res,
+      isLoading,
+      isResEmpty,
+      defaultChecked,
     };
   },
 };

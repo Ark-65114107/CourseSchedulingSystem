@@ -56,7 +56,7 @@ request.interceptors.response.use(
     error => {
 
         if(isCancel(error)){
-            console.log("重复请求!");
+            ElMessage.error("请勿频繁请求!")
         }
         return Promise.reject(error)
     }
