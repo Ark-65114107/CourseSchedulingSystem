@@ -17,12 +17,12 @@ import {
 } from "@/data/academic"
 import getAcademicYears from "@/utils/getAcademicYears";
 import { useLocationStore } from "../locationStore";
-import { getGradeByQueryApi, getGradeListApi } from "@/api/grade.api";
-import { getDepartmentByQueryApi, getDepartmentListApi } from "@/api/departments.api";
-import { getMajorListApi } from "@/api/major.api";
-import { getClassListApi } from "@/api/class.api";
-import { getSemesterListApi } from "@/api/semester.api";
-import { getCourseListApi } from "@/api/course.api";
+import { getGradeByQueryApi, getGradeListApi } from "@/api/basicData/grade.api";
+import { getDepartmentByQueryApi, getDepartmentListApi } from "@/api/basicData/departments.api";
+import { getMajorListApi } from "@/api/basicData/major.api";
+import { getClassListApi } from "@/api/basicData/class.api";
+import { getSemesterListApi } from "@/api/basicData/semester.api";
+import { getCourseListApi } from "@/api/basicData/course.api";
 
 export const useAcademicStore = defineStore('academic', {
     state: () => ({

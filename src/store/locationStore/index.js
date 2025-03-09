@@ -7,10 +7,10 @@ import {
     initialclassroomTypes
 } from "@/data/locations"
 
-import { addCampusApi, deleteCampusApi, getCampusByQueryApi, getCampusListApi, updateCampusApi } from "@/api/campus.api";
+import { addCampusApi, deleteCampusApi, getCampusByQueryApi, getCampusListApi, updateCampusApi } from "@/api/basicData/campus.api";
 import { ElMessage } from "element-plus";
-import { getClassroomListApi } from "@/api/classroom.api";
-import { getGradeByQueryApi } from "@/api/grade.api";
+import { getClassroomListApi } from "@/api/basicData/classroom.api";
+import { getGradeByQueryApi } from "@/api/basicData/grade.api";
 
 
 
