@@ -15,10 +15,6 @@
           <el-icon><List /></el-icon>
           <span>排课任务</span>
         </el-button>
-        <el-button type="primary" class="action-btn" @click="fillInformation">
-          <el-icon><Edit /></el-icon>
-          <span>信息填写</span>
-        </el-button>
       </div>
     </div>
   </template>
@@ -26,7 +22,11 @@
   <script lang="ts" setup>
   import { Calendar, List, Edit, Refresh } from '@element-plus/icons-vue'
   import { RouterView,RouterLink,useRouter } from 'vue-router';
-
+  import FillInformation from '@/views/index/FillInformation.vue';
+  import { markRaw } from 'vue'
+import { ElMessageBox } from 'element-plus'
+import { Delete } from '@element-plus/icons-vue'
+import { h } from 'vue'
   const router = useRouter()
   // 查看课表
   function viewSchedule() {
@@ -42,12 +42,6 @@
     router.push('/home/task/scheduleManagement')
   }
   
-  // 填写信息
-  function fillInformation() {
-    console.log('填写信息')
-    // 这里可以添加填写信息的逻辑，例如打开信息填写表单
-    router.push({name:'fillInformation'})
-  }
   </script>
   
   <style scoped>

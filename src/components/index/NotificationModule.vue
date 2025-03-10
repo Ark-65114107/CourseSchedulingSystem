@@ -27,7 +27,7 @@
   <script lang="ts" setup>
   import { ref, onMounted } from 'vue'
   import { Refresh } from '@element-plus/icons-vue'
-  import { fetchNotificationData } from '@/api/notifications.index.ts'
+  import { fetchNotificationData } from '@/api/notifications.index'
   
   // 通知列表
   const notifications = ref([])

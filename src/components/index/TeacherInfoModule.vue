@@ -55,7 +55,7 @@
   <script lang="ts" setup>
   import { ref, onMounted, onUnmounted } from 'vue'
   import { Document, Calendar, User } from '@element-plus/icons-vue'
-  import { fetchTeacherData } from '@/api/teacher.index.ts'
+  import { fetchTeacherData } from '@/api/teacher.index'
   
   // 当前时间
   const currentTime = ref(updateCurrentTime())
