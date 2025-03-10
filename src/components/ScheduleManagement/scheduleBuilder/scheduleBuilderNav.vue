@@ -25,7 +25,7 @@
           <template #description> 系统正在生成课表 </template>
         </el-step>
         <el-step title="排课结果" :icon="CircleCheck" @click="HandleNavClick('addClass')">
-          <template #description> 查看和导出课表 </template>
+          <template #description> 查看和导出课表   </template>
         </el-step>
       </el-steps>
     </div>
@@ -249,5 +249,9 @@ export default {
   .custom-steps :deep(.el-step__description) {
     display: none;
   }
+}
+
+.el-step{
+  height: min-content;
 }
 </style>

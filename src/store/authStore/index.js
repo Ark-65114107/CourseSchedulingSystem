@@ -61,6 +61,7 @@ export const useAuthStore = defineStore('auth', {
                                 name: c2.name,
                                 path: c2.path,
                                 meta: c2.meta,
+                                redirect:c2.redirect,
                                 component: modules[`../../views${c2.componentUrl}`],
                                 children: children3
                             })

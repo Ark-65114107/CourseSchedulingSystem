@@ -266,7 +266,7 @@ export default {
 
     const HandleScheduleClick = (value) => {
       console.log(value);
-      router.push({name:"scheduleBuilder",query:{
+      router.push({path:"/home/task/scheduleBuilder",query:{
         id:value.id
       }})
     };

@@ -25,10 +25,11 @@
       <el-tree
         :data="data"
         :filter-node-method="treeFilter"
+        node-key="id"
         @check-change="HandleCheckChange"
         show-checkbox
         default-expand-all
-        :default-checked-keys="['21rgzb']"  
+        :default-checked-keys="defaultChecked"  
         ref="treeRef"
       />
     </el-scrollbar>
