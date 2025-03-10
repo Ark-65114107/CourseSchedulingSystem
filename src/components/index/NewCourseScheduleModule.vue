@@ -7,7 +7,7 @@
     <div class="dialog-content">
       <el-table 
         :data="weekViewData" 
-        border 
+        border  
         stripe 
         show-overflow-tooltip 
         height="680"
@@ -101,7 +101,7 @@ const isDateInSelectedWeek = (date: Date) => {
 const calendarOptions = reactive({
   plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin],
   initialView: 'timeGridDay',
-  height: '780px',
+  height: '440px',
   locale: zhCn,
   selectable: true,
   editable: true,
