@@ -15,10 +15,6 @@
           <el-icon><List /></el-icon>
           <span>排课任务</span>
         </el-button>
-        <el-button type="primary" class="action-btn" @click="fillInformation">
-          <el-icon><Edit /></el-icon>
-          <span>信息填写</span>
-        </el-button>
       </div>
     </div>
   </template>
@@ -46,11 +42,6 @@ import { h } from 'vue'
     router.push('/home/task/scheduleManagement')
   }
   
-  // 填写信息
-  function fillInformation() {
-    console.log('填写信息')
-    
-}
   </script>
   
   <style scoped>

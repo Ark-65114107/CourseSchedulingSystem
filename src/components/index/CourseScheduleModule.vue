@@ -109,6 +109,7 @@
     border-radius: 8px;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     overflow: hidden;
+    height:100px;
   }
   
   .panel-header {
@@ -130,6 +131,7 @@
   
   .panel-content {
     padding: 15px 20px;
+    height: 350px;
   }
   
   .schedule-card {

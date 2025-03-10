@@ -12,9 +12,6 @@
         <!-- 通知模块 -->
         <NotificationModule />
         
-        <!-- 待办任务模块 -->
-        <TodoTaskModule />
-        
         <!-- 快捷操作模块 -->
         <QuickActionModule />
         
@@ -28,7 +25,7 @@
         <TeacherInfoModule />
         
         <!-- 课表模块 -->
-        <CourseScheduleModule />
+        <NewCourseScheduleModule />
       </div>
     </div>
   </div>
@@ -36,11 +33,11 @@
 
 <script lang="ts" setup name="index">
 import NotificationModule from '@/components/index/NotificationModule.vue'
-import TodoTaskModule from '@/components/index/TodoTaskModule.vue'
 import QuickActionModule from '@/components/index/QuickActionModule.vue'
 import DownloadModule from '@/components/index/DownloadModule.vue'
 import TeacherInfoModule from '@/components/index/TeacherInfoModule.vue'
 import CourseScheduleModule from '@/components/index/CourseScheduleModule.vue'
+import NewCourseScheduleModule from '@/components/index/NewCourseScheduleModule.vue'
 </script>
 
 <style scoped>
@@ -68,6 +65,7 @@ import CourseScheduleModule from '@/components/index/CourseScheduleModule.vue'
   display: flex;
   padding: 16px;
   gap: 16px;
+  height: auto;
 }
 
 .left-panel, .right-panel {
