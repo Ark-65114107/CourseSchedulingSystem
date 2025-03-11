@@ -20,13 +20,8 @@
 </template>
 
 <script lang="ts" setup>
-import { Calendar, List, Edit, Refresh } from '@element-plus/icons-vue'
-import { RouterView,RouterLink,useRouter } from 'vue-router';
-import FillInformation from '@/views/index/FillInformation.vue';
-import { markRaw } from 'vue'
-import { ElMessageBox } from 'element-plus'
-import { Delete } from '@element-plus/icons-vue'
-import { h } from 'vue'
+import { Calendar, List, Refresh } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router';
 
 const router = useRouter()
 // 查看课表

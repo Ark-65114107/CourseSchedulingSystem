@@ -22,52 +22,7 @@
         </div>
       </div>
     </div>
-    <div class="panel-content">
-      <!-- 日历 -->
-      <el-dialog v-model="isWeekViewVisible" width="60%" class="week-view-dialog">
-        <template #header>
-          <h1>看板</h1>
-        </template>
-        <div class="dialog-content">
-          <el-table 
-            :data="weekViewData" 
-            border 
-            stripe 
-            show-overflow-tooltip 
-            height="680"
-          >
-            <el-table-column 
-              v-for="col in weekViewColumns" 
-              :key="col.key"
-              :prop="col.key" 
-              :label="col.title" 
-              :width="col.width"
-            >
-              <template #default="scope">
-                <div :class="{ 'flex items-center': col.key === 'ownUserName' }">
-                  <template v-if="col.key === 'ownUserName'">
-                    {{ scope.row[col.key] }}
-                  </template>
-                  <template v-else>
-                    <ul class="week-view-list">
-                      <li 
-                        v-for="(item, index) in scope.row[col.key]" 
-                        :key="index"
-                        class="week-view-item"
-                      >
-                        <el-tooltip :content="item.subject" placement="top" effect="light">
-                          {{ `${index + 1}.${item.subject}` }}
-                        </el-tooltip>
-                      </li>
-                    </ul>
-                  </template>
-                </div>
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
-      </el-dialog>
-
+    <div class="panel-content calendar-wrapper">
       <!-- FullCalendar -->
       <FullCalendar
         ref="calendarRef"
@@ -201,13 +156,11 @@ async function fetchCalendarEvents() {
   }
 }
 
-// 修改日历配置中的高度设置
+// 修改日历配置
 const calendarOptions = reactive({
   plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin],
   initialView: 'timeGridWeek',
-  height: 'auto', // 改为auto以适应内容
-  contentHeight: 'auto', // 添加contentHeight设置
-  aspectRatio: 1.8, // 添加宽高比设置
+  height: '100%', // 改为100%以填充容器
   locale: zhCn,
   selectable: true,
   editable: false,
@@ -340,8 +293,6 @@ watch(currentView, (newView) => {
   border-radius: 4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  height: auto; /* 改为auto */
-  min-height: 600px; /* 设置最小高度 */
 }
 
 .panel-header {
@@ -363,8 +314,11 @@ watch(currentView, (newView) => {
 
 .panel-content {
   padding: 0;
-  height: calc(100% - 52px); /* 减去header的高度 */
-  min-height: 550px; /* 设置最小高度 */
+}
+
+.calendar-wrapper {
+  height: 600px; /* 设置固定高度 */
+  position: relative;
 }
 
 .schedule-card {
@@ -383,6 +337,10 @@ watch(currentView, (newView) => {
 }
 
 /* FullCalendar 样式覆盖 */
+.fc {
+  height: 100% !important;
+}
+
 .fc-theme-standard td, .fc-theme-standard th {
   border-color: #ebeef5;
 }
@@ -400,28 +358,12 @@ watch(currentView, (newView) => {
 
 /* 调整时间槽的高度 */
 .fc-timegrid-slot {
-  height: 30px !important; /* 减小时间槽高度从 40px 到 30px */
+  height: 28px !important;
 }
 
 .fc-timegrid-slot-label {
   font-size: 12px;
   color: #909399;
-}
-
-/* 确保日历容器填满可用空间 */
-.fc {
-  height: 100% !important;
-}
-
-/* 调整滚动区域 */
-.fc-scroller {
-  height: auto !important;
-  overflow-y: visible !important;
-}
-
-/* 防止内容溢出 */
-.fc-view-harness {
-  height: auto !important;
 }
 
 .fc-event {
@@ -501,57 +443,23 @@ watch(currentView, (newView) => {
   background-color: #f0f7ff !important;
 }
 
-/* 看板样式 */
-.week-view-dialog .el-dialog__header {
-  margin: 0;
-  padding: 15px 20px;
-  border-bottom: 1px solid #ebeef5;
+/* 确保滚动条正常显示 */
+.fc .fc-scroller-liquid-absolute {
+  position: absolute !important;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
 }
 
-.week-view-dialog .el-dialog__body {
-  padding: 0;
+.fc .fc-scroller {
+  overflow: auto !important;
 }
 
-.dialog-content {
-  padding: 15px;
-}
-
-.week-view-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.week-view-item {
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.fc .fc-scroller-harness {
+  position: relative;
   overflow: hidden;
-  padding: 3px 0;
-}
-
-.flex {
-  display: flex;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.is-week {
-  background-color: #f0f9eb;
-  border-radius: 4px;
-}
-
-.text-ellipsis {
-  text-overflow: ellipsis;
-}
-
-.whitespace-nowrap {
-  white-space: nowrap;
-}
-
-.overflow-hidden {
-  overflow: hidden;
+  direction: ltr;
 }
 </style>
 
