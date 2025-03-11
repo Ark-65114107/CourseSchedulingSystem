@@ -160,4 +160,7 @@ function updateWeekViewData() {
 .custom-calendar {
   height: 100px;
 }
+.fc{
+  height: 100px;
+}
 </style>
