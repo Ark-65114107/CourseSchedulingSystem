@@ -51,11 +51,12 @@ const router = createRouter({
   routes
 })
 
-const whiteList = ['/login','/register', '/404', '403', '/']
+const whiteList = ['/login', '/register', '/404', '403', '/']
 
 
 router.beforeEach((to, from, next) => {
   console.log("to:", to);
+  console.log("route:", router);
   const hasToken = getToken()
   const authStore = useAuthStore()
   if (to.path == "/login" && hasToken) {
@@ -65,7 +66,7 @@ router.beforeEach((to, from, next) => {
       return next()
     } else {
       if (Object.keys(authStore.routes).length == 0 && hasToken) {
-        authStore.setRoutes().then(() => {
+        return authStore.setRoutes().then(() => {
           return next({ ...to, replace: true })
         }
         )
@@ -73,6 +74,7 @@ router.beforeEach((to, from, next) => {
         if (hasToken && router.hasRoute(to.name)) {
           return next()
         } else {
+
           return next('/404')
         }
       }

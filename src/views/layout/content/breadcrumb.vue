@@ -43,7 +43,13 @@ export default {
   }
 
   .el-breadcrumb-item{
+      white-space: nowrap;
+  }
+
+  .el-breadcrumb{
     display: flex;
     flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: hidden;
   }
 </style>

@@ -461,5 +461,8 @@ watch(currentView, (newView) => {
   overflow: hidden;
   direction: ltr;
 }
+.fc{
+  height: 100px;
+}
 </style>
 

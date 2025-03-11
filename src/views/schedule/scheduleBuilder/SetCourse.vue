@@ -14,37 +14,47 @@
           >2024级软件工程中本一体化</el-text
         >
       </div>
-      <el-button class="addCourseButton" type="primary">添加课程</el-button>
+      <el-button
+        class="addCourseButton"
+        type="primary"
+        @click="HandleSetCourseClick"
+        >添加课程</el-button
+      >
 
       <div class="courseListBorder">
         <div class="nodata" v-show="hasCourse">
           <el-text type="info">暂无数据,请在上方添加</el-text>
         </div>
-        <el-scrollbar height="250px">
         <div class="courseList">
-          <el-tag
-            class="courseTag"
-            v-for="course of currentClassCourseList"
-            :key="id"
-            @close="HandleTagClose"
-            size="large"
-            closable
-          >
-            {{ course.name }}
-          </el-tag>
+          <el-scrollbar height="250px">
+            <el-tag
+              class="courseTag"
+              v-for="course of currentClassCourseList"
+              :key="id"
+              @close="HandleTagClose"
+              size="large"
+              closable
+            >
+              {{ course.name }}
+            </el-tag>
+          </el-scrollbar>
         </div>
-        </el-scrollbar>
       </div>
     </div>
   </div>
+  <setCourseDialog />
 </template>
 
 <script>
 import { Search } from "@element-plus/icons-vue";
 import { computed, reactive, ref } from "vue";
+import bus from "@/bus/bus";
+import SetCourseDialog from "./SetCourseDialog.vue";
+
 
 export default {
   name: "SetCourse",
+  components: { SetCourseDialog },
   setup() {
     const activePane = ref("unselectedCourse");
     const classCourseList = reactive([
@@ -62,48 +72,6 @@ export default {
     ]);
     const currentClass = ref("");
     const currentClassCourseList = reactive([
-      { id: "qwwqwqwqwwq", name: "高等数学(一)" },
-      { id: "qwwqwqwqwgwq", name: "线性代数" },
-      { id: "qwwqwqwqawwq", name: "C语言程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwqswwq", name: "Java程序基础" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
-      { id: "qwwqwqwdqwwq", name: "网络拓补" },
       { id: "qwwqwqwdqwwq", name: "网络拓补" },
       { id: "qwwqwqwdqwwq", name: "网络拓补" },
       { id: "qwwqwqwdqwwq", name: "网络拓补" },
@@ -119,16 +87,21 @@ export default {
       return false;
     });
 
-    const HandleTagClose = (tag)=>{
-        console.log(tag);
-    }
+    const HandleTagClose = (tag) => {
+      console.log(tag);
+    };
+
+    const HandleSetCourseClick = () => {
+      bus.emit("showSetCourseDialog");
+    };
     return {
       Search,
       activePane,
       classCourseList,
       currentClassCourseList,
       hasCourse,
-      HandleTagClose
+      HandleTagClose,
+      HandleSetCourseClick,
     };
   },
 };
