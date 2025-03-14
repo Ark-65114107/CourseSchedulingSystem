@@ -102,8 +102,6 @@ onMounted(() => {
 
 .panel-content {
   padding: 15px 20px;
-  max-height: 300px;
-  overflow-y: auto;
 }
 
 .download-list {
