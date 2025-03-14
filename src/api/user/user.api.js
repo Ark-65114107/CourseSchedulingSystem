@@ -5,7 +5,9 @@ export const userLogin = (param)=>{
     return request.post('login',{
         ...param
     })
-}   
+}
+
+
 export const userRegister = (param)=>{
     return request.post('register',{
         ...param

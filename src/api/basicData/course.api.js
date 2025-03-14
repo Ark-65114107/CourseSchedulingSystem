@@ -9,6 +9,13 @@ export const getCourseListApi = (parm)=>{
         isAbort:true
     }).catch(()=>{})
 }
+export const getCoursesApi = ()=>{
+    return request({
+        url:"/task/getCourses",
+        method:"get",
+        isAbort:true
+    }).catch(()=>{})
+}
 
 //添加校区数据
 export const addCampusApi = (parm)=>{

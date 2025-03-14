@@ -15,7 +15,7 @@ function cancelRepeatCache(key){
 
 const request = axios.create({
     baseURL: "https://mock.presstime.cn/mock/679a2d5fb365a6d86942118b/testapi",
-    timeout: "5000"
+    timeout: "3000"
 })
 
 request.interceptors.request.use(
@@ -54,11 +54,15 @@ request.interceptors.response.use(
         return response.data
     },
     error => {
-
+        console.log(error);
+        if(error.code === "ECONNABORTED"){
+            ElMessage.error("请求超时TAT,请检查网络后稍后再试")
+        }
         if(isCancel(error)){
             ElMessage.error("请勿频繁请求!")
         }
-        return Promise.reject(error)
+
+        Promise.reject(error)
     }
 )
 

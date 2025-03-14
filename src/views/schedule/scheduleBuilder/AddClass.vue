@@ -34,7 +34,6 @@
       />
     </el-scrollbar>
   </div>
-  <div></div>
 </template>
 
 <script>
@@ -56,7 +55,7 @@ export default {
     const keyWord = ref();
     const treeRef = ref();
     let res = ref([]);
-    const data = ref([]);
+    const data = ref([]);//班级tree的数据
     const isLoading = ref(false);
     let defaultChecked = ref([]);
 
@@ -72,7 +71,6 @@ export default {
         .finally(() => {
           isLoading.value = false;
         });
-
       getClassList()
     });
 
@@ -85,8 +83,7 @@ export default {
 
     const getClassList = () => {
       getClassListApi(route.query.id).then(res=>{
-        defaultChecked.value = res.data
-        console.log(defaultChecked.value);
+        defaultChecked.value = res.data.map((c)=>c.id)
       })
     };
 

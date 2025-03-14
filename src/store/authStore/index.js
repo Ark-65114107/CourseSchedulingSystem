@@ -20,7 +20,9 @@ export const useAuthStore = defineStore('auth', {
         },
         setRoutes() {
             return getRoutes().then(res => {
-                this.routes = res.data.routes
+                if (res.meta.code === 200) {
+                    this.routes = res.data.routes
+                }
             }).then(() => {
                 const childrens = this.setRouterList(this.routes.children)
                 router.addRoute({
@@ -31,6 +33,7 @@ export const useAuthStore = defineStore('auth', {
                     component: modules[`../../views${this.routes.componentUrl}`],
                     children: childrens
                 })
+                return 200
             })
         },
         setRouterList(data) {
@@ -61,7 +64,7 @@ export const useAuthStore = defineStore('auth', {
                                 name: c2.name,
                                 path: c2.path,
                                 meta: c2.meta,
-                                redirect:c2.redirect,
+                                redirect: c2.redirect,
                                 component: modules[`../../views${c2.componentUrl}`],
                                 children: children3
                             })

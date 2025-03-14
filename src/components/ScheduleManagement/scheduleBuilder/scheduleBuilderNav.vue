@@ -15,17 +15,47 @@
         process-status="process"
         class="custom-steps"
       >
-        <el-step title="选择班级" :icon="School" @click="HandleNavClick('addClass')">
+        <el-step
+          title="选择班级"
+          :icon="School"
+          @click="HandleNavClick('addClass')"
+        >
           <template #description> 选择需要排课的班级 </template>
         </el-step>
-        <el-step title="数据选择" :icon="Files"  @click="HandleNavClick('setCourse')" >
-          <template #description> 选择课程和教师数据 </template>
+        <el-step
+          title="课程选择"
+          :icon="Files"
+          @click="HandleNavClick('setCourse')"
+        >
+          <template #description> 为选择的班级添加课程 </template>
         </el-step>
-        <el-step title="排课进行中" :icon="Loading"  @click="HandleNavClick('addClass')">
-          <template #description> 系统正在生成课表 </template>
+        <el-step
+          title="学时设置"
+          :icon="Timer"
+          @click="HandleNavClick('setCourseHour')"
+        >
+          <template #description> 为每个班级的课程设置学时</template>
         </el-step>
-        <el-step title="排课结果" :icon="CircleCheck" @click="HandleNavClick('addClass')">
-          <template #description> 查看和导出课表   </template>
+        <el-step
+          title="教学班设置"
+          :icon="FolderChecked"
+          @click="HandleNavClick('setCourseClass')"
+        >
+          <template #description> 添加或设置教学班 </template>
+        </el-step>
+        <el-step
+          title="排课设置"
+          :icon="Loading"
+          @click="HandleNavClick('addClass')"
+        >
+          <template #description> 设置排课条件 </template>
+        </el-step>
+        <el-step
+          title="排课结果"
+          :icon="CircleCheck"
+          @click="HandleNavClick('addClass')"
+        >
+          <template #description> 查看和导出课表 </template>
         </el-step>
       </el-steps>
     </div>
@@ -90,40 +120,48 @@ import {
   CircleCheck,
   QuestionFilled,
   ArrowRight,
+  Timer,
+  FolderChecked,
 } from "@element-plus/icons-vue";
 import { computed, reactive, toRefs } from "vue";
-import router from '@/router';
-import { useRoute, useRouter } from 'vue-router';
+import router from "@/router";
+import { useRoute, useRouter } from "vue-router";
 export default {
   name: "scheduleBuilderNav",
   setup() {
-    const router = useRouter()
-    const route = useRoute()
+    const router = useRouter();
+    const route = useRoute();
     const data = reactive({
-      id: ""
+      id: "",
     });
-    const step = computed(()=>{
-       switch(router.currentRoute.value.name){
+    const step = computed(() => {
+      switch (router.currentRoute.value.name) {
         case "addClass":
           return 0;
         case "setCourse":
           return 1;
+        case "setCourseHour":
+          return 2;
+        case "setCourseClass":
+          return 3;
         default:
           return -1;
-       }
-    })
+      }
+    });
 
-    
-
-    const HandleNavClick = (value)=>{
-      router.push({name:value,query:{
-        id:route.query.id
-      }})
-    }
+    const HandleNavClick = (value) => {
+      router.push({
+        name: value,
+        query: {
+          id: route.query.id,
+        },
+      });
+    };
 
     return {
       ...toRefs(data),
       step,
+      Timer,
       School,
       Files,
       Loading,
@@ -131,6 +169,7 @@ export default {
       QuestionFilled,
       ArrowRight,
       HandleNavClick,
+      FolderChecked,
     };
   },
 };
@@ -251,7 +290,7 @@ export default {
   }
 }
 
-.el-step{
+.el-step {
   height: min-content;
 }
 </style>
