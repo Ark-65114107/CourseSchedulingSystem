@@ -1,6 +1,6 @@
 import request from "@/utils/request"
 
-//获取校区列表数据
+//获取排课任务列表数据
 export const getTaskListApi = (parm)=>{
     return request({
         url:"/task/list",
@@ -10,7 +10,7 @@ export const getTaskListApi = (parm)=>{
     }).catch(()=>{})
 }
 
-//获取单个校区数据
+
 export const getTaskByQueryApi = (parm)=>{
     return request({
         url:"/task/search",
@@ -20,7 +20,7 @@ export const getTaskByQueryApi = (parm)=>{
     }).catch(()=>{})
 }
 
-//添加校区数据
+
 export const addCampusApi = (parm)=>{
     return request({
         url:"/campuses/create",
@@ -30,7 +30,6 @@ export const addCampusApi = (parm)=>{
     }).catch(()=>{})   
 }
 
-//修改校区数据
 export const updateCampusApi = (parm)=>{
     return request({
         url:"/campuses/update",

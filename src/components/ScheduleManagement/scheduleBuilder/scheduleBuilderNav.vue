@@ -16,7 +16,7 @@
         class="custom-steps"
       >
         <el-step
-          title="选择班级"
+          title="班级选择"
           :icon="School"
           @click="HandleNavClick('addClass')"
         >
@@ -39,23 +39,37 @@
         <el-step
           title="教学班设置"
           :icon="FolderChecked"
-          @click="HandleNavClick('setCourseClass')"
+          @click="HandleNavClick('setTeachingClass')"
         >
           <template #description> 添加或设置教学班 </template>
         </el-step>
         <el-step
+          title="教师安排"
+          :icon="Avatar"
+          @click="HandleNavClick('teacherAssignment')"
+        >
+          <template #description> 为教学班安排教师 </template>
+        </el-step>
+        <el-step
           title="排课设置"
-          :icon="Loading"
-          @click="HandleNavClick('addClass')"
+          :icon="Operation"
+          @click="HandleNavClick('scheduleSetting')"
         >
           <template #description> 设置排课条件 </template>
         </el-step>
         <el-step
-          title="排课结果"
-          :icon="CircleCheck"
-          @click="HandleNavClick('addClass')"
+          title="课表编辑"
+          :icon="Brush"
+          @click="HandleNavClick('scheduleBuild')"
         >
-          <template #description> 查看和导出课表 </template>
+          <template #description> 添加与编辑课表 </template>
+        </el-step>
+        <el-step
+          title="课表查看"
+          :icon="Printer"
+          @click="HandleNavClick('scheduleViewing')"
+        >
+          <template #description> 添加与编辑课表 </template>
         </el-step>
       </el-steps>
     </div>
@@ -122,6 +136,11 @@ import {
   ArrowRight,
   Timer,
   FolderChecked,
+  Avatar,
+  Operation,
+  Grid,
+  Brush,
+  Printer
 } from "@element-plus/icons-vue";
 import { computed, reactive, toRefs } from "vue";
 import router from "@/router";
@@ -142,8 +161,16 @@ export default {
           return 1;
         case "setCourseHour":
           return 2;
-        case "setCourseClass":
+        case "setTeachingClass":
           return 3;
+        case "teacherAssignment":
+          return 4;
+        case "scheduleSetting":
+          return 5;
+        case "scheduleBuild":
+          return 6;
+        case "scheduleViewing":
+          return 6;
         default:
           return -1;
       }
@@ -170,6 +197,11 @@ export default {
       ArrowRight,
       HandleNavClick,
       FolderChecked,
+      Avatar,
+      Operation,
+      Grid,
+      Brush,
+      Printer
     };
   },
 };

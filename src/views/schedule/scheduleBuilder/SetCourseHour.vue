@@ -22,9 +22,9 @@
       </div>
       <div class="courseHourTableDiv">
         <el-button class="allsetButton" type="primary" @click="HandleShowDialog">统一设置</el-button>
-        <el-table class="courseHourTable" :data="currentCourseClassList">
+        <el-table class="courseHourTable" :data="currentTeachingClassList">
           <el-table-column prop="name" label="班级名"></el-table-column>
-          <el-table-column label="学时">
+          <el-table-column label="周学时">
             <template #default="scope">
               <el-input-number
                 class="eduhourInput"
@@ -180,7 +180,7 @@ export default {
       },
     ]);
     const currentCourse = ref("");
-    const currentCourseClassList = ref([]);
+    const currentTeachingClassList = ref([]);
     const eduHourTemp = ref("");
     const route = useRoute();
     const isNumInputMouseUp = ref();
@@ -188,7 +188,7 @@ export default {
     const HandleCourseClick = (course) => {
       if (course != currentCourse.value) {
         currentCourse.value = course;
-        currentCourseClassList.value = course.classList;
+        currentTeachingClassList.value = course.classList;
       }
     };
 
@@ -235,7 +235,7 @@ export default {
     return {
       courseTab,
       courseList,
-      currentCourseClassList,
+      currentTeachingClassList,
       currentCourse,
       HandleCourseClick,
       eduHourTemp,

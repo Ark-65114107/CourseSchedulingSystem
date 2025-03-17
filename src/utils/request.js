@@ -45,6 +45,7 @@ request.interceptors.request.use(
 )
 request.interceptors.response.use(
     response => {
+        console.log(response);
         //在这里处理响应码
         // if(response.data.meta.code != 200){
         //     if(response.data.meta.message) ElMessage.error(response.data.meta.message)
@@ -54,14 +55,12 @@ request.interceptors.response.use(
         return response.data
     },
     error => {
-        console.log(error);
         if(error.code === "ECONNABORTED"){
             ElMessage.error("请求超时TAT,请检查网络后稍后再试")
         }
         if(isCancel(error)){
             ElMessage.error("请勿频繁请求!")
         }
-
         Promise.reject(error)
     }
 )

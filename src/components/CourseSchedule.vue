@@ -32,7 +32,7 @@
           :key="course.id"
           class="course-item"
           :style="getCourseStyle(course)"
-          :class="getCourseClass(course)"
+          :class="getTeachingClass(course)"
           @click="showCourseDetail(course)"
         >
           <div class="course-content">
@@ -148,7 +148,7 @@ function getCourseStyle(course: Course) {
 }
 
 // 获取课程类名
-function getCourseClass(course: Course) {
+function getTeachingClass(course: Course) {
   return {
     [`course-type-${course.type}`]: true
   }
