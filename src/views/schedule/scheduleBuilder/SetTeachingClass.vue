@@ -27,10 +27,12 @@
             </el-table-column>
             <el-table-column prop="code" label="教学班编号"> </el-table-column>
             <el-table-column prop="name" label="教学班名称"> </el-table-column>
-            <el-table-column label="组成班级" v-slot="scope">
-              <el-tag class="classTag" v-for="cl of scope.row.classList">{{
-                cl.name
-              }}</el-tag>
+            <el-table-column label="组成班级" v-slot="scope" min-width="110px">
+              <el-scrollbar height="60px">
+                <el-tag class="classTag" v-for="cl of scope.row.classList">{{
+                  cl.name
+                }}</el-tag>
+              </el-scrollbar>
             </el-table-column>
             <el-table-column
               label="教学班人数"
@@ -55,7 +57,7 @@
 import { onMounted, ref } from "vue";
 import SetTeachingClassDialog from "./SetTeachingClassDialog.vue";
 import bus from "@/bus/bus";
-import { getListTeachingClassApi } from "@/api/schedule/teachingClass.api";
+import { getListTeachingClassApi } from "@/api/schedule/setTeachingClass/teachingClass.api";
 import { useRoute } from "vue-router";
 export default {
   name: "SetTeachingClass",

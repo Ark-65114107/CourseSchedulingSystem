@@ -42,9 +42,9 @@ import { Search } from "@element-plus/icons-vue";
 import {
   getClassTreeApi,
   setClassTreeApi,
-} from "@/api/schedule/classTree.api.js";
+} from "@/api/schedule/addClass/classTree.api.js";
 
-import { getClassListApi } from "@/api/schedule/classList.api.js";
+import { getClassListApi } from "@/api/schedule/addClass/classList.api.js";
 import { useRoute } from "vue-router";
 import router from "@/router";
 
@@ -91,7 +91,7 @@ export default {
       treeRef.value.filter(value);
     });
 
-    const treeFilter = (value, data) => {
+    const treeFilter = (value, data) => {//搜索过虑
       if (!value) return true;
       return data.label.includes(value);
     };

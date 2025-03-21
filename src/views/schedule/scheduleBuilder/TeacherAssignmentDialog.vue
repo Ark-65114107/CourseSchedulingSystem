@@ -69,7 +69,7 @@ import { ElMessage, ElMessageBox } from "element-plus";
 import {
   getSingleTeacherTeachingClassApi,
   searchTeachingClassApi,
-} from "@/api/schedule/teacherAssignment.api";
+} from "@/api/schedule/teacherAssignment/teacherAssignment.api";
 
 export default {
   name: "TeacherAssignmentDialog",

@@ -22,7 +22,6 @@ export const getSingleTeacherTeachingClassApi = (taskId, teacherId) => {
     }).catch(() => { })
 }
 
-//添加校区数据
 export const searchTeachingClassApi = (taskId,keyword) => {
     return request({
         url: "/task/searchListTeachingClass",

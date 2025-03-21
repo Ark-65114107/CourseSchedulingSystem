@@ -20,7 +20,7 @@
 <script>
 import { onMounted, ref } from "vue";
 import bus from "@/bus/bus";
-import { batchUpdateCourseHour } from '@/api/schedule/courseHour.api';
+import { batchUpdateCourseHour } from '@/api/schedule/setCourseHour/courseHour.api';
 export default {
   name: "SetCourseHourDialog",
   setup() {

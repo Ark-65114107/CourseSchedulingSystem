@@ -179,8 +179,8 @@
 <script>
 import { computed, onMounted, ref, watch } from "vue";
 import bus from "@/bus/bus";
-import { getSingleTeachingClassApi } from "@/api/schedule/teachingClass.api";
-import { getListClassByCourseHour } from "@/api/schedule/getListClassByCourseHour.api";
+import { getSingleTeachingClassApi } from "@/api/schedule/setTeachingClass/teachingClass.api";
+import { getListClassByCourseHour } from "@/api/schedule/setCourseHour/getListClassByCourseHour.api";
 import { useRoute } from "vue-router";
 import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
 import { ElMessage, ElMessageBox } from "element-plus";

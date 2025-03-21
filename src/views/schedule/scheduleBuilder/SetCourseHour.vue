@@ -47,7 +47,7 @@
 
 <script>
 import { computed, ref } from "vue";
-import { updateCourseHour } from "@/api/schedule/courseHour.api.js";
+import { updateCourseHour } from "@/api/schedule/setCourseHour/courseHour.api.js";
 import { useRoute } from "vue-router";
 import { ElLoading } from "element-plus";
 import bus from '@/bus/bus';
