@@ -1,12 +1,12 @@
 <template>
   <div class="guide">
     <div class="header">
-      <el-tooltip
+      <!-- <el-tooltip
         content="在这里您可以为班级进行排课管理，请按步骤操作"
         placement="right"
       >
         <el-icon class="help-icon"><QuestionFilled /></el-icon>
-      </el-tooltip>
+      </el-tooltip> -->
     </div>
     <div class="steps-container">
       <el-steps
@@ -69,7 +69,7 @@
           :icon="Printer"
           @click="HandleNavClick('scheduleViewing')"
         >
-          <template #description> 添加与编辑课表 </template>
+          <template #description> 查看和导出课表 </template>
         </el-step>
       </el-steps>
     </div>
@@ -218,7 +218,7 @@ export default {
 
 .guide {
   background-color: white;
-  padding: 20px;
+  padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
 }

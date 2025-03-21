@@ -1,4 +1,4 @@
-import { getTaskByQueryApi, getTaskListApi } from "@/api/schedule/task.api";
+import { getTaskByQueryApi, getTaskListApi } from "@/api/schedule/task/task.api";
 import { defineStore } from "pinia";
 
 

@@ -25,10 +25,10 @@
           <div class="TagDiv">
             <el-popover
               v-for="tc of scope.row.classlist"
-              width="200"
+              width="250"
               trigger="hover"
             >
-              <el-text> 教学班编号：{{ tc.id }} </el-text>
+              <el-text> 教学班编号：{{ tc.id }} </el-text><br/>
               <el-text> 班级： </el-text>
               <el-text v-for="cl of tc.classlist">{{ cl.name }},<br /></el-text>
 
@@ -128,9 +128,9 @@
 import { onMounted, ref } from "vue";
 import bus from "@/bus/bus";
 import { useRoute } from "vue-router";
-import { getListTeacherTeachingClassApi } from "@/api/schedule/teacherAssignment.api.js";
-import { getListTeachingClassApi } from "@/api/schedule/teachingClass.api";
+import { getListTeacherTeachingClassApi } from "@/api/schedule/teacherAssignment/teacherAssignment.api.js";
 import TeacherAssignmentDialog from "./TeacherAssignmentDialog.vue";
+import { getListTeachingClassApi } from '@/api/schedule/setTeachingClass/teachingClass.api';
 export default {
   name: "TeacherAssignment",
   components: { TeacherAssignmentDialog },
