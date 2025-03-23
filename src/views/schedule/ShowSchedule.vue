@@ -368,24 +368,38 @@ h1{
   width: 100%; /* 确保宽度正确 */
 }
 
-/* 增加时间轴宽度，但不要过宽 */
+/* 增加时间轴宽度，防止与周一列重叠 */
 th.fc-timegrid-axis {
-  width: 105px !important;
-}
-
-/* 时间轴标签样式优化 */
-.fc-timegrid-slot-label-cushion {
-  width: 100%;
-  text-align: center;
-  line-height: 1.2; /* 调整行高以容纳更多文本 */
-  font-size: 11px; /* 稍微减小字体 */
+  width: 160px !important; 
 }
 
 /* 确保标签框架布局正确 */
 td.fc-timegrid-slot-label {
-  max-width: 105px;
-  width: 105px !important;
+  max-width: 160px; 
+  width: 160px !important; 
   position: relative;
+}
+
+/* 确保时间轴内容不会溢出 */
+.fc-timegrid-axis-cushion {
+  max-width: 160px;
+  overflow: hidden;
+}
+
+/* 添加以下样式，确保第一列和第二列之间有明确的分隔 */
+.fc-timegrid-cols table {
+  border-spacing: 0;
+  border-collapse: separate;
+}
+
+/* 增强第一列与其他列的视觉分隔 */
+.fc-timegrid-col.fc-day:first-child {
+  border-left: 2px solid #ddd;
+}
+
+/* 确保事件不会溢出到时间轴列 */
+.fc-timegrid-event-harness {
+  margin-left: 2px;
 }
 
 /* 为节次行添加边框 */
@@ -432,3 +446,4 @@ td.fc-timegrid-slot-label {
   border-color: #1c5a9c;
 }
 </style>
+
