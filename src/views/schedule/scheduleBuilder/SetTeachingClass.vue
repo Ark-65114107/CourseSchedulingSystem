@@ -20,7 +20,8 @@
             class="teachingClassTable"
             :data="currentTeachingClassList"
             :span-method="tableSpan"
-            height="345px"
+            height="440px"
+            max-height="500px"
             fit
           >
             <el-table-column prop="perWeekCourseHour" label="周学时">
@@ -189,7 +190,7 @@ export default {
 
 <style scoped>
 .setTeachingClassBody {
-  height: 425px;
+  height: 520px;
   display: flex;
   margin: 10px 0px 0px 0px;
   flex-direction: column;
@@ -219,7 +220,7 @@ export default {
 
 .teachingClassTable {
   width: auto;
-  height: 280px;
+  height: 100%;
   padding: 0px 10px;
   margin: 10px;
   border: solid 1px #dcdfe6;

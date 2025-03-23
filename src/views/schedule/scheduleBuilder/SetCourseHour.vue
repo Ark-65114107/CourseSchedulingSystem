@@ -249,7 +249,7 @@ export default {
 
 <style scoped>
 .setCourseHourBody {
-  height: 360px;
+  height: 520px;
   display: flex;
   margin: 10px 0px 0px 0px;
   flex-direction: column;
@@ -258,7 +258,7 @@ export default {
   border-radius: 8px;
 }
 .setCourseHourDiv {
-  height: 350px;
+  height: 100%;
   display: flex;
   flex-direction: row;
   background: white;

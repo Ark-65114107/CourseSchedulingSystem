@@ -2,7 +2,7 @@
   <el-header>
     <router-link to="/" class="logotitle">
       <img src="/src/assets/logo.png" alt="" class="logo" />
-      <h2>高校排课系统</h2>
+      <el-text class="titleText">高校排课系统</el-text>
     </router-link>
 
     <div class="userInfo">
@@ -79,7 +79,7 @@ export default {
 
 <style scoped>
 .el-header {
-  height: 10%;
+  height: 8%;
   background: rgb(50.8, 116.6, 184.5);
   display: flex;
   justify-content: space-between;
@@ -103,6 +103,12 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.titleText{
+  color: white;
+  font-size: 22px;
+  font-weight: bold;
 }
 
 .username {

@@ -19,7 +19,7 @@
     >
 
     <div class="teacherViewDiv" v-if="!viewMode">
-      <el-table class="viewTable" :data="teacherList" max-height="365px">
+      <el-table class="viewTable" :data="teacherList" max-height="465px">
         <el-table-column label="教师姓名" prop="name"></el-table-column>
         <el-table-column label="教学班" v-slot="scope">
           <div class="TagDiv">
@@ -83,7 +83,8 @@
                 class="teachingClassTable"
                 :data="currentTeachingClassList"
                 :span-method="tableSpan"
-                height="345px"
+                height="420px"
+                max-height="420px"
                 fit
               >
                 <el-table-column prop="id" label="教学班编号">
@@ -268,7 +269,7 @@ export default {
 
 <style scoped>
 .teacherAssignmentBody {
-  height: 425px;
+  height: 520px;
   display: flex;
   margin: 10px 0px 0px 0px;
   flex-direction: column;
@@ -283,10 +284,10 @@ export default {
 }
 
 .teacherViewDiv {
-  height: auto;
+  height: 100%;
 }
 .viewTable {
-  height: 370px;
+  height: 520px;
   width: auto;
   margin: 10px;
   padding: 0px 20px;
@@ -336,7 +337,6 @@ export default {
 
 .teachingClassTable {
   width: auto;
-  height: 200px;
   padding: 0px 10px;
   margin: 10px;
   border: solid 1px #dcdfe6;
