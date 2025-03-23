@@ -83,13 +83,14 @@ async function fetchCalendarEvents() {
   try {
     // 从 api.index 获取课程数据，传入当前日期和选中的课表类型
     const courses = await coursedata(currentDate.value, selectedScheduleType.value)
-    
+
+    console.log('获取到的课程数据:', courses)
     if (!courses || courses.length === 0) {
       console.log('没有找到课程数据，或返回了空数组')
       return []
     }
     
-    console.log('获取到的课程数据:', courses)
+
     
     const events: CalendarEvent[] = courses.map((course: any) => {
       // 获取当前周的开始日期（周一）

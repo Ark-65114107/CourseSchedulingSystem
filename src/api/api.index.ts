@@ -15,33 +15,61 @@ export const getRoutes = () => {
  * @returns 课程数据列表
  */
 export const coursedata = (date: Date, scheduleType: string = '') => {
+  // 解析scheduleType格式，例如: "1/2/3" 表示 学期/专业/班级
+  const [semester, majorId, classId] = scheduleType.split('/');
+
   return request({
-    url: "/task/getScheduleTable",
+    url: "/task/getScheduleTable", // 修改为实际的API端点
     method: "get",
     params: {
       date: date.toISOString().split('T')[0], // 格式化日期为 YYYY-MM-DD
-      type: scheduleType || undefined // 如果为空字符串则传 undefined
+      semester: semester || undefined,
+      majorId: majorId || undefined,
+      classId: classId || undefined,
+      // 下面参数按需添加
+      // campusId: undefined,
+      // departmentId: undefined,
+      // grade: undefined,
     }
   }).then(response => {
-    // 假设API返回的是包含课程信息的数组
-    // 如果需要对返回数据做转换处理，可以在这里添加逻辑
-    // 示例：将后端返回的数据转换为前端需要的格式
-    if (Array.isArray(response)) {
-      return response.map(course => ({
+    console.log('API返回原始数据:', response);
+
+    // 检查响应格式是否符合预期
+    if (response && response.data && Array.isArray(response.data)) {
+      // 处理meta中的状态码
+      if (response.meta && response.meta.code !== 200) {
+        console.warn('API返回非成功状态:', response.meta.message);
+        return [];
+      }
+
+      // 将后端返回的数据转换为前端需要的格式
+      return response.data.map(course => ({
         id: course.id,
         name: course.name,
-        day: course.dayOfWeek - 1, // 假设后端是 1-7，前端需要 0-6
+        day: course.day - 1, // 后端是 1-7，前端需要 0-6
         startTime: course.startTime,
         endTime: course.endTime,
         location: course.location || '未指定地点',
-        type: course.courseType || 'lecture', // 默认为普通课程
-      }))
+        type: course.type || 'lecture', // 使用后端提供的类型
+      }));
+      // } else if (Array.isArray(response)) {
+      //   // 兼容直接返回数组的情况
+      //   return response.map(course => ({
+      //     id: course.id,
+      //     name: course.name,
+      //     day: course.day - 1, // 后端是 1-7，前端需要 0-6
+      //     startTime: course.startTime,
+      //     endTime: course.endTime,
+      //     location: course.location || '未指定地点',
+      //     type: course.type || 'lecture',
+      //   }));
     }
 
     // 如果没有数据或者格式不对，返回空数组
-    return []
+    console.warn('API返回数据格式不符合预期');
+    return [];
   }).catch(error => {
-    console.error('获取课程数据失败:', error)
-    return []
-  })
-}
+    console.error('获取课程数据失败:', error);
+    return [];
+  });
+};
