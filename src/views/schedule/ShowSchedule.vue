@@ -1,309 +1,59 @@
 <template>
   <div class="guide">
     <h1>课表查看</h1>
-  <div class="choose-control">
-    <el-cascader
-      @change="handleChange"
-      placeholder="选择要查看的课表"
-      :options="options"
-      filterable
-    />
+    <div class="choose-control">
+      <el-cascader
+        @change="handleChange"
+        placeholder="选择要查看的课表"
+        :options="options"
+        filterable
+      />
+    </div>
   </div>
-</div>
   <div class="panel-card schedule-card">
     <div class="panel-header">
       <h2>课表</h2>
     </div>
-    </div>
-    <div class="panel-content calendar-wrapper">
-      <FullCalendar ref="calendarRef" :options="calendarOptions" />
-    </div>
+  </div>
+  <div class="panel-content calendar-wrapper">
+    <FullCalendar ref="calendarRef" :options="calendarOptions" />
+  </div>
 </template>
 
 <script lang="ts" setup name="ShowSchedule">
 import { ref, reactive, computed, onMounted, nextTick, onUnmounted } from 'vue'
+import { ElMessage, ElLoading } from 'element-plus'
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import zhCn from '@fullcalendar/core/locales/zh-cn'
-import { fetchCourseData } from '@/api/courses.index'
+// 使用 api.index 中的方法
+import { coursedata } from '@/api/api.index'
 
+// 选择课表时触发的方法
 function handleChange(value: string[]) {
   //监听选择的课表，根据筛选的数据进行数据刷新
   console.log('选择的课表:', value)
+  // 存储当前选中的课表类型
+  selectedScheduleType.value = value.join('/')
+  updateCalendarEvents()
 }
 
+// 存储当前选中的课表类型
+const selectedScheduleType = ref('')
+
+// 级联选择器选项数据
 const options = [
   {
-    value: 'guide',
-    label: 'Guide',
-    children: [
-      {
-        value: 'disciplines',
-        label: 'Disciplines',
-        children: [
-          {
-            value: 'consistency',
-            label: 'Consistency',
-          },
-          {
-            value: 'feedback',
-            label: 'Feedback',
-          },
-          {
-            value: 'efficiency',
-            label: 'Efficiency',
-          },
-          {
-            value: 'controllability',
-            label: 'Controllability',
-          },
-        ],
-      },
-      {
-        value: 'navigation',
-        label: 'Navigation',
-        children: [
-          {
-            value: 'side nav',
-            label: 'Side Navigation',
-          },
-          {
-            value: 'top nav',
-            label: 'Top Navigation',
-          },
-        ],
-      },
-    ],
+    value: '1',
+    label: '第1学期'
   },
   {
-    value: 'component',
-    label: 'Component',
-    children: [
-      {
-        value: 'basic',
-        label: 'Basic',
-        children: [
-          {
-            value: 'layout',
-            label: 'Layout',
-          },
-          {
-            value: 'color',
-            label: 'Color',
-          },
-          {
-            value: 'typography',
-            label: 'Typography',
-          },
-          {
-            value: 'icon',
-            label: 'Icon',
-          },
-          {
-            value: 'button',
-            label: 'Button',
-          },
-        ],
-      },
-      {
-        value: 'form',
-        label: 'Form',
-        children: [
-          {
-            value: 'radio',
-            label: 'Radio',
-          },
-          {
-            value: 'checkbox',
-            label: 'Checkbox',
-          },
-          {
-            value: 'input',
-            label: 'Input',
-          },
-          {
-            value: 'input-number',
-            label: 'InputNumber',
-          },
-          {
-            value: 'select',
-            label: 'Select',
-          },
-          {
-            value: 'cascader',
-            label: 'Cascader',
-          },
-          {
-            value: 'switch',
-            label: 'Switch',
-          },
-          {
-            value: 'slider',
-            label: 'Slider',
-          },
-          {
-            value: 'time-picker',
-            label: 'TimePicker',
-          },
-          {
-            value: 'date-picker',
-            label: 'DatePicker',
-          },
-          {
-            value: 'datetime-picker',
-            label: 'DateTimePicker',
-          },
-          {
-            value: 'upload',
-            label: 'Upload',
-          },
-          {
-            value: 'rate',
-            label: 'Rate',
-          },
-          {
-            value: 'form',
-            label: 'Form',
-          },
-        ],
-      },
-      {
-        value: 'data',
-        label: 'Data',
-        children: [
-          {
-            value: 'table',
-            label: 'Table',
-          },
-          {
-            value: 'tag',
-            label: 'Tag',
-          },
-          {
-            value: 'progress',
-            label: 'Progress',
-          },
-          {
-            value: 'tree',
-            label: 'Tree',
-          },
-          {
-            value: 'pagination',
-            label: 'Pagination',
-          },
-          {
-            value: 'badge',
-            label: 'Badge',
-          },
-        ],
-      },
-      {
-        value: 'notice',
-        label: 'Notice',
-        children: [
-          {
-            value: 'alert',
-            label: 'Alert',
-          },
-          {
-            value: 'loading',
-            label: 'Loading',
-          },
-          {
-            value: 'message',
-            label: 'Message',
-          },
-          {
-            value: 'message-box',
-            label: 'MessageBox',
-          },
-          {
-            value: 'notification',
-            label: 'Notification',
-          },
-        ],
-      },
-      {
-        value: 'navigation',
-        label: 'Navigation',
-        children: [
-          {
-            value: 'menu',
-            label: 'Menu',
-          },
-          {
-            value: 'tabs',
-            label: 'Tabs',
-          },
-          {
-            value: 'breadcrumb',
-            label: 'Breadcrumb',
-          },
-          {
-            value: 'dropdown',
-            label: 'Dropdown',
-          },
-          {
-            value: 'steps',
-            label: 'Steps',
-          },
-        ],
-      },
-      {
-        value: 'others',
-        label: 'Others',
-        children: [
-          {
-            value: 'dialog',
-            label: 'Dialog',
-          },
-          {
-            value: 'tooltip',
-            label: 'Tooltip',
-          },
-          {
-            value: 'popover',
-            label: 'Popover',
-          },
-          {
-            value: 'card',
-            label: 'Card',
-          },
-          {
-            value: 'carousel',
-            label: 'Carousel',
-          },
-          {
-            value: 'collapse',
-            label: 'Collapse',
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: 'resource',
-    label: 'Resource',
-    children: [
-      {
-        value: 'axure',
-        label: 'Axure Components',
-      },
-      {
-        value: 'sketch',
-        label: 'Sketch Templates',
-      },
-      {
-        value: 'docs',
-        label: 'Design Documentation',
-      },
-    ],
-  },
+    value: '2',
+    label: '第2学期'
+  }
 ]
-
-
 
 interface CalendarEvent {
   id: string
@@ -328,43 +78,70 @@ const selectedWeekRange = computed(() => {
   return [monday, sunday]
 })
 
+// 使用 api.index 中的 coursedata 方法获取数据
 async function fetchCalendarEvents() {
   try {
-    const courses = await fetchCourseData(currentDate.value)
+    // 从 api.index 获取课程数据，传入当前日期和选中的课表类型
+    const courses = await coursedata(currentDate.value, selectedScheduleType.value)
+    
+    if (!courses || courses.length === 0) {
+      console.log('没有找到课程数据，或返回了空数组')
+      return []
+    }
+    
+    console.log('获取到的课程数据:', courses)
+    
     const events: CalendarEvent[] = courses.map((course: any) => {
+      // 获取当前周的开始日期（周一）
       const weekStart = new Date(selectedWeekRange.value[0])
+      // 根据课程的星期几（0-6）设置具体日期
       const courseDate = new Date(weekStart)
-      courseDate.setDate(weekStart.getDate() + course.day)
-
-      const startDateTime = `${courseDate.toISOString().split('T')[0]}T${course.startTime}:00`
-      const endDateTime = `${courseDate.toISOString().split('T')[0]}T${course.endTime}:00`
-
-      let backgroundColor = '#409eff'
+      courseDate.setDate(weekStart.getDate() + course.day) // course.day 应该是 0-6
+      
+      // 格式化日期和时间为 ISO 格式的日期时间字符串
+      const startDateTime = `${courseDate.toISOString().split('T')[0]}T${course.startTime}`
+      const endDateTime = `${courseDate.toISOString().split('T')[0]}T${course.endTime}`
+      
+      // 根据课程类型设置不同背景色
+      let backgroundColor = '#409eff' // 默认蓝色
       let borderColor = '#409eff'
-      if (course.type === 'lab') {
-        backgroundColor = '#67c23a'
-        borderColor = '#67c23a'
-      } else if (course.type === 'seminar') {
-        backgroundColor = '#e6a23c'
-        borderColor = '#e6a23c'
-      } else if (course.type === 'exam') {
-        backgroundColor = '#f56c6c'
-        borderColor = '#f56c6c'
+      
+      switch(course.type) {
+        case 'lab':
+          backgroundColor = '#67c23a' // 绿色
+          borderColor = '#67c23a'
+          break
+        case 'seminar':
+          backgroundColor = '#e6a23c' // 橙色
+          borderColor = '#e6a23c'
+          break
+        case 'exam':
+          backgroundColor = '#f56c6c' // 红色
+          borderColor = '#f56c6c'
+          break
+        // 可以添加更多课程类型的颜色
       }
-
+      
+      // 返回格式化后的日历事件对象
       return {
         id: course.id.toString(),
-        title: `${course.name}`,
+        title: course.name,
         start: startDateTime,
         end: endDateTime,
         backgroundColor,
         borderColor,
-        extendedProps: { location: course.location, type: course.type }
+        extendedProps: { 
+          location: course.location || '未指定地点',
+          type: course.type || 'lecture'
+        }
       }
     })
+    
     return events
   } catch (error) {
     console.error('获取日历事件失败:', error)
+    // 当捕获到错误时，显示给用户一个友好的提示
+    ElMessage.error('获取课表数据失败，请稍后重试')
     return []
   }
 }
@@ -422,11 +199,31 @@ const calendarOptions = reactive({
 })
 
 async function updateCalendarEvents() {
-  const events = await fetchCalendarEvents()
-  const api = calendarRef.value?.getApi()
-  if (!api) return
-  api.removeAllEvents()
-  events.forEach(event => api.addEvent(event))
+  // 添加加载状态
+  const loading = ElLoading.service({
+    lock: true,
+    text: '加载课表中...',
+    background: 'rgba(255, 255, 255, 0.7)'
+  })
+  
+  try {
+    const events = await fetchCalendarEvents()
+    const api = calendarRef.value?.getApi()
+    if (!api) return
+    api.removeAllEvents()
+    events.forEach(event => api.addEvent(event))
+    
+    // 如果没有事件，显示提示
+    if (events.length === 0) {
+      ElMessage.info('当前没有课程安排')
+    }
+  } catch (error) {
+    console.error('更新日历事件失败:', error)
+    ElMessage.error('加载课表失败')
+  } finally {
+    // 无论成功失败都关闭加载状态
+    loading.close()
+  }
 }
 
 // 简化版的自定义渲染时间轴标签函数 - 修复节次显示问题
