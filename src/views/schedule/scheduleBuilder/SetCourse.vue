@@ -207,7 +207,7 @@ export default {
 
 <style scoped>
 .setCourseBody {
-  height: 360px;
+  height: 500px;
   display: flex;
   margin:10px 0px 0px 0px;
   padding: 10px;
@@ -241,7 +241,7 @@ export default {
 
 .courseListBorder {
   min-height: 200px;
-  max-height: 260px;
+  height: 395px;
   margin: 10px 10px 0px 10px;
   border: solid 1px #dcdfe6;
   border-radius: 8px;

@@ -4,7 +4,7 @@
     <el-tabs class="settingTab" v-model="currentTab" stretch type="border-card">
       <el-tab-pane label="作息设置" name="scheduleSetting">
         <div class="settingMenu">
-          <el-scrollbar height="345px" style="padding-right:10px;">
+          <el-scrollbar height="345px" style="padding-right: 10px">
             <el-form label-position="left" label-width="auto">
               <div class="formItemTitle">
                 <el-text>课程设置</el-text>
@@ -190,239 +190,21 @@
           <template #default="scope">
             <span>第{{ scope.row.period }}节</span>
             <span>{{
-              `(${dateFormate(scope.row.timeRange[0])}-${dateFormate(
-                scope.row.timeRange[1]
-              )})`
+              `(${scope.row.timeRange[0]}-${scope.row.timeRange[1]})`
             }}</span>
           </template>
         </el-table-column>
 
-        <el-table-column label="星期一" prop="MonData">
+        <el-table-column v-for="column of tableHeader" :label="column.name">
           <template #default="scope">
             <el-link
               class="cellLink"
               type="primary"
-              v-show="
-                scheduleConditions.typeList.MonData[scope.row.period - 1]
-                  .isHover &&
-                !scheduleConditions.typeList.MonData[scope.row.period - 1]
-                  .isEdit
-              "
               @click="HandleEditLinkClick(scope)"
               >修改</el-link
             >
             <el-select
               class="cellSelect"
-              v-model="
-                scheduleConditions.typeList.MonData[scope.row.period - 1].type
-              "
-              v-show="
-                scheduleConditions.typeList.MonData[scope.row.period - 1].isEdit
-              "
-              size="small"
-              ref="currentCellRef"
-              @change="HandleCellSelectChange(scope)"
-              @blur="HandleCellSelectBlur(scope)"
-            >
-              <el-option label="正课" :value="1" />
-              <el-option label="补课" :value="2" />
-              <el-option label="早自习" :value="3" />
-              <el-option label="晚自习" :value="4" />
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column label="星期二" prop="TueData">
-          <template #default="scope">
-            <el-link
-              class="cellLink"
-              type="primary"
-              v-show="
-                scheduleConditions.typeList.TueData[scope.row.period - 1]
-                  .isHover &&
-                !scheduleConditions.typeList.TueData[scope.row.period - 1]
-                  .isEdit
-              "
-              @click="HandleEditLinkClick(scope)"
-              >修改</el-link
-            >
-            <el-select
-              class="cellSelect"
-              v-model="
-                scheduleConditions.typeList.TueData[scope.row.period - 1].type
-              "
-              v-show="
-                scheduleConditions.typeList.TueData[scope.row.period - 1].isEdit
-              "
-              size="small"
-              ref="currentCellRef"
-              @change="HandleCellSelectChange(scope)"
-              @blur="HandleCellSelectBlur(scope)"
-            >
-              <el-option label="正课" :value="1" />
-              <el-option label="补课" :value="2" />
-              <el-option label="早自习" :value="3" />
-              <el-option label="晚自习" :value="4" />
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column label="星期三" prop="WedData">
-          <template #default="scope">
-            <el-link
-              class="cellLink"
-              type="primary"
-              v-show="
-                scheduleConditions.typeList.WedData[scope.row.period - 1]
-                  .isHover &&
-                !scheduleConditions.typeList.WedData[scope.row.period - 1]
-                  .isEdit
-              "
-              @click="HandleEditLinkClick(scope)"
-              >修改</el-link
-            >
-            <el-select
-              class="cellSelect"
-              v-model="
-                scheduleConditions.typeList.WedData[scope.row.period - 1].type
-              "
-              v-show="
-                scheduleConditions.typeList.WedData[scope.row.period - 1].isEdit
-              "
-              size="small"
-              ref="currentCellRef"
-              @change="HandleCellSelectChange(scope)"
-              @blur="HandleCellSelectBlur(scope)"
-            >
-              <el-option label="正课" :value="1" />
-              <el-option label="补课" :value="2" />
-              <el-option label="早自习" :value="3" />
-              <el-option label="晚自习" :value="4" />
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column label="星期四" prop="ThuData">
-          <template #default="scope">
-            <el-link
-              class="cellLink"
-              type="primary"
-              v-show="
-                scheduleConditions.typeList.ThuData[scope.row.period - 1]
-                  .isHover &&
-                !scheduleConditions.typeList.ThuData[scope.row.period - 1]
-                  .isEdit
-              "
-              @click="HandleEditLinkClick(scope)"
-              >修改</el-link
-            >
-            <el-select
-              class="cellSelect"
-              v-model="
-                scheduleConditions.typeList.ThuData[scope.row.period - 1].type
-              "
-              v-show="
-                scheduleConditions.typeList.ThuData[scope.row.period - 1].isEdit
-              "
-              size="small"
-              ref="currentCellRef"
-              @change="HandleCellSelectChange(scope)"
-              @blur="HandleCellSelectBlur(scope)"
-            >
-              <el-option label="正课" :value="1" />
-              <el-option label="补课" :value="2" />
-              <el-option label="早自习" :value="3" />
-              <el-option label="晚自习" :value="4" />
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column label="星期五" prop="FriData">
-          <template #default="scope">
-            <el-link
-              class="cellLink"
-              type="primary"
-              v-show="
-                scheduleConditions.typeList.FriData[scope.row.period - 1]
-                  .isHover &&
-                !scheduleConditions.typeList.FriData[scope.row.period - 1]
-                  .isEdit
-              "
-              @click="HandleEditLinkClick(scope)"
-              >修改</el-link
-            >
-            <el-select
-              class="cellSelect"
-              v-model="
-                scheduleConditions.typeList.FriData[scope.row.period - 1].type
-              "
-              v-show="
-                scheduleConditions.typeList.FriData[scope.row.period - 1].isEdit
-              "
-              size="small"
-              ref="currentCellRef"
-              @change="HandleCellSelectChange(scope)"
-              @blur="HandleCellSelectBlur(scope)"
-            >
-              <el-option label="正课" :value="1" />
-              <el-option label="补课" :value="2" />
-              <el-option label="早自习" :value="3" />
-              <el-option label="晚自习" :value="4" />
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column label="星期六" prop="SatData">
-          <template #default="scope">
-            <el-link
-              class="cellLink"
-              type="primary"
-              v-show="
-                scheduleConditions.typeList.SatData[scope.row.period - 1]
-                  .isHover &&
-                !scheduleConditions.typeList.SatData[scope.row.period - 1]
-                  .isEdit
-              "
-              @click="HandleEditLinkClick(scope)"
-              >修改</el-link
-            >
-            <el-select
-              class="cellSelect"
-              v-model="
-                scheduleConditions.typeList.SatData[scope.row.period - 1].type
-              "
-              v-show="
-                scheduleConditions.typeList.SatData[scope.row.period - 1].isEdit
-              "
-              size="small"
-              ref="currentCellRef"
-              @change="HandleCellSelectChange(scope)"
-              @blur="HandleCellSelectBlur(scope)"
-            >
-              <el-option label="正课" :value="1" />
-              <el-option label="补课" :value="2" />
-              <el-option label="早自习" :value="3" />
-              <el-option label="晚自习" :value="4" />
-            </el-select>
-          </template>
-        </el-table-column>
-        <el-table-column label="星期日" prop="SunData">
-          <template #default="scope">
-            <el-link
-              class="cellLink"
-              type="primary"
-              v-show="
-                scheduleConditions.typeList.SunData[scope.row.period - 1]
-                  .isHover &&
-                !scheduleConditions.typeList.SunData[scope.row.period - 1]
-                  .isEdit
-              "
-              @click="HandleEditLinkClick(scope)"
-              >修改</el-link
-            >
-            <el-select
-              class="cellSelect"
-              v-model="
-                scheduleConditions.typeList.SunData[scope.row.period - 1].type
-              "
-              v-show="
-                scheduleConditions.typeList.SunData[scope.row.period - 1].isEdit
-              "
               size="small"
               ref="currentCellRef"
               @change="HandleCellSelectChange(scope)"
@@ -437,7 +219,6 @@
         </el-table-column>
       </el-table>
     </div>
-    
   </div>
 </template>
 
@@ -547,554 +328,294 @@ export default {
           ],
         },
       ],
+    });
 
-      typeList: {
-        MonData: [
+    const tableHeader = [
+      { name: "星期一", prop: "MonData" },
+      { name: "星期二", prop: "TueData" },
+      { name: "星期三", prop: "WedData" },
+      { name: "星期四", prop: "ThuData" },
+      { name: "星期五", prop: "FriData" },
+      { name: "星期六", prop: "SatData" },
+      { name: "星期日", prop: "SunData" },
+    ];
+
+    const scheduleData = ref([
+      {
+        period: 1,
+        dayPeriod: "上午",
+        timeRange: ["8:10", "9:35"],
+        cellList: [
           {
-            period: 1,
-            type: 3,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 2,
             type: 1,
             isHover: false,
             isEdit: false,
           },
           {
-            period: 3,
             type: 1,
             isHover: false,
             isEdit: false,
           },
           {
-            period: 4,
             type: 1,
             isHover: false,
             isEdit: false,
           },
           {
-            period: 5,
             type: 1,
             isHover: false,
             isEdit: false,
           },
           {
-            period: 6,
             type: 1,
             isHover: false,
             isEdit: false,
           },
           {
-            period: 7,
             type: 1,
             isHover: false,
             isEdit: false,
           },
           {
-            period: 8,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 8,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-        ],
-        TueData: [
-          {
-            period: 1,
-            type: 3,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 2,
             type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 3,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 4,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 5,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 6,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 7,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 8,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-        ],
-        WedData: [
-          {
-            period: 1,
-            type: 3,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 2,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 3,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 4,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 5,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 6,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 7,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 8,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-        ],
-        ThuData: [
-          {
-            period: 1,
-            type: 3,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 2,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 3,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 4,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 5,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 6,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 7,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 8,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-        ],
-        FriData: [
-          {
-            period: 1,
-            type: 3,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 2,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 3,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 4,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 5,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 6,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 7,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 8,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-        ],
-        SatData: [
-          {
-            period: 1,
-            type: 3,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 2,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 3,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 4,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 5,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 6,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 7,
-            type: 4,
-          },
-          {
-            period: 8,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-        ],
-        SunData: [
-          {
-            period: 1,
-            type: 3,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 2,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 3,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 4,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 5,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 6,
-            type: 1,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 7,
-            type: 4,
-            isHover: false,
-            isEdit: false,
-          },
-          {
-            period: 8,
-            type: 4,
             isHover: false,
             isEdit: false,
           },
         ],
       },
-    });
+      {
+        period: 2,
+        dayPeriod: "上午",
+        timeRange: ["8:10", "9:35"],
+        cellList: [
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+        ],
+      },
+    ]);
 
     //type  1:正课  2:补课  3:早自习  4:晚自习
-    const scheduleData = computed(() => {
-      let res = [];
-      for (let i = 1; i <= scheduleConditions.morningSelfStudyPeriods; i++) {
-        res.push({
-          period: i,
-          dayPeriod: "早自习",
-          timeRange: [HandleDate("8:10"), HandleDate("9:35")],
-          MonData: {
-            type: 3,
-          },
-          TueData: {
-            type: 3,
-          },
-          WedData: {
-            type: 3,
-          },
-          ThuData: {
-            type: 3,
-          },
-          FriData: {
-            type: 3,
-          },
-          SatData: {
-            type: 2,
-          },
-          SunData: {
-            type: 2,
-          },
-        });
-      }
-      for (
-        let i = scheduleConditions.morningSelfStudyPeriods + 1;
-        i <=
-        scheduleConditions.morningPeriods +
-          scheduleConditions.morningSelfStudyPeriods;
-        i++
-      ) {
-        res.push({
-          period: i,
-          dayPeriod: "上午",
-          timeRange: [HandleDate("8:10"), HandleDate("9:35")],
-          MonData: {
-            type: 1,
-          },
-          TueData: {
-            type: 1,
-          },
-          WedData: {
-            type: 1,
-          },
-          ThuData: {
-            type: 1,
-          },
-          FriData: {
-            type: 1,
-          },
-          SatData: {
-            type: 2,
-          },
-          SunData: {
-            type: 2,
-          },
-        });
-      }
-      for (
-        let i =
-          scheduleConditions.morningPeriods +
-          scheduleConditions.morningSelfStudyPeriods +
-          1;
-        i <=
-        scheduleConditions.afternoonPeriods +
-          scheduleConditions.morningPeriods +
-          scheduleConditions.morningSelfStudyPeriods;
-        i++
-      ) {
-        res.push({
-          period: i,
-          dayPeriod: "下午",
-          timeRange: [HandleDate("8:10"), HandleDate("9:35")],
+    // const scheduleData = computed(() => {
+    //   let res = [];
+    //   for (let i = 1; i <= scheduleConditions.morningSelfStudyPeriods; i++) {
+    //     res.push({
+    //       period: i,
+    //       dayPeriod: "早自习",
+    //       timeRange: [HandleDate("8:10"), HandleDate("9:35")],
+    //       MonData: {
+    //         type: 3,
+    //       },
+    //       TueData: {
+    //         type: 3,
+    //       },
+    //       WedData: {
+    //         type: 3,
+    //       },
+    //       ThuData: {
+    //         type: 3,
+    //       },
+    //       FriData: {
+    //         type: 3,
+    //       },
+    //       SatData: {
+    //         type: 2,
+    //       },
+    //       SunData: {
+    //         type: 2,
+    //       },
+    //     });
+    //   }
+    //   for (
+    //     let i = scheduleConditions.morningSelfStudyPeriods + 1;
+    //     i <=
+    //     scheduleConditions.morningPeriods +
+    //       scheduleConditions.morningSelfStudyPeriods;
+    //     i++
+    //   ) {
+    //     res.push({
+    //       period: i,
+    //       dayPeriod: "上午",
+    //       timeRange: [HandleDate("8:10"), HandleDate("9:35")],
+    //       MonData: {
+    //         type: 1,
+    //       },
+    //       TueData: {
+    //         type: 1,
+    //       },
+    //       WedData: {
+    //         type: 1,
+    //       },
+    //       ThuData: {
+    //         type: 1,
+    //       },
+    //       FriData: {
+    //         type: 1,
+    //       },
+    //       SatData: {
+    //         type: 2,
+    //       },
+    //       SunData: {
+    //         type: 2,
+    //       },
+    //     });
+    //   }
+    //   for (
+    //     let i =
+    //       scheduleConditions.morningPeriods +
+    //       scheduleConditions.morningSelfStudyPeriods +
+    //       1;
+    //     i <=
+    //     scheduleConditions.afternoonPeriods +
+    //       scheduleConditions.morningPeriods +
+    //       scheduleConditions.morningSelfStudyPeriods;
+    //     i++
+    //   ) {
+    //     res.push({
+    //       period: i,
+    //       dayPeriod: "下午",
+    //       timeRange: [HandleDate("8:10"), HandleDate("9:35")],
 
-          MonData: {
-            type: 1,
-          },
-          TueData: {
-            type: 1,
-          },
-          WedData: {
-            type: 1,
-          },
-          ThuData: {
-            type: 1,
-          },
-          FriData: {
-            type: 1,
-          },
-          SatData: {
-            type: 2,
-          },
-          SunData: {
-            type: 2,
-          },
-        });
-      }
+    //       MonData: {
+    //         type: 1,
+    //       },
+    //       TueData: {
+    //         type: 1,
+    //       },
+    //       WedData: {
+    //         type: 1,
+    //       },
+    //       ThuData: {
+    //         type: 1,
+    //       },
+    //       FriData: {
+    //         type: 1,
+    //       },
+    //       SatData: {
+    //         type: 2,
+    //       },
+    //       SunData: {
+    //         type: 2,
+    //       },
+    //     });
+    //   }
 
-      for (
-        let i =
-          scheduleConditions.morningPeriods +
-          scheduleConditions.afternoonPeriods +
-          scheduleConditions.morningSelfStudyPeriods +
-          1;
-        i <=
-        scheduleConditions.afternoonPeriods +
-          scheduleConditions.morningPeriods +
-          scheduleConditions.morningSelfStudyPeriods +
-          scheduleConditions.eveningPeriods;
-        i++
-      ) {
-        res.push({
-          period: i,
-          dayPeriod: "晚上",
-          timeRange: [HandleDate("8:10"), HandleDate("9:35")],
-          MonData: {
-            type: 2,
-          },
-          TueData: {
-            type: 2,
-          },
-          WedData: {
-            type: 2,
-          },
-          ThuData: {
-            type: 2,
-          },
-          FriData: {
-            type: 2,
-          },
-          SatData: {
-            type: 2,
-          },
-          SunData: {
-            type: 2,
-          },
-        });
-      }
-      for (
-        let i =
-          scheduleConditions.morningPeriods +
-          scheduleConditions.afternoonPeriods +
-          scheduleConditions.morningSelfStudyPeriods +
-          scheduleConditions.eveningPeriods +
-          1;
-        i <=
-        scheduleConditions.afternoonPeriods +
-          scheduleConditions.morningPeriods +
-          scheduleConditions.eveningPeriods +
-          scheduleConditions.morningSelfStudyPeriods +
-          scheduleConditions.eveningSelfStudyPeriods;
-        i++
-      ) {
-        res.push({
-          period: i,
-          dayPeriod: "晚自习",
-          timeRange: [HandleDate("8:10"), HandleDate("9:35")],
-          MonData: {
-            type: 4,
-          },
-          TueData: {
-            type: 4,
-          },
-          WedData: {
-            type: 4,
-          },
-          ThuData: {
-            type: 4,
-          },
-          FriData: {
-            type: 4,
-          },
-          SatData: {
-            type: 4,
-          },
-          SunData: {
-            type: 4,
-          },
-        });
-      }
-      return setListRowspan(res);
-    });
+    //   for (
+    //     let i =
+    //       scheduleConditions.morningPeriods +
+    //       scheduleConditions.afternoonPeriods +
+    //       scheduleConditions.morningSelfStudyPeriods +
+    //       1;
+    //     i <=
+    //     scheduleConditions.afternoonPeriods +
+    //       scheduleConditions.morningPeriods +
+    //       scheduleConditions.morningSelfStudyPeriods +
+    //       scheduleConditions.eveningPeriods;
+    //     i++
+    //   ) {
+    //     res.push({
+    //       period: i,
+    //       dayPeriod: "晚上",
+    //       timeRange: [HandleDate("8:10"), HandleDate("9:35")],
+    //       MonData: {
+    //         type: 2,
+    //       },
+    //       TueData: {
+    //         type: 2,
+    //       },
+    //       WedData: {
+    //         type: 2,
+    //       },
+    //       ThuData: {
+    //         type: 2,
+    //       },
+    //       FriData: {
+    //         type: 2,
+    //       },
+    //       SatData: {
+    //         type: 2,
+    //       },
+    //       SunData: {
+    //         type: 2,
+    //       },
+    //     });
+    //   }
+    //   for (
+    //     let i =
+    //       scheduleConditions.morningPeriods +
+    //       scheduleConditions.afternoonPeriods +
+    //       scheduleConditions.morningSelfStudyPeriods +
+    //       scheduleConditions.eveningPeriods +
+    //       1;
+    //     i <=
+    //     scheduleConditions.afternoonPeriods +
+    //       scheduleConditions.morningPeriods +
+    //       scheduleConditions.eveningPeriods +
+    //       scheduleConditions.morningSelfStudyPeriods +
+    //       scheduleConditions.eveningSelfStudyPeriods;
+    //     i++
+    //   ) {
+    //     res.push({
+    //       period: i,
+    //       dayPeriod: "晚自习",
+    //       timeRange: [HandleDate("8:10"), HandleDate("9:35")],
+    //       MonData: {
+    //         type: 4,
+    //       },
+    //       TueData: {
+    //         type: 4,
+    //       },
+    //       WedData: {
+    //         type: 4,
+    //       },
+    //       ThuData: {
+    //         type: 4,
+    //       },
+    //       FriData: {
+    //         type: 4,
+    //       },
+    //       SatData: {
+    //         type: 4,
+    //       },
+    //       SunData: {
+    //         type: 4,
+    //       },
+    //     });
+    //   }
+    //   return setListRowspan(res);
+    // });
 
     const disabledSecond = () => {
       return [
@@ -1105,9 +626,9 @@ export default {
       ];
     };
 
-    const currentCellRef = ref();//每个单元格里select的ref
+    const currentCellRef = ref(); //每个单元格里select的ref
 
-    const currentTab = ref("scheduleSetting")
+    const currentTab = ref("scheduleSetting");
 
     const getUpdateTable = () => {
       //获取更新后的表格
@@ -1149,107 +670,32 @@ export default {
       }
     };
 
-    const HandleDate = (date) => {
-      return dayjs(date, "H:m").toDate();
+    const HandleDate = (dateArray) => {
+      return [
+        dayjs(dateArray[0], "H:m").toDate(),
+        dayjs(dateArray[1], "H:m").toDate(),
+      ];
     };
+
     const dateFormate = (datyObj) => {
       return dayjs(datyObj).format("H:m");
     };
 
+    // switch (cell.row.MonData.type) {
+    //         case 1:
+    //           return { background: "#ffa8a8" };
+    //         case 2:
+    //           return { background: "#add8ff" };
+    //         case 3:
+    //           return { background: "#fffb06" };
+    //         case 4:
+    //           return { background: "#0065bd" };
+    //         default:
+    //           return "";
+    //       }
+
     const setCellColor = (cell) => {
-      switch (cell.columnIndex - 1) {
-        case 1:
-          switch (cell.row.MonData.type) {
-            case 1:
-              return { background: "#ffa8a8" };
-            case 2:
-              return { background: "#add8ff" };
-            case 3:
-              return { background: "#fffb06" };
-            case 4:
-              return { background: "#0065bd" };
-            default:
-              return "";
-          }
-        case 2:
-          switch (cell.row.TueData.type) {
-            case 1:
-              return { background: "#ffa8a8" };
-            case 2:
-              return { background: "#add8ff" };
-            case 3:
-              return { background: "#fffb06" };
-            case 4:
-              return { background: "#0065bd" };
-            default:
-              return "";
-          }
-        case 3:
-          switch (cell.row.WedData.type) {
-            case 1:
-              return { background: "#ffa8a8" };
-            case 2:
-              return { background: "#add8ff" };
-            case 3:
-              return { background: "#fffb06" };
-            case 4:
-              return { background: "#0065bd" };
-            default:
-              return "";
-          }
-        case 4:
-          switch (cell.row.ThuData.type) {
-            case 1:
-              return { background: "#ffa8a8" };
-            case 2:
-              return { background: "#add8ff" };
-            case 3:
-              return { background: "#fffb06" };
-            case 4:
-              return { background: "#0065bd" };
-            default:
-              return "";
-          }
-        case 5:
-          switch (cell.row.FriData.type) {
-            case 1:
-              return { background: "#ffa8a8" };
-            case 2:
-              return { background: "#add8ff" };
-            case 3:
-              return { background: "#fffb06" };
-            case 4:
-              return { background: "#0065bd" };
-            default:
-              return "";
-          }
-        case 6:
-          switch (cell.row.SatData.type) {
-            case 1:
-              return { background: "#ffa8a8" };
-            case 2:
-              return { background: "#add8ff" };
-            case 3:
-              return { background: "#fffb06" };
-            case 4:
-              return { background: "#0065bd" };
-            default:
-              return "";
-          }
-        case 7:
-          switch (cell.row.SunData.type) {
-            case 1:
-              return { background: "#ffa8a8" };
-            case 2:
-              return { background: "#add8ff" };
-            case 3:
-              return { background: "#fffb06" };
-            case 4:
-              return { background: "#0065bd" };
-            default:
-              return "";
-          }
-      }
+      console.log(cell);
     };
 
     const HandleEnterHover = (row, column, cell, event) => {
@@ -1304,6 +750,7 @@ export default {
       HandleCellSelectBlur,
       currentCellRef,
       currentTab,
+      tableHeader,
     };
   },
 };
@@ -1312,7 +759,7 @@ export default {
 
 <style scoped>
 .scheduleSettingBody {
-  height: 425px;
+  height: 520px;
   display: flex;
   margin: 10px 0px 0px 0px;
   flex-direction: row;
@@ -1330,7 +777,6 @@ export default {
 
 .settingMenu {
   width: auto;
-
 }
 
 .scheduleTableDiv {
