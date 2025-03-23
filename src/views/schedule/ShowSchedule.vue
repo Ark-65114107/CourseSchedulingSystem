@@ -262,7 +262,7 @@ function customizeTimeGridAxis() {
     if (slotsContainer) {
       const rows = slotsContainer.querySelectorAll('tr')
       // 计算适合的行高 (650px容器 - 头部约50px) / 12节课
-      const rowHeight = Math.floor((650 - 50) / 12)
+      const rowHeight = Math.floor((800 - 50) / 12)
       rows.forEach(row => {
         if (row.querySelector('.fc-timegrid-slot-label-cushion')) {
           row.style.height = `${rowHeight}px`
