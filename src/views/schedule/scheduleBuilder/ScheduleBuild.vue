@@ -108,8 +108,7 @@
 
       <div class="scheduleDiv">
         <el-text class="className">班级名:{{ currentClassName }}</el-text>
-        <div class="navDiv">
-        </div>
+        <div class="navDiv"></div>
         <div class="scheduleTableDiv">
           <!-- <span> </span> -->
           <el-table
@@ -343,34 +342,51 @@ export default {
           }
         } else {
           if (row.period < scheduleData.value.length - ClassPeriodsTemp + 2) {
-            if (
-              row.cellList[column.no - 1].isAvailable &&
-              !row.cellList[column.no - 1].hasCourse &&
-              scheduleData.value[row.period].cellList[column.no - 1]
-                .isAvailable &&
-              !scheduleData.value[row.period].cellList[column.no - 1].hasCourse
-            ) {
+            let counter = 0;
+            for (let p = 0; p < ClassPeriodsTemp; p++) {
+              if (p == 0) {
+                if (
+                  row.cellList[column.no - 1].isAvailable &&
+                  !row.cellList[column.no - 1].hasCourse
+                ) {
+                  counter++;
+                  continue;
+                }
+              } else {
+                if (
+                  scheduleData.value[row.period + p - 1].cellList[column.no - 1]
+                    .isAvailable &&
+                  !scheduleData.value[row.period + p - 1].cellList[
+                    column.no - 1
+                  ].hasCourse
+                ) {
+                  counter++;
+                  continue;
+                }
+              }
+            }
+
+            if (counter == ClassPeriodsTemp) {
               cell.preventDefault(); //使单元格允许drop
               cell.target.classList.add("cellHover");
 
               let currentRow = cell.target.closest("tr");
-              if (currentRow) {
-                if (currentRow.nextElementSibling) {
-                  let nextCell =
-                    scheduleData.value[row.period].cellList[column.no - 1]
-                      .cellIndex;
-                  if (cellIndex == 1) {
-                    currentRow.nextElementSibling.cells[1].classList.add(
-                      "cellHover"
-                    );
-                  } else {
-                    if (nextCell != 0) {
+              for (let p = 1; p < ClassPeriodsTemp; p++) {
+                if (currentRow) {
+                  if (currentRow.nextElementSibling) {
+                    let nextCell =
+                      scheduleData.value[row.period + p - 1].cellList[
+                        column.no - 1
+                      ].cellIndex;
+
+                    if (nextCell) {
                       currentRow.nextElementSibling.cells[
                         nextCell
                       ].classList.add("cellHover");
                     }
                   }
                 }
+                currentRow = currentRow.nextElementSibling;
               }
             } else {
               if (row.cellList[column.no - 1].isAvailable) {
@@ -390,20 +406,26 @@ export default {
       //被拖动的单元格离开
       cell.target.classList.remove("cellHover");
       cell.target.classList.remove("cellHoverProhibited");
-      let currentRow = cell.target.closest("tr");
-      if (currentRow) {
-        if (currentRow.nextElementSibling) {
-          let nextCell =
-            scheduleData.value[row.period].cellList[column.no - 1].cellIndex;
-          if (cellIndex == 1) {
-            currentRow.nextElementSibling.cells[1].classList.remove("cellHover");
-          } else {
-            if (nextCell != 0) {
-              currentRow.nextElementSibling.cells[nextCell].classList.remove(
-                "cellHover"
-              );
+      let ClassPeriodsTemp =
+        CurrentDragCellData.value.cellData.consecutiveClassPeriods;
+
+      if (row.period < scheduleData.value.length - ClassPeriodsTemp + 2) {
+        let currentRow = cell.target.closest("tr");
+        for (let p = 1; p < ClassPeriodsTemp; p++) {
+          if (currentRow) {
+            if (currentRow.nextElementSibling) {
+              let nextCell =
+                scheduleData.value[row.period + p - 1].cellList[column.no - 1]
+                  .cellIndex;
+
+              if (nextCell) {
+                currentRow.nextElementSibling.cells[nextCell].classList.remove(
+                  "cellHover"
+                );
+              }
             }
           }
+          currentRow = currentRow.nextElementSibling;
         }
       }
     };
@@ -493,22 +515,26 @@ export default {
       }
       cell.target.classList.remove("cellHover");
 
-      let currentRow = cell.target.closest("tr");
-      if (currentRow) {
-        if (currentRow.nextElementSibling) {
-          let nextCell =
-            scheduleData.value[row.period].cellList[column.no - 1].cellIndex;
-          if (cellIndex == 1) {
-            currentRow.nextElementSibling.cells[1].classList.remove(
-              "cellHover"
-            );
-          } else {
-            if (nextCell != 0 && nextCell) {
-              currentRow.nextElementSibling.cells[nextCell].classList.remove(
-                "cellHover"
-              );
+      let ClassPeriodsTemp =
+        CurrentDragCellData.value.cellData.consecutiveClassPeriods;
+
+      if (row.period < scheduleData.value.length - ClassPeriodsTemp + 2) {
+        let currentRow = cell.target.closest("tr");
+        for (let p = 1; p < ClassPeriodsTemp; p++) {
+          if (currentRow) {
+            if (currentRow.nextElementSibling) {
+              let nextCell =
+                scheduleData.value[row.period + p - 1].cellList[column.no - 1]
+                  .cellIndex;
+
+              if (nextCell) {
+                currentRow.nextElementSibling.cells[nextCell].classList.remove(
+                  "cellHover"
+                );
+              }
             }
           }
+          currentRow = currentRow.nextElementSibling;
         }
       }
     };
