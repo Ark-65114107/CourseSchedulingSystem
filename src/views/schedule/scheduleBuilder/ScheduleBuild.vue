@@ -403,11 +403,7 @@ export default {
             cell.target.classList.add("cellHover"); //如果当前单元格没有课程且可用改变背景
           }
         } else {
-<<<<<<< HEAD
           if (row.period < scheduleStruct.value.length - ClassPeriodsTemp + 2) {
-=======
-          if (row.period < scheduleData.value.length - ClassPeriodsTemp + 2) {
->>>>>>> 2f1cac9d47c764dbb75441b48b76e86085491ac9
             let counter = 0;
             for (let p = 0; p < ClassPeriodsTemp; p++) {
               if (p == 0) {
@@ -420,16 +416,10 @@ export default {
                 }
               } else {
                 if (
-<<<<<<< HEAD
                   scheduleStruct.value[row.period + p - 1].cellList[
                     column.no - 1
                   ].isAvailable &&
                   !scheduleStruct.value[row.period + p - 1].cellList[
-=======
-                  scheduleData.value[row.period + p - 1].cellList[column.no - 1]
-                    .isAvailable &&
-                  !scheduleData.value[row.period + p - 1].cellList[
->>>>>>> 2f1cac9d47c764dbb75441b48b76e86085491ac9
                     column.no - 1
                   ].hasCourse
                 ) {
@@ -448,11 +438,7 @@ export default {
                 if (currentRow) {
                   if (currentRow.nextElementSibling) {
                     let nextCell =
-<<<<<<< HEAD
                       scheduleStruct.value[row.period + p - 1].cellList[
-=======
-                      scheduleData.value[row.period + p - 1].cellList[
->>>>>>> 2f1cac9d47c764dbb75441b48b76e86085491ac9
                         column.no - 1
                       ].cellIndex;
 
@@ -486,21 +472,13 @@ export default {
       let ClassPeriodsTemp =
         CurrentDragCellData.value.cellData.consecutiveClassPeriods;
 
-<<<<<<< HEAD
       if (row.period < scheduleStruct.value.length - ClassPeriodsTemp + 2) {
-=======
-      if (row.period < scheduleData.value.length - ClassPeriodsTemp + 2) {
->>>>>>> 2f1cac9d47c764dbb75441b48b76e86085491ac9
         let currentRow = cell.target.closest("tr");
         for (let p = 1; p < ClassPeriodsTemp; p++) {
           if (currentRow) {
             if (currentRow.nextElementSibling) {
               let nextCell =
-<<<<<<< HEAD
                 scheduleStruct.value[row.period + p - 1].cellList[column.no - 1]
-=======
-                scheduleData.value[row.period + p - 1].cellList[column.no - 1]
->>>>>>> 2f1cac9d47c764dbb75441b48b76e86085491ac9
                   .cellIndex;
 
               if (nextCell) {
@@ -661,11 +639,7 @@ export default {
       let ClassPeriodsTemp =
         CurrentDragCellData.value.cellData.consecutiveClassPeriods;
 
-<<<<<<< HEAD
       if (row.period < scheduleStruct.value.length - ClassPeriodsTemp + 2) {
-=======
-      if (row.period < scheduleData.value.length - ClassPeriodsTemp + 2) {
->>>>>>> 2f1cac9d47c764dbb75441b48b76e86085491ac9
         let currentRow = cell.target.closest("tr");
         for (let p = 1; p < ClassPeriodsTemp; p++) {
           if (currentRow) {
