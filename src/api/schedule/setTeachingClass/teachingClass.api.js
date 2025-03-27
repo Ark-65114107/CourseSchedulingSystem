@@ -1,7 +1,6 @@
 import request from "@/utils/request"
 
-//获取指定课程的所有教学班数据 参数:任务id,课程id
-export const getListTeachingClassApi = (taskId,courseId)=>{
+export const getListTeachingClassApi = (taskId,courseId,)=>{
     return request({
         url:"/task/getListTeachingClassByCourse",
         method:"get",
@@ -21,6 +20,19 @@ export const getSingleTeachingClassApi = (taskId,teachingClassId)=>{
         params:{
             taskId,
             teachingClassId
+        },
+    }).catch(()=>{})
+}
+
+export const updateTeachingClassApi = (taskId,teachingClassId,teachingClass)=>{
+    return request({
+        url:"/task/updateTeachingClass",
+        method:"post",
+        isAbort:true,
+        data:{
+            taskId,
+            teachingClassId,
+            teachingClass
         },
     }).catch(()=>{})
 }
