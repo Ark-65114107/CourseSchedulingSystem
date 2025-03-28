@@ -30,11 +30,11 @@
             >
               <template #default="{ node, data }">
                 <div class="treeNode">
-                  <el-text v-if="data.select" style="font-weight: bold">{{ node.label }}</el-text>
+                  <el-text v-if="data.select" style="font-weight: bold">{{
+                    node.label
+                  }}</el-text>
                   <el-text v-else>{{ node.label }}</el-text>
-                  <el-text v-if="data.select"
-                    >({{ data.courseNum }})</el-text
-                  >
+                  <el-text v-if="data.select">({{ data.courseNum }})</el-text>
                 </div>
               </template>
             </el-tree>
@@ -105,7 +105,7 @@
                   {{ tc.courseName }}
                 </span>
                 <span class="teachingClassCellTextSpan">{{
-                  tc.teacherName
+                  tc.teachersName
                 }}</span>
                 <span class="teachingClassCellTextSpan">{{
                   `(${tc.finishHour}/${tc.totalHour})`
@@ -128,7 +128,6 @@
             :key="updateKey"
             :border="true"
             max-height="400px"
-            :span-method="tableSpan"
             :cell-style="setCellColor"
             v-loading="isTableLoading"
             fit
@@ -148,24 +147,41 @@
             >
               <template #default="scope">
                 <div
-                  class="cellDiv"
-                  :draggable="scope.row.cellList[scope.column.no - 1].hasCourse"
+                  class="cellContainer"
                   @drop="(cell) => HandleCellDrop(cell, scope)"
-                  @dragstart="(cell) => HandleCellDragStart(cell, scope)"
-                  @dragend="(cell) => HandleCellDragEnd(cell, scope)"
                   @dragover="(cell) => HandleCellDragOver(cell, scope)"
                   @dragleave="(cell) => HandleCellDragLeave(cell, scope)"
                 >
-                  <span
-                    class="cellText"
+                  <div
+                    class="cellDiv"
+                    v-for="course of scope.row.cellList[scope.column.no - 1]
+                      .courseList"
                     v-show="scope.row.cellList[scope.column.no - 1].hasCourse"
+                    :draggable="true"
+                    @dragstart="
+                      (cell) => HandleCellDragStart(cell, scope, course)
+                    "
+                    @dragend="(cell) => HandleCellDragEnd(cell, scope, course)"
+                    @dragover="
+                      (cell) => HandleTeachingClassDragOver(cell, scope, course)
+                    "
+                    @dragleave="
+                      (cell) => HandleTeachingClassLeave(cell, scope, course)
+                    "
+                    @drop="
+                      (cell) => HandleTeachingClassDrop(cell, scope, course)
+                    "
                   >
-                    {{ scope.row.cellList[scope.column.no - 1].courseName
-                    }}<br />
-                    {{ scope.row.cellList[scope.column.no - 1].teacherName }}
-                    <br />
-                    {{ scope.row.cellList[scope.column.no - 1].weeks }}
-                  </span>
+                    <span
+                      class="cellText"
+                      v-show="scope.row.cellList[scope.column.no - 1].hasCourse"
+                    >
+                      {{ course.courseName }}<br />
+                      {{ course.teacherName }}
+                      <br />
+                      {{ course.weeks }}
+                    </span>
+                  </div>
                 </div>
               </template>
             </el-table-column>
@@ -203,48 +219,7 @@ export default {
 
     const currentClassId = ref("");
 
-    const classTree = ref([
-      {
-        id: 1,
-        label: "南浔校区",
-        children: [
-          {
-            id: "wefsfgrdgr",
-            label: "计算机科学与技术学院",
-            children: [
-              {
-                id: 2,
-                label: "软件工程",
-                children: [
-                  {
-                    id: 3,
-                    label: "2023级",
-                    children: [
-                      {
-                        id: "rgzb23",
-                        label: "23软件工程中本一体化",
-                        select: true,
-                      },
-                    ],
-                  },
-                  {
-                    id: 4,
-                    label: "2024级",
-                    children: [
-                      {
-                        id: "rgzb24",
-                        label: "24软件工程中本一体化",
-                        select: true,
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ]); //班级tree的数据
+    const classTree = ref([]); //班级tree的数据
 
     const firstClassId = ref("");
 
@@ -265,10 +240,456 @@ export default {
       { name: "星期六", prop: "SatData" },
       { name: "星期日", prop: "SunData" },
     ];
-    const scheduleStruct = ref([]);
+    const scheduleStruct = ref([
+      {
+        period: 1,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            courseList: [],
+          },
+        ],
+      },
+      {
+        period: 2,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            courseList: [],
+          },
+        ],
+      },
+      {
+        period: 3,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            courseList: [],
+          },
+        ],
+      },
+      {
+        period: 4,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            courseList: [],
+          },
+        ],
+      },
+      {
+        period: 5,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            courseList: [],
+          },
+        ],
+      },
+      {
+        period: 6,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            courseList: [],
+          },
+        ],
+      },
+      {
+        period: 7,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            courseList: [],
+          },
+        ],
+      },
+      {
+        period: 8,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            courseList: [],
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            courseList: [],
+          },
+        ],
+      },
+    ]);
     const scheduleStructTemp = ref([]);
 
-    const scheduleData = ref([]);
+    const scheduleData = ref([
+      {
+        cellId: "c1",
+        teachingClassId: "tc1",
+        teachingClassName: "高等数学（一）",
+        teacherList: [
+          {
+            teacherId: "t1",
+            teacherName: "郑秀嫦",
+          },
+          {
+            teacherId: "t2",
+            teacherName: "宋浩",
+          },
+        ],
+        courseWeeks: [
+          {
+            courseStartWeek: 3,
+            courseEndWeek: 10,
+          },
+          {
+            courseStartWeek: 11,
+            courseEndWeek: 18,
+          },
+        ],
+        period: 1,
+        cellIndex: 1,
+        consecutiveClassPeriods: 2,
+      },
+      {
+        cellId: "c2",
+        teachingClassId: "tc2",
+        teachingClassName: "C语言程序基础",
+        teacherList: [
+          {
+            teacherId: "whx",
+            teacherName: "王红霞",
+          },
+        ],
+        courseWeeks: [
+          {
+            courseStartWeek: 3,
+            courseEndWeek: 10,
+          },
+          {
+            courseStartWeek: 11,
+            courseEndWeek: 18,
+          },
+        ],
+        period: 2,
+        cellIndex: 2,
+        consecutiveClassPeriods: 1,
+      },
+      {
+        cellId: "c3",
+        teachingClassId: "tc3",
+        teachingClassName: "Java程序设计",
+        teacherList: [
+          {
+            teacherId: "hma",
+            teacherName: "黑马程序员",
+          },
+        ],
+        courseWeeks: [
+          {
+            courseStartWeek: 3,
+            courseEndWeek: 10,
+          },
+          {
+            courseStartWeek: 11,
+            courseEndWeek: 18,
+          },
+        ],
+        period: 1,
+        cellIndex: 3,
+        consecutiveClassPeriods: 4,
+      },
+      {
+        cellId: "c4",
+        teachingClassId: "tc4",
+        teachingClassName: "Unity3D游戏开发",
+        teacherList: [
+          {
+            teacherId: "ltm",
+            teacherName: "刘铁猛",
+          },
+        ],
+        courseWeeks: [
+          {
+            courseStartWeek: 4,
+            courseEndWeek: 12,
+          },
+          {
+            courseStartWeek: 13,
+            courseEndWeek: 18,
+          },
+        ],
+        period: 1,
+        cellIndex: 4,
+        consecutiveClassPeriods: 1,
+      },
+    ]);
 
     const teachingClassList = ref([
       // {
@@ -382,253 +803,10 @@ export default {
       treeRef.value.filter(val);
     });
 
-    const setCellColor = ({ row, column, rowIndex, columnIndex }) => {
-      //根据单元格状态改变背景
-      if (columnIndex > 0 && columnIndex < 8) {
-        if (row.cellList[columnIndex - 1].isAvailable) {
-          return { padding: "0px", height: "40px", width: "100px" };
-        } else {
-          return {
-            background: "#DCDFE6",
-            padding: "0px",
-            height: "40px",
-            width: "100px",
-          };
-        }
-      }
-    };
+    //<--------------------------------下面是教学班拖拽处理---------------------------------->
 
-    const HandleCellDragOver = (cell, { row, column, cellIndex }) => {
-      //被拖动的单元格经过
-      if (CurrentDragCellData.value.cellData) {
-        if (
-          CurrentDragCellData.value.cellData.cellId !=
-          row.cellList[column.no - 1].cellId
-        ) {
-          let ClassPeriodsTemp =
-            CurrentDragCellData.value.cellData.consecutiveClassPeriods;
-          if (
-            ClassPeriodsTemp ==
-            row.cellList[column.no - 1].consecutiveClassPeriods
-          ) {
-            if (row.cellList[column.no - 1].isAvailable) {
-              cell.preventDefault(); //使单元格允许drop
-              cell.target.classList.add("cellHover"); //如果当前单元格没有课程且可用改变背景
-            }
-          } else {
-            if (
-              row.period <
-              scheduleStruct.value.length - ClassPeriodsTemp + 2
-            ) {
-              let counter = 0;
-              for (let p = 0; p < ClassPeriodsTemp; p++) {
-                if (p == 0) {
-                  if (
-                    row.cellList[column.no - 1].isAvailable &&
-                    !row.cellList[column.no - 1].hasCourse
-                  ) {
-                    counter++;
-                    continue;
-                  }
-                } else {
-                  if (
-                    scheduleStruct.value[row.period + p - 1].cellList[
-                      column.no - 1
-                    ].isAvailable &&
-                    !scheduleStruct.value[row.period + p - 1].cellList[
-                      column.no - 1
-                    ].hasCourse
-                  ) {
-                    counter++;
-                    continue;
-                  }
-                }
-              }
-
-              if (counter == ClassPeriodsTemp) {
-                cell.preventDefault(); //使单元格允许drop
-                cell.target.classList.add("cellHover");
-
-                let currentRow = cell.target.closest("tr");
-                for (let p = 1; p < ClassPeriodsTemp; p++) {
-                  if (currentRow) {
-                    if (currentRow.nextElementSibling) {
-                      let nextCell =
-                        scheduleStruct.value[row.period + p - 1].cellList[
-                          column.no - 1
-                        ].cellIndex;
-
-                      if (nextCell) {
-                        currentRow.nextElementSibling.cells[
-                          nextCell
-                        ].classList.add("cellHover");
-                      }
-                    }
-                  }
-                  currentRow = currentRow.nextElementSibling;
-                }
-              } else {
-                if (row.cellList[column.no - 1].isAvailable) {
-                  cell.target.classList.add("cellHoverProhibited");
-                }
-              }
-            } else {
-              if (row.cellList[column.no - 1].isAvailable) {
-                cell.target.classList.add("cellHoverProhibited");
-              }
-            }
-          }
-        }
-      }
-    };
-
-    const HandleCellDragLeave = (cell, { row, column, cellIndex }) => {
-      //被拖动的单元格离开
-      cell.target.classList.remove("cellHover");
-      cell.target.classList.remove("cellHoverProhibited");
-      let ClassPeriodsTemp =
-        CurrentDragCellData.value.cellData.consecutiveClassPeriods;
-
-      if (row.period < scheduleStruct.value.length - ClassPeriodsTemp + 2) {
-        let currentRow = cell.target.closest("tr");
-        for (let p = 1; p < ClassPeriodsTemp; p++) {
-          if (currentRow) {
-            if (currentRow.nextElementSibling) {
-              let nextCell =
-                scheduleStruct.value[row.period + p - 1].cellList[column.no - 1]
-                  .cellIndex;
-
-              if (currentRow.nextElementSibling.cells[nextCell]) {
-                currentRow.nextElementSibling.cells[nextCell].classList.remove(
-                  "cellHover"
-                );
-              }
-            }
-          }
-          currentRow = currentRow.nextElementSibling;
-        }
-      }
-    };
-
-    const HandleCellDrop = (cell, { row, column, cellIndex }) => {
-      //单元格被放下
-      // //获取被拖动单元格的数据
-      let cellType = CurrentDragCellData.value.cellType;
-      if (cellType === "tableCell") {
-        let periodTemp = CurrentDragCellData.value.period;
-        let columnIndexTemp = CurrentDragCellData.value.columnIndex;
-        let ClassPeriodsTemp =
-          CurrentDragCellData.value.cellData.consecutiveClassPeriods;
-        let cellId = CurrentDragCellData.value.cellData.cellId;
-
-        if (row.period < scheduleStruct.value.length - ClassPeriodsTemp + 2) {
-          let currentRow = cell.target.closest("tr");
-          for (let p = 1; p < ClassPeriodsTemp; p++) {
-            if (currentRow) {
-              if (currentRow.nextElementSibling) {
-                let nextCell =
-                  scheduleStruct.value[row.period + p - 1].cellList[
-                    column.no - 1
-                  ].cellIndex;
-                if (nextCell) {
-                  currentRow.nextElementSibling.cells[
-                    nextCell
-                  ].classList.remove("cellHover");
-                }
-              }
-            }
-            currentRow = currentRow.nextElementSibling;
-          }
-        }
-
-        if (
-          row.cellList[column.no - 1].cellId !=
-          CurrentDragCellData.value.cellData.cellId
-        ) {
-          if (row.cellList[column.no - 1].hasCourse) {
-            //当前单元格有课程，交换数据
-            HandleCellExchange(
-              true,
-              row.cellList[column.no - 1].cellId,
-              CurrentDragCellData.value.cellData.cellId
-            );
-            // scheduleData.value.forEach((tc) => {
-            //   if (tc.cellId == cellId) {
-            //     tc.period = row.period;
-            //     tc.cellIndex = column.no - 1;
-            //   }
-            //   if (tc.cellId == row.cellList[column.no - 1].cellId) {
-            //     tc.period = periodTemp;
-            //     tc.cellIndex = cellIndexTemp;
-            //   }
-            // });
-          } else {
-            //当前单元格没有课程
-            HandleCellMove(
-              cellId,
-              periodTemp,
-              columnIndexTemp,
-              row.period,
-              column.no - 1
-            );
-            // cellClear(periodTemp, columnIndexTemp, false);
-          }
-        }
-      }
-      if (cellType === "targetCell") {
-        let teachingClassIdTemp = CurrentDragCellData.value.cellData.id;
-        let ClassPeriodsTemp =
-          CurrentDragCellData.value.cellData.consecutiveClassPeriods;
-        let cellId = CurrentDragCellData.value.cellData.cellId;
-
-        if (row.period < scheduleStruct.value.length - ClassPeriodsTemp + 2) {
-          let currentRow = cell.target.closest("tr");
-          for (let p = 1; p < ClassPeriodsTemp; p++) {
-            if (currentRow) {
-              if (currentRow.nextElementSibling) {
-                let nextCell =
-                  scheduleStruct.value[row.period + p - 1].cellList[
-                    column.no - 1
-                  ].cellIndex;
-                if (nextCell) {
-                  currentRow.nextElementSibling.cells[
-                    nextCell
-                  ].classList.remove("cellHover");
-                }
-              }
-            }
-            currentRow = currentRow.nextElementSibling;
-          }
-        }
-        if (
-          row.cellList[column.no - 1].cellId !=
-          CurrentDragCellData.value.cellData.cellId
-        ) {
-          if (row.cellList[column.no - 1].hasCourse) {
-            //当前单元格有课程，交换数据
-            HandleCellExchange(
-              false,
-              row.cellList[column.no - 1].cellId,
-              "",
-              CurrentDragCellData.value.cellData
-            );
-          } else {
-            //当前单元格没有课程
-            HandleCellCreate(
-              cellId,
-              teachingClassIdTemp,
-              row.period,
-              column.no - 1,
-              ClassPeriodsTemp
-            );
-            // cellClear(periodTemp, columnIndexTemp, false);
-          }
-        }
-      }
-      cell.target.classList.remove("cellHover");
-    };
-
-    const HandleCellDragStart = (cell, { row, column, cellIndex }) => {
+    //开始拖动
+    const HandleCellDragStart = (cell, { row, column, cellIndex }, course) => {
       // CurrentDragCell.value.consecutiveClassPeriods =
       //   row.cellList[column.no - 1].consecutiveClassPeriods;
       CurrentDragCellData.value.cellType = "tableCell";
@@ -636,38 +814,259 @@ export default {
         scheduleStruct.value[row.period - 1].cellList[column.no - 1];
       CurrentDragCellData.value.period = row.period;
       CurrentDragCellData.value.columnIndex = column.no - 1;
-
+      CurrentDragCellData.value.courseData = course;
       cell.target.classList.add("cellDraging");
     };
 
+    //被拖动的教学班结束拖动
     const HandleCellDragEnd = (cell, { row, column, cellIndex }) => {
       cell.target.classList.remove("cellDraging");
-      let currentRow = cell.target.closest("tr");
-      if (currentRow) {
-        if (currentRow.nextElementSibling) {
-          let nextCell =
-            cellIndex -
-            (scheduleStruct.value.length +
-              1 -
-              currentRow.nextElementSibling.cells.length);
-          if (cellIndex == 1) {
-            currentRow.nextElementSibling.cells[1].classList.remove(
-              "cellHover"
-            );
-          } else {
-            if (nextCell != 0) {
-              currentRow.nextElementSibling.cells[nextCell].classList.remove(
-                "cellHover"
-              );
+      CurrentDragCellData.value = {};
+    };
+
+    //被拖动的教学班经过教学班单元格
+    const HandleTeachingClassDragOver = (
+      cell,
+      { row, column, cellIndex },
+      course
+    ) => {
+      let ClassPeriodsTemp; //连排节次
+
+      if (CurrentDragCellData.value.cellType == "targetCell") {
+        ClassPeriodsTemp =
+          CurrentDragCellData.value.cellData.consecutiveClassPeriods;
+      }
+      if (CurrentDragCellData.value.cellType == "tableCell") {
+        ClassPeriodsTemp =
+          CurrentDragCellData.value.courseData.consecutiveClassPeriods;
+      }
+      //当连排节次相同时改变背景样式
+
+      if (cell.target.className.includes("cellDiv")) {
+        cell.preventDefault(); //使单元格允许drop
+
+        cell.target.classList.add("teachingClassExchangeHover");
+      }
+    };
+
+    //被拖动的教学班离开教学班单元格
+    const HandleTeachingClassLeave = (
+      cell,
+      { row, column, cellIndex },
+      course
+    ) => {
+      cell.target.classList.remove("teachingClassExchangeHover");
+    };
+    //被拖动的教学班被放置在教学班单元格上
+    const HandleTeachingClassDrop = (
+      cell,
+      { row, column, cellIndex },
+      course
+    ) => {
+      HandleCellExchange(
+        false,
+        course.cellId,
+        "",
+        CurrentDragCellData.value.cellData
+      );
+    };
+
+    //<--------------------------------下面是表格单元格拖拽处理---------------------------------->
+
+    //根据单元格状态改变背景
+    const setCellColor = ({ row, column, rowIndex, columnIndex }) => {
+      if (columnIndex > 0 && columnIndex < 8) {
+        if (row.cellList[columnIndex - 1].isAvailable) {
+          return { padding: "0px", height: "100px", width: "200px" };
+        } else {
+          return {
+            background: "#DCDFE6",
+            padding: "0px",
+            height: "100px",
+            width: "200px",
+          };
+        }
+      }
+    };
+
+    //被拖动的教学班经过单元格
+    const HandleCellDragOver = (cell, { row, column, cellIndex }) => {
+      //被拖动的单元格经过
+      console.log(cell.target.className);
+      if (cell.target.className.includes("cellContainer")) {
+        let ClassPeriodsTemp; //连排节次
+        if (CurrentDragCellData.value.cellType == "targetCell") {
+          ClassPeriodsTemp =
+            CurrentDragCellData.value.cellData.consecutiveClassPeriods;
+        }
+        if (CurrentDragCellData.value.cellType == "tableCell") {
+          ClassPeriodsTemp =
+            CurrentDragCellData.value.courseData.consecutiveClassPeriods;
+        }
+
+        if (CurrentDragCellData.value.cellData) {
+          //检查被拖动的单元格是否是自己
+          if (
+            !row.cellList[column.no - 1].courseList.includes(
+              CurrentDragCellData.value.cellData.courseId
+            )
+          ) {
+            if (ClassPeriodsTemp == 1) {
+              if (row.cellList[column.no - 1].isAvailable) {
+                cell.preventDefault(); //使单元格允许drop
+                cell.target.classList.add("cellHover"); //如果当前单元格没有课程且可用改变背景
+              }
+            } else {
+              if (
+                row.period <
+                scheduleStruct.value.length - ClassPeriodsTemp + 2
+              ) {
+                let counter = 0;
+                for (let p = 0; p < ClassPeriodsTemp; p++) {
+                  if (p == 0) {
+                    if (
+                      row.cellList[column.no - 1].isAvailable &&
+                      !row.cellList[column.no - 1].hasCourse
+                    ) {
+                      counter++;
+                      continue;
+                    }
+                  } else {
+                    if (
+                      scheduleStruct.value[row.period + p - 1].cellList[
+                        column.no - 1
+                      ].isAvailable &&
+                      !scheduleStruct.value[row.period + p - 1].cellList[
+                        column.no - 1
+                      ].hasCourse
+                    ) {
+                      counter++;
+                      continue;
+                    }
+                  }
+                }
+
+                if (counter == ClassPeriodsTemp) {
+                  cell.preventDefault(); //使单元格允许drop
+                  cell.target.classList.add("cellHover");
+
+                  //根据连排节次改变下面的单元格样式
+                  let currentRow = cell.target.closest("tr");
+                  for (let p = 1; p < ClassPeriodsTemp; p++) {
+                    if (currentRow) {
+                      if (currentRow.nextElementSibling) {
+                        currentRow.nextElementSibling.cells[
+                          column.no
+                        ].classList.add("cellHover");
+                      }
+                      currentRow = currentRow.nextElementSibling;
+                    }
+                  }
+                } else {
+                  if (row.cellList[column.no - 1].isAvailable) {
+                    cell.target.classList.add("cellHoverProhibited");
+                  }
+                }
+              } else {
+                if (row.cellList[column.no - 1].isAvailable) {
+                  cell.target.classList.add("cellHoverProhibited");
+                }
+              }
             }
           }
         }
       }
-      CurrentDragCellData.value = {};
-      // CurrentDragCell.value = {};
     };
 
-    //<--------------------------------分割线---------------------------------->
+    //被拖动的教学班离开单元格
+    const HandleCellDragLeave = (cell, { row, column, cellIndex }) => {
+      //被拖动的单元格离开
+      cell.target.classList.remove("cellHover");
+      cell.target.classList.remove("cellHoverProhibited");
+      let ClassPeriodsTemp; //连排节次
+      if (CurrentDragCellData.value.cellType == "targetCell") {
+        ClassPeriodsTemp =
+          CurrentDragCellData.value.cellData.consecutiveClassPeriods;
+      }
+      if (CurrentDragCellData.value.cellType == "tableCell") {
+        ClassPeriodsTemp =
+          CurrentDragCellData.value.courseData.consecutiveClassPeriods;
+      }
+
+      //根据连排节次改变下面的单元格样式
+      let currentRow = cell.target.closest("tr");
+      for (let p = 1; p < ClassPeriodsTemp; p++) {
+        if (currentRow) {
+          if (currentRow.nextElementSibling) {
+            currentRow.nextElementSibling.cells[column.no].classList.remove(
+              "cellHover"
+            );
+          }
+          currentRow = currentRow.nextElementSibling;
+        }
+      }
+    };
+
+    //被拖动的教学班被放置在单元格上
+    const HandleCellDrop = (cell, { row, column, cellIndex }) => {
+      //单元格被放下
+      // //获取被拖动单元格的数据
+      let cellType = CurrentDragCellData.value.cellType;
+
+      if (cellType === "tableCell") {
+        let periodTemp = CurrentDragCellData.value.period;
+        let columnIndexTemp = CurrentDragCellData.value.columnIndex;
+        let courseIndexTemp = CurrentDragCellData.value.courseData.courseIndex;
+        let cellId = CurrentDragCellData.value.courseData.cellId;
+        let ClassPeriodsTemp =
+          CurrentDragCellData.value.courseData.consecutiveClassPeriods; //连排节次
+
+        //根据连排节次改变下面的单元格样式
+        let currentRow = cell.target.closest("tr");
+        for (let p = 1; p < ClassPeriodsTemp; p++) {
+          if (currentRow) {
+            if (currentRow.nextElementSibling) {
+              currentRow.nextElementSibling.cells[column.no].classList.remove(
+                "cellHover"
+              );
+            }
+            currentRow = currentRow.nextElementSibling;
+          }
+        }
+        //验证周次是否冲突后添加课程
+        HandleCellMove(
+          cellId,
+          periodTemp,
+          columnIndexTemp,
+          courseIndexTemp,
+          row.period,
+          column.no - 1
+        );
+      }
+      if (cellType === "targetCell") {
+        let teachingClassIdTemp = CurrentDragCellData.value.cellData.id;
+        let ClassPeriodsTemp =
+          CurrentDragCellData.value.cellData.consecutiveClassPeriods;
+        let currentRow = cell.target.closest("tr");
+        for (let p = 1; p < ClassPeriodsTemp; p++) {
+          if (currentRow) {
+            if (currentRow.nextElementSibling) {
+              currentRow.nextElementSibling.cells[column.no].classList.remove(
+                "cellHover"
+              );
+            }
+            currentRow = currentRow.nextElementSibling;
+          }
+        }
+        HandleCellCreate(teachingClassIdTemp, row.period, column.no - 1);
+        // cellClear(periodTemp, columnIndexTemp, false);
+      }
+
+      cell.target.classList.remove("cellHover");
+      cell.target.classList.remove("teachingClassExchangeHover");
+    };
+
+    //<--------------------------------下面是教学班列表拖拽处理---------------------------------->
 
     const HandleTargetCellDragStart = (cell, data) => {
       CurrentDragCellData.value = { cellType: "targetCell", cellData: data };
@@ -680,11 +1079,13 @@ export default {
       CurrentDragCellData.value = {};
       // CurrentDragCell.value = {};
     };
+
     const HandleTargetCellDragOver = (cell) => {
       if (CurrentDragCellData.value.cellData) {
         cell.preventDefault(); //使单元格允许drop
       }
     };
+
     const HandleListDragOver = (cell) => {
       if (CurrentDragCellData.value.cellData) {
         cell.preventDefault(); //使单元格允许drop
@@ -694,8 +1095,7 @@ export default {
     const HandleTargetCellDrop = (cell) => {
       let cellType = CurrentDragCellData.value.cellType;
       if (cellType === "tableCell") {
-        let cellId = CurrentDragCellData.value.cellData.cellId;
-        CurrentDragCellData.value.cellData.teachingClassId;
+        let cellId = CurrentDragCellData.value.courseData.cellId;
         HandleCellDelete(cellId);
       }
       cell.target.classList.remove("cellHover");
@@ -716,71 +1116,59 @@ export default {
       }
     };
 
-    const setListRowspan = (List) => {
-      List.forEach((item) => {
-        for (let i = 0; i < item.cellList.length; i++) {
-          item.cellList[i].rowspan = 1;
-        }
-      });
-      for (let i = 0; i < List.length; i++) {
-        let cellIndexTemp = 1;
-        for (let j = 0; j < List[i].cellList.length; j++) {
-          if (List[i].cellList[j].consecutiveClassPeriods == 1) {
-            List[i].cellList[j].rowspan = 1;
-            List[i].cellList[j].cellIndex = cellIndexTemp;
-            cellIndexTemp++;
-          } else {
-            if (List[i].cellList[j].rowspan != 0) {
-              List[i].cellList[j].rowspan =
-                List[i].cellList[j].consecutiveClassPeriods;
-              List[i].cellList[j].cellIndex = null;
-              cellIndexTemp++;
-            }
-            if (i < List.length - 1) {
-              for (let k = i + 1; k < i + List[i].cellList[j].rowspan; k++) {
-                List[k].cellList[j].rowspan = 0;
-                List[k].cellList[j].consecutiveClassPeriods = 0;
-                List[k].cellList[j].cellIndex = cellIndexTemp;
-              }
-            }
-          }
-          // List[i].rowspan=List[i].consecutiveClassPeriods;
-          // List[j].rowspan--;
-        }
-        // i = i + List[i].rowspan - 1;
-      }
-      return List;
-    };
+    // const setListRowspan = (List) => {
+    //   List.forEach((item) => {
+    //     for (let i = 0; i < item.cellList.length; i++) {
+    //       item.cellList[i].rowspan = 1;
+    //     }
+    //   });
+    //   for (let i = 0; i < List.length; i++) {
+    //     let cellIndexTemp = 1;
+    //     for (let j = 0; j < List[i].cellList.length; j++) {
+    //       if (List[i].cellList[j].consecutiveClassPeriods == 1) {
+    //         List[i].cellList[j].rowspan = 1;
+    //         List[i].cellList[j].cellIndex = cellIndexTemp;
+    //         cellIndexTemp++;
+    //       } else {
+    //         if (List[i].cellList[j].rowspan != 0) {
+    //           List[i].cellList[j].rowspan =
+    //             List[i].cellList[j].consecutiveClassPeriods;
+    //           List[i].cellList[j].cellIndex = null;
+    //           cellIndexTemp++;
+    //         }
+    //         if (i < List.length - 1) {
+    //           for (let k = i + 1; k < i + List[i].cellList[j].rowspan; k++) {
+    //             List[k].cellList[j].rowspan = 0;
+    //             List[k].cellList[j].consecutiveClassPeriods = 0;
+    //             List[k].cellList[j].cellIndex = cellIndexTemp;
+    //           }
+    //         }
+    //       }
+    //       // List[i].rowspan=List[i].consecutiveClassPeriods;
+    //       // List[j].rowspan--;
+    //     }
+    //     // i = i + List[i].rowspan - 1;
+    //   }
+    //   return List;
+    // };
 
     //在连堂课时合并单元格
-    const tableSpan = ({ row, column, rowIndex, columnIndex }) => {
-      if (columnIndex != 0) {
-        if (
-          scheduleStruct.value[rowIndex].cellList[columnIndex - 1].rowspan <= 0
-        ) {
-          return [0, 0];
-        } else {
-          return [
-            scheduleStruct.value[rowIndex].cellList[columnIndex - 1].rowspan,
-            1,
-          ];
-        }
-      } else {
-        return [1, 1];
-      }
-    };
-
-    const cellClear = (period, cellIndex, hasCourse) => {
-      (scheduleStruct.value[period - 1].cellList[cellIndex].cellId = ""),
-        (scheduleStruct.value[period - 1].cellList[cellIndex].hasCourse =
-          hasCourse),
-        (scheduleStruct.value[period - 1].cellList[cellIndex].courseName = ""),
-        (scheduleStruct.value[period - 1].cellList[cellIndex].teacherName = ""),
-        (scheduleStruct.value[period - 1].cellList[
-          cellIndex
-        ].consecutiveClassPeriods = 1);
-      scheduleStruct.value[period - 1].cellList[cellIndex].rowspan = 1;
-    };
+    // const tableSpan = ({ row, column, rowIndex, columnIndex }) => {
+    //   if (columnIndex != 0) {
+    //     if (
+    //       scheduleStruct.value[rowIndex].cellList[columnIndex - 1].rowspan <= 0
+    //     ) {
+    //       return [0, 0];
+    //     } else {
+    //       return [
+    //         scheduleStruct.value[rowIndex].cellList[columnIndex - 1].rowspan,
+    //         1,
+    //       ];
+    //     }
+    //   } else {
+    //     return [1, 1];
+    //   }
+    // };
 
     watch(scheduleStruct, () => {
       console.log("up!");
@@ -790,42 +1178,43 @@ export default {
       scheduleStruct.value = JSON.parse(scheduleStructTemp.value);
       if (scheduleData.value.length > 0) {
         scheduleData.value.forEach((cell) => {
+          console.log(cell);
           if (scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]) {
             if (
               scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]
                 .isAvailable
             ) {
-              let teachersName = "";
+              let teacherName = "";
               cell.teacherList.forEach((teacher) => {
-                teachersName += `#${teacher.teacherName}`;
+                teacherName += `#${teacher.teacherName}`;
+              });
+
+              let weeks = "";
+            
+              cell.courseWeeks.forEach((time) => {
+                weeks += `${time.courseStartWeek}-${time.courseEndWeek}周;`;
               });
               scheduleStruct.value[cell.period - 1].cellList[
                 cell.cellIndex
-              ].cellId = cell.cellId;
-              scheduleStruct.value[cell.period - 1].cellList[
-                cell.cellIndex
-              ].courseName = cell.teachingClassName;
-              scheduleStruct.value[cell.period - 1].cellList[
-                cell.cellIndex
-              ].teacherName = teachersName;
-              scheduleStruct.value[cell.period - 1].cellList[
-                cell.cellIndex
-              ].consecutiveClassPeriods = cell.consecutiveClassPeriods;
-              scheduleStruct.value[cell.period - 1].cellList[
-                cell.cellIndex
-              ].rowspan = cell.consecutiveClassPeriods;
+              ].courseList.push({
+                cellId: cell.cellId,
+                courseName: cell.teachingClassName,
+                teacherName,
+                weeks,
+                consecutiveClassPeriods: cell.consecutiveClassPeriods,
+              });
               scheduleStruct.value[cell.period - 1].cellList[
                 cell.cellIndex
               ].hasCourse = true;
             } else {
               ElMessage.error(
-                `${cell.teachingClassName}  与排课设置冲突! 请修改排课设置后重试！`
+                `${cell.teachingClassName} 与排课设置冲突! 请修改排课设置后重试！`
               );
             }
           }
         });
-        scheduleStruct.value = setListRowspan(scheduleStruct.value);
-        updateKey.value += 1;
+        // scheduleStruct.value = setListRowspan(scheduleStruct.value);
+        // updateKey.value += 1;
       }
     };
 
@@ -861,8 +1250,8 @@ export default {
         .then((res) => {
           if (res) {
             if (res.meta.code == 200) {
-              scheduleStructTemp.value = JSON.stringify(res.data);
-              scheduleStruct.value = setListRowspan(res.data);
+              // scheduleStruct.value = res.data
+              scheduleStructTemp.value = JSON.stringify(scheduleStruct.value);
               isTableLoading.value = false;
               return true;
             }
@@ -874,18 +1263,18 @@ export default {
     };
 
     const getScheduleData = () => {
+      isTableLoading.value = true;
       getScheduleDataApi(taskId, currentClassId.value)
         .then((res) => {
           if (res) {
             if (res.meta.code == 200) {
-              if (1) {
-                scheduleData.value = res.data;
-              }
+              isTableLoading.value = false;
+              // scheduleData.value = res.data;
             }
           }
         })
-        .then(() => {
-          updateScheduleStruct();
+        .then((res) => {
+          updateScheduleStruct(res);
         });
     };
 
@@ -907,16 +1296,18 @@ export default {
       cellId,
       newPeriod,
       newCellIndex,
+      newCourseIndex,
       oldPeriod,
-      oldCellIndex
+      oldCellIndex,
+      oldCourseIndex
     ) => {
       console.log("move!");
       cellMoveApi(
         taskId,
         currentClassId.value,
         cellId,
-        { oldPeriod, oldCellIndex },
-        { newPeriod, newCellIndex }
+        { oldPeriod, oldCellIndex, oldCourseIndex },
+        { newPeriod, newCellIndex, newCourseIndex }
       ).then((res) => {
         if (res) {
           if (res.meta.code === 200) {
@@ -952,22 +1343,14 @@ export default {
       });
     };
 
-    const HandleCellCreate = (
-      cellId,
-      teachingClassId,
-      period,
-      cellIndex,
-      consecutiveClassPeriods
-    ) => {
+    const HandleCellCreate = (teachingClassId, period, cellIndex) => {
       console.log("create!");
       cellCreateApi(
         taskId,
         currentClassId.value,
-        cellId,
         teachingClassId,
         period,
-        cellIndex,
-        consecutiveClassPeriods
+        cellIndex
       ).then((res) => {
         if (res) {
           if (res.meta.code === 200) {
@@ -1015,6 +1398,10 @@ export default {
       HandleTargetCellDragOver,
       HandleListDragOver,
 
+      HandleTeachingClassDragOver,
+      HandleTeachingClassLeave,
+      HandleTeachingClassDrop,
+
       teachingClassList,
 
       HandleTreeNodeClick,
@@ -1027,7 +1414,6 @@ export default {
       totalTeachingClassNum,
 
       HandleAiClick,
-      tableSpan,
       CurrentDragCellData,
       treeKeyword,
       isTreeLoading,
@@ -1160,11 +1546,22 @@ export default {
 }
 
 .cellDiv {
+  width: 100%;
+  height: 100%;
+  background: #ebedf0;
+  border: solid 1px #dcdfe6;
+  z-index: 15;
+}
+
+.cellContainer {
   height: 100%;
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   box-sizing: border-box;
+  z-index: 10;
+  border: solid 1px #dcdfe6;
+
 }
 
 .cell:has(.cellDiv) {
@@ -1178,10 +1575,10 @@ export default {
   font-size: 10px;
   height: 100%;
   width: 100%;
+  margin: 5px;
   line-height: 20px;
-  text-align: center;
-  justify-content: center;
-  align-content: center;
+  text-align: left;
+  align-content: flex-start;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -1203,14 +1600,12 @@ export default {
 .cellHoverProhibited {
   background: #ff4d5f;
 }
+.teachingClassExchangeHover {
+  background: #7dff7b !important;
+}
 
 .cellDraging {
-  height: 40px;
-  width: 115px;
-  display: flex;
-  justify-content: center;
   opacity: 0.4;
-  box-sizing: border-box;
   border: dashed 1px rgb(121.3, 187.1, 255);
 }
 
