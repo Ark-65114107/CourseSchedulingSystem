@@ -26,6 +26,65 @@
             disabled
           ></el-input-number>
         </el-form-item>
+        <div class="courseWeekDiv">
+          <el-form-item
+            label="上课周次："
+            prop="courseWeekHours"
+            style="height: auto"
+          >
+            <div
+              class="courseWeekRow"
+              v-for="weeks of formInput.courseWeekHours"
+            >
+              <el-input-number
+                class="courseWeekInput"
+                v-model="weeks.courseStartWeeks"
+                controls-position="right"
+                :max="weeks.courseEndWeeks - 1"
+                min="1"
+              >
+                <template #prefix>
+                  <span>第</span>
+                </template>
+
+                <template #suffix>
+                  <span>周</span>
+                </template>
+              </el-input-number>
+
+              <el-text>到</el-text>
+
+              <el-input-number
+                class="courseWeekInput"
+                v-model="weeks.courseEndWeeks"
+                controls-position="right"
+                max="25"
+                :min="weeks.courseStartWeeks + 1"
+              >
+                <template #prefix>
+                  <span>第</span>
+                </template>
+                <template #suffix>
+                  <span>周</span>
+                </template>
+              </el-input-number>
+              <el-button
+                class="courseWeekDeleteButton"
+                size="small"
+                type="danger"
+                @click="HandleCourseWeekDelete(weeks)"
+                >删除</el-button
+              >
+            </div>
+            <el-button
+              type="primary"
+              size="small"
+              class="courseWeekInputAddButton"
+              @click="HandleCourseWeekInputAdd"
+              >添加</el-button
+            >
+          </el-form-item>
+        </div>
 
         <el-form-item
           label="合并教学班:"
@@ -88,75 +147,15 @@
           <el-input-number
             max="9999"
             min="0"
-            v-model="teachingClassSize"
+            v-model="formInput.teachingClassSize"
             controls-position="right"
             disabled
           />
         </el-form-item>
 
-        <div class="courseWeekDiv">
-          <el-form-item
-            label="上课周次："
-            prop="courseWeekHours"
-            style="height: auto"
-          >
-            <div
-              class="courseWeekRow"
-              v-for="weeks of formInput.courseWeekHours"
-            >
-              <el-input-number
-                class="courseWeekInput"
-                v-model="weeks.courseStartWeeks"
-                controls-position="right"
-                :max="weeks.courseEndWeeks - 1"
-                min="1"
-              >
-                <template #prefix>
-                  <span>第</span>
-                </template>
-
-                <template #suffix>
-                  <span>周</span>
-                </template>
-              </el-input-number>
-
-              <el-text>到</el-text>
-
-              <el-input-number
-                class="courseWeekInput"
-                v-model="weeks.courseEndWeeks"
-                controls-position="right"
-                max="25"
-                :min="weeks.courseStartWeeks + 1"
-              >
-                <template #prefix>
-                  <span>第</span>
-                </template>
-                <template #suffix>
-                  <span>周</span>
-                </template>
-              </el-input-number>
-              <el-button
-                class="courseWeekDeleteButton"
-                size="small"
-                type="danger"
-                @click="HandleCourseWeekDelete(weeks)"
-                >删除</el-button
-              >
-            </div>
-            <el-button
-              type="primary"
-              size="small"
-              class="courseWeekInputAddButton"
-              @click="HandleCourseWeekInputAdd"
-              >添加</el-button
-            >
-          </el-form-item>
-        </div>
-
         <el-form-item label="排课学时：">
           <el-input-number
-            v-model="scheduledCourseHours"
+            v-model="formInput.scheduledCourseHours"
             controls-position="right"
             disabled
           />
@@ -171,7 +170,13 @@
           />
         </el-form-item>
         <el-form-item label="教室类型：">
-          <el-select v-model="formInput.assignedClassroomType">
+          <el-select
+            v-model="formInput.assignedClassroomType"
+            filterable
+            remote
+            :remote-method="classroomTypeRemoteMethod"
+            placeholder="搜索教室类型"
+          >
             <el-option
               v-for="opt of classroomTypeList"
               :label="opt.name"
@@ -180,7 +185,13 @@
           </el-select>
         </el-form-item>
         <el-form-item label="指定教室：">
-          <el-select v-model="formInput.assignedClassroom">
+          <el-select
+            v-model="formInput.assignedClassroom"
+            filterable
+            remote
+            :remote-method="classroomRemoteMethod"
+            placeholder="搜索教室"
+          >
             <el-option
               v-for="opt of classroomList"
               :label="opt.name"
@@ -189,7 +200,13 @@
           </el-select>
         </el-form-item>
         <el-form-item label="指定教学楼：">
-          <el-select v-model="formInput.assignedBuilding">
+          <el-select
+            v-model="formInput.assignedBuilding"
+            filterable
+            remote
+            :remote-method="buildingRemoteMethod"
+            placeholder="搜索教学楼"
+          >
             <el-option
               v-for="opt of buildingList"
               :label="opt.name"
@@ -197,8 +214,13 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="指定时间："> 
-          <el-time-select></el-time-select>
+        <el-form-item label="指定时间：">
+          <el-time-picker
+            is-range
+            range-separator="到"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+          ></el-time-picker>
         </el-form-item>
 
         <el-form-item label="排课优先级：" prop="priorityLevel">
@@ -254,6 +276,15 @@ export default {
       name: "",
       perWeekCourseHour: "",
       courseWeekHours: [],
+      scheduledCourseHours: computed(() => {
+        let totalHour = 0;
+        formInput.value.courseWeekHours.forEach((weeks) => {
+          totalHour +=
+            formInput.value.perWeekCourseHour *
+            (weeks.courseEndWeeks - weeks.courseStartWeeks + 1);
+        });
+        return totalHour;
+      }),
       courseWeekNum: 1,
       // {
       //     courseStartWeeks: 1,
@@ -266,13 +297,15 @@ export default {
       assignedBuilding: "",
       assignedDate: "",
       priorityLevel: 1,
-    });
-    const scheduledCourseHours = computed(() => {
-      let totalHour = 0
-      formInput.value.courseWeekHours.forEach((weeks)=>{
-        totalHour += formInput.value.perWeekCourseHour * (weeks.courseEndWeeks - weeks.courseStartWeeks + 1)
-      })
-      return totalHour
+      teachingClassSize: computed(() => {
+        let temp = 0;
+        formInput.value.classList.forEach((cl) => {
+          temp += cl.size;
+        });
+        return temp;
+      }),
+      deletedClasses: [],
+      mergedTeachingClasses: [],
     });
 
     const maxClassPeriods = computed(() => {
@@ -281,14 +314,6 @@ export default {
       } else {
         return formInput.value.perWeekCourseHour / 2;
       }
-    });
-
-    const teachingClassSize = computed(() => {
-      let temp = 0;
-      formInput.value.classList.forEach((cl) => {
-        temp += cl.size;
-      });
-      return temp;
     });
 
     const buildingList = ref([]);
@@ -394,6 +419,7 @@ export default {
             ...formInput.value.classList,
             ...selectedClass.value.data.classList,
           ];
+          formInput.value.mergedTeachingClasses.push(selectedClass.value.data);
           selectedClass.value = "";
           searchClassKeyword.value = "";
         });
@@ -410,6 +436,7 @@ export default {
           type: "warning",
         }
       ).then(() => {
+        formInput.value.deletedClasses.push(item);
         formInput.value.classList = formInput.value.classList.filter((tag) => {
           return tag != item;
         });
@@ -550,6 +577,34 @@ export default {
       );
     };
 
+    const classroomRemoteMethod = (keyword) => {
+      getClassroomListApi(keyword).then((res) => {
+        if (res) {
+          if (res.meta.code == 200) {
+            classroomList.value = res.data;
+          }
+        }
+      });
+    };
+    const classroomTypeRemoteMethod = (keyword) => {
+      getClassroomListApi(keyword).then((res) => {
+        if (res) {
+          if (res.meta.code == 200) {
+            classroomTypeList.value = res.data;
+          }
+        }
+      });
+    };
+    const buildingRemoteMethod = (keyword) => {
+      getTeachingBuildingListApi(keyword).then((res) => {
+        if (res) {
+          if (res.meta.code == 200) {
+            buildingList.value = res.data;
+          }
+        }
+      });
+    };
+
     return {
       formInput,
       isDialogVisiable,
@@ -559,7 +614,6 @@ export default {
       getClassSuggestions,
       searchClassKeyword,
       inputRules,
-      scheduledCourseHours,
       isClassPeriodsDisabled,
       maxClassPeriods,
       teachingClassFormRef,
@@ -569,12 +623,14 @@ export default {
       HandleOptionSelect,
       HandleInputClear,
       scrollBarRef,
-      teachingClassSize,
       HandleCourseWeekInputAdd,
       HandleCourseWeekDelete,
       buildingList,
       classroomTypeList,
       classroomList,
+      classroomRemoteMethod,
+      classroomTypeRemoteMethod,
+      buildingRemoteMethod,
     };
   },
 };
@@ -609,7 +665,6 @@ export default {
   display: flex;
   flex-direction: column;
   height: auto;
-  border: solid 1px #dcdfe6;
   border-radius: 8px;
   padding-right: 10px;
   margin-bottom: 10px;

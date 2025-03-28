@@ -30,8 +30,11 @@
             >
               <template #default="{ node, data }">
                 <div class="treeNode">
-                  <el-text>{{ node.label }}</el-text>
-                  <el-text v-if="data.select">({{}})</el-text>
+                  <el-text v-if="data.select" style="font-weight: bold">{{ node.label }}</el-text>
+                  <el-text v-else>{{ node.label }}</el-text>
+                  <el-text v-if="data.select"
+                    >({{ data.courseNum }})</el-text
+                  >
                 </div>
               </template>
             </el-tree>
@@ -101,9 +104,9 @@
                 <span class="teachingClassCellTextSpan">
                   {{ tc.courseName }}
                 </span>
-                <span class="teachingClassCellTextSpan"
-                  >{{ tc.teacherName }}</span
-                >
+                <span class="teachingClassCellTextSpan">{{
+                  tc.teacherName
+                }}</span>
                 <span class="teachingClassCellTextSpan">{{
                   `(${tc.finishHour}/${tc.totalHour})`
                 }}</span>
@@ -124,10 +127,9 @@
             :data="scheduleStruct"
             :key="updateKey"
             :border="true"
-            max-height="350px"
+            max-height="400px"
             :span-method="tableSpan"
             :cell-style="setCellColor"
-            row-class-name="rowClass"
             v-loading="isTableLoading"
             fit
           >
@@ -160,7 +162,9 @@
                   >
                     {{ scope.row.cellList[scope.column.no - 1].courseName
                     }}<br />
-                    #{{ scope.row.cellList[scope.column.no - 1].teacherName }}
+                    {{ scope.row.cellList[scope.column.no - 1].teacherName }}
+                    <br />
+                    {{ scope.row.cellList[scope.column.no - 1].weeks }}
                   </span>
                 </div>
               </template>
@@ -178,16 +182,16 @@ import { computed, onMounted, ref, watch, nextTick } from "vue";
 import { getTeachingClassListApi } from "@/api/schedule/scheduleBuild/teachingClassList.api.js";
 import { getScheduleStructApi } from "@/api/schedule/scheduleBuild/scheduleStruct.api.js";
 import { getScheduleDataApi } from "@/api/schedule/scheduleBuild/scheduleData.api.js";
-import { getClassTreeApi } from "@/api/schedule/addClass/classTree.api";
+import { getClassTreeApi } from "@/api/schedule/scheduleBuild/classTree.api";
 import { cellCreateApi } from "@/api/schedule/scheduleBuild/cellCreate.api";
 import { cellMoveApi } from "@/api/schedule/scheduleBuild/cellMove.api";
 import { cellDeleteApi } from "@/api/schedule/scheduleBuild/cellDelete.api";
+import { cellExchangeApi } from "@/api/schedule/scheduleBuild/cellExchange.api";
 
 import { useRoute } from "vue-router";
 import aiScheduleDialogVue from "./AiScheduleDialog.vue";
 import bus from "@/bus/bus";
-import { ElLoading } from 'element-plus';
-import { options } from '@fullcalendar/core/preact';
+import { ElLoading, ElMessage } from "element-plus";
 
 export default {
   name: "ScheduleBuild",
@@ -262,7 +266,7 @@ export default {
       { name: "星期日", prop: "SunData" },
     ];
     const scheduleStruct = ref([]);
-    let scheduleStructTemp = [];
+    const scheduleStructTemp = ref([]);
 
     const scheduleData = ref([]);
 
@@ -351,19 +355,21 @@ export default {
 
     const updateKey = ref(0);
 
-
-
     onMounted(() => {
-      getClassTree().then(() => {
-        currentClassName.value = firstClassName.value;
-        currentClassId.value = firstClassId.value;
-        getTeachingClassList(taskId, firstClassId.value);
-        getScheduleStruct(taskId, firstClassId.value).then((res) => {
-          if (res) {
-            getScheduleData();
-          }
+      if (taskId) {
+        getClassTree().then(() => {
+          currentClassName.value = firstClassName.value;
+          currentClassId.value = firstClassId.value;
+          getTeachingClassList(taskId, firstClassId.value);
+          getScheduleStruct(taskId, firstClassId.value).then((res) => {
+            if (res) {
+              getScheduleData();
+            }
+          });
         });
-      });
+      } else {
+        ElMessage.error("发生错误，请回到菜单点击 开始排课 进入");
+      }
     });
 
     //树结构过虑
@@ -395,70 +401,81 @@ export default {
     const HandleCellDragOver = (cell, { row, column, cellIndex }) => {
       //被拖动的单元格经过
       if (CurrentDragCellData.value.cellData) {
-        let ClassPeriodsTemp =
-          CurrentDragCellData.value.cellData.consecutiveClassPeriods;
-        if (ClassPeriodsTemp == 1) {
-          if (row.cellList[column.no - 1].isAvailable) {
-            cell.preventDefault(); //使单元格允许drop
-            cell.target.classList.add("cellHover"); //如果当前单元格没有课程且可用改变背景
-          }
-        } else {
-          if (row.period < scheduleStruct.value.length - ClassPeriodsTemp + 2) {
-            let counter = 0;
-            for (let p = 0; p < ClassPeriodsTemp; p++) {
-              if (p == 0) {
-                if (
-                  row.cellList[column.no - 1].isAvailable &&
-                  !row.cellList[column.no - 1].hasCourse
-                ) {
-                  counter++;
-                  continue;
-                }
-              } else {
-                if (
-                  scheduleStruct.value[row.period + p - 1].cellList[
-                    column.no - 1
-                  ].isAvailable &&
-                  !scheduleStruct.value[row.period + p - 1].cellList[
-                    column.no - 1
-                  ].hasCourse
-                ) {
-                  counter++;
-                  continue;
-                }
-              }
-            }
-
-            if (counter == ClassPeriodsTemp) {
+        if (
+          CurrentDragCellData.value.cellData.cellId !=
+          row.cellList[column.no - 1].cellId
+        ) {
+          let ClassPeriodsTemp =
+            CurrentDragCellData.value.cellData.consecutiveClassPeriods;
+          if (
+            ClassPeriodsTemp ==
+            row.cellList[column.no - 1].consecutiveClassPeriods
+          ) {
+            if (row.cellList[column.no - 1].isAvailable) {
               cell.preventDefault(); //使单元格允许drop
-              cell.target.classList.add("cellHover");
-
-              let currentRow = cell.target.closest("tr");
-              for (let p = 1; p < ClassPeriodsTemp; p++) {
-                if (currentRow) {
-                  if (currentRow.nextElementSibling) {
-                    let nextCell =
-                      scheduleStruct.value[row.period + p - 1].cellList[
-                        column.no - 1
-                      ].cellIndex;
-
-                    if (nextCell) {
-                      currentRow.nextElementSibling.cells[
-                        nextCell
-                      ].classList.add("cellHover");
-                    }
+              cell.target.classList.add("cellHover"); //如果当前单元格没有课程且可用改变背景
+            }
+          } else {
+            if (
+              row.period <
+              scheduleStruct.value.length - ClassPeriodsTemp + 2
+            ) {
+              let counter = 0;
+              for (let p = 0; p < ClassPeriodsTemp; p++) {
+                if (p == 0) {
+                  if (
+                    row.cellList[column.no - 1].isAvailable &&
+                    !row.cellList[column.no - 1].hasCourse
+                  ) {
+                    counter++;
+                    continue;
+                  }
+                } else {
+                  if (
+                    scheduleStruct.value[row.period + p - 1].cellList[
+                      column.no - 1
+                    ].isAvailable &&
+                    !scheduleStruct.value[row.period + p - 1].cellList[
+                      column.no - 1
+                    ].hasCourse
+                  ) {
+                    counter++;
+                    continue;
                   }
                 }
-                currentRow = currentRow.nextElementSibling;
+              }
+
+              if (counter == ClassPeriodsTemp) {
+                cell.preventDefault(); //使单元格允许drop
+                cell.target.classList.add("cellHover");
+
+                let currentRow = cell.target.closest("tr");
+                for (let p = 1; p < ClassPeriodsTemp; p++) {
+                  if (currentRow) {
+                    if (currentRow.nextElementSibling) {
+                      let nextCell =
+                        scheduleStruct.value[row.period + p - 1].cellList[
+                          column.no - 1
+                        ].cellIndex;
+
+                      if (nextCell) {
+                        currentRow.nextElementSibling.cells[
+                          nextCell
+                        ].classList.add("cellHover");
+                      }
+                    }
+                  }
+                  currentRow = currentRow.nextElementSibling;
+                }
+              } else {
+                if (row.cellList[column.no - 1].isAvailable) {
+                  cell.target.classList.add("cellHoverProhibited");
+                }
               }
             } else {
               if (row.cellList[column.no - 1].isAvailable) {
                 cell.target.classList.add("cellHoverProhibited");
               }
-            }
-          } else {
-            if (row.cellList[column.no - 1].isAvailable) {
-              cell.target.classList.add("cellHoverProhibited");
             }
           }
         }
@@ -481,7 +498,7 @@ export default {
                 scheduleStruct.value[row.period + p - 1].cellList[column.no - 1]
                   .cellIndex;
 
-              if (nextCell) {
+              if (currentRow.nextElementSibling.cells[nextCell]) {
                 currentRow.nextElementSibling.cells[nextCell].classList.remove(
                   "cellHover"
                 );
@@ -504,29 +521,6 @@ export default {
           CurrentDragCellData.value.cellData.consecutiveClassPeriods;
         let cellId = CurrentDragCellData.value.cellData.cellId;
 
-        if (row.cellList[column.no - 1].hasCourse) {
-          //当前单元格有课程，交换数据
-          scheduleData.value.forEach((tc) => {
-            if (tc.cellId == cellId) {
-              tc.period = row.period;
-              tc.cellIndex = column.no - 1;
-            }
-            if (tc.cellId == row.cellList[column.no - 1].cellId) {
-              tc.period = periodTemp;
-              tc.cellIndex = cellIndexTemp;
-            }
-          });
-        } else {
-          //当前单元格没有课程，添加数据并清空旧位置的数据
-          scheduleData.value.forEach((tc) => {
-            if (tc.cellId == cellId) {
-              tc.period = row.period;
-              tc.cellIndex = column.no - 1;
-            }
-          });
-          cellClear(periodTemp, columnIndexTemp, false);
-        }
-
         if (row.period < scheduleStruct.value.length - ClassPeriodsTemp + 2) {
           let currentRow = cell.target.closest("tr");
           for (let p = 1; p < ClassPeriodsTemp; p++) {
@@ -547,117 +541,91 @@ export default {
           }
         }
 
-        HandleCellMove(
-          cellId,
-          periodTemp,
-          columnIndexTemp,
-          row.period,
-          column.no - 1
-        );
-
-        // scheduleStruct.value[periodTemp - 1].cellList[
-        //   columnIndexTemp
-        // ].consecutiveClassPeriods =
-        //   row.cellList[column.no - 1].consecutiveClassPeriods;
-
-        // scheduleStruct.value[periodTemp - 1].cellList[
-        //   columnIndexTemp
-        // ].teacherName = row.cellList[column.no - 1].teacherName;
-
-        // scheduleStruct.value[periodTemp - 1].cellList[
-        //   columnIndexTemp
-        // ].teachingClassId = row.cellList[column.no - 1].teachingClassId;
-
-        // scheduleStruct.value[row.period - 1].cellList[
-        //   column.no - 1
-        // ].courseName = courseNameTemp;
-
-        // scheduleStruct.value[row.period - 1].cellList[
-        //   column.no - 1
-        // ].teacherName = teacherNameTemp;
-
-        // scheduleStruct.value[row.period - 1].cellList[
-        //   column.no - 1
-        // ].teachingClassId = teachingClassIdTemp;
-
-        // scheduleStruct.value[row.period - 1].cellList[
-        //   column.no - 1
-        // ].consecutiveClassPeriods = consecutiveClassPeriodsTemp;
-
-        // scheduleStruct.value[periodTemp - 1].cellList[
-        //   columnIndexTemp
-        // ].hasCourse = row.cellList[column.no - 1].hasCourse;
-
-        // scheduleStruct.value[row.period - 1].cellList[
-        //   column.no - 1
-        // ].hasCourse = true;
-      }
-      if (cellType === "targetCell") {
-        let courseNameTemp = CurrentDragCellData.value.cellData.courseName;
-        let teacherNameTemp = CurrentDragCellData.value.cellData.teacherName;
-        let teachingClassIdTemp = CurrentDragCellData.value.cellData.id;
-        let consecutiveClassPeriodsTemp =
-          CurrentDragCellData.value.cellData.consecutiveClassPeriods;
-
-        let hasCourseTemp = true;
-
-        let cellId = CurrentDragCellData.value.cellData.cellId;
-
-        const targetItem =
-          teachingClassList.value[
-            teachingClassList.value.findIndex(
-              (tc) => tc.id === teachingClassIdTemp
-            )
-          ];
-        scheduleStruct.value[row.period - 1].cellList[
-          column.no - 1
-        ].courseName = courseNameTemp;
-        scheduleStruct.value[row.period - 1].cellList[
-          column.no - 1
-        ].teacherName = teacherNameTemp;
-        scheduleStruct.value[row.period - 1].cellList[
-          column.no - 1
-        ].teachingClassId = teachingClassIdTemp;
-        scheduleStruct.value[row.period - 1].cellList[column.no - 1].hasCourse =
-          hasCourseTemp;
-        scheduleStruct.value[row.period - 1].cellList[
-          column.no - 1
-        ].consecutiveClassPeriods = consecutiveClassPeriodsTemp;
-        scheduleStruct.value[row.period - 1].cellList[column.no - 1].cellId =
-          cellId;
-        targetItem.finishHour += targetItem.consecutiveClassPeriods;
-        HandleCellCreate(
-          cellId,
-          teachingClassIdTemp,
-          row.period,
-          column.no - 1,
-          consecutiveClassPeriodsTemp
-        );
-      }
-      cell.target.classList.remove("cellHover");
-
-      let ClassPeriodsTemp =
-        CurrentDragCellData.value.cellData.consecutiveClassPeriods;
-
-      if (row.period < scheduleStruct.value.length - ClassPeriodsTemp + 2) {
-        let currentRow = cell.target.closest("tr");
-        for (let p = 1; p < ClassPeriodsTemp; p++) {
-          if (currentRow) {
-            if (currentRow.nextElementSibling) {
-              let nextCell =
-                scheduleStruct.value[row.period + p - 1].cellList[column.no - 1]
-                  .cellIndex;
-
-              if (nextCell) {
-                currentRow.nextElementSibling.cells[nextCell].classList.remove(
-                  "cellHover"
-                );
-              }
-            }
+        if (
+          row.cellList[column.no - 1].cellId !=
+          CurrentDragCellData.value.cellData.cellId
+        ) {
+          if (row.cellList[column.no - 1].hasCourse) {
+            //当前单元格有课程，交换数据
+            HandleCellExchange(
+              true,
+              row.cellList[column.no - 1].cellId,
+              CurrentDragCellData.value.cellData.cellId
+            );
+            // scheduleData.value.forEach((tc) => {
+            //   if (tc.cellId == cellId) {
+            //     tc.period = row.period;
+            //     tc.cellIndex = column.no - 1;
+            //   }
+            //   if (tc.cellId == row.cellList[column.no - 1].cellId) {
+            //     tc.period = periodTemp;
+            //     tc.cellIndex = cellIndexTemp;
+            //   }
+            // });
+          } else {
+            //当前单元格没有课程
+            HandleCellMove(
+              cellId,
+              periodTemp,
+              columnIndexTemp,
+              row.period,
+              column.no - 1
+            );
+            // cellClear(periodTemp, columnIndexTemp, false);
           }
-          currentRow = currentRow.nextElementSibling;
         }
       }
+      if (cellType === "targetCell") {
+        let teachingClassIdTemp = CurrentDragCellData.value.cellData.id;
+        let ClassPeriodsTemp =
+          CurrentDragCellData.value.cellData.consecutiveClassPeriods;
+        let cellId = CurrentDragCellData.value.cellData.cellId;
+
+        if (row.period < scheduleStruct.value.length - ClassPeriodsTemp + 2) {
+          let currentRow = cell.target.closest("tr");
+          for (let p = 1; p < ClassPeriodsTemp; p++) {
+            if (currentRow) {
+              if (currentRow.nextElementSibling) {
+                let nextCell =
+                  scheduleStruct.value[row.period + p - 1].cellList[
+                    column.no - 1
+                  ].cellIndex;
+                if (nextCell) {
+                  currentRow.nextElementSibling.cells[
+                    nextCell
+                  ].classList.remove("cellHover");
+                }
+              }
+            }
+            currentRow = currentRow.nextElementSibling;
+          }
+        }
+        if (
+          row.cellList[column.no - 1].cellId !=
+          CurrentDragCellData.value.cellData.cellId
+        ) {
+          if (row.cellList[column.no - 1].hasCourse) {
+            //当前单元格有课程，交换数据
+            HandleCellExchange(
+              false,
+              row.cellList[column.no - 1].cellId,
+              "",
+              CurrentDragCellData.value.cellData
+            );
+          } else {
+            //当前单元格没有课程
+            HandleCellCreate(
+              cellId,
+              teachingClassIdTemp,
+              row.period,
+              column.no - 1,
+              ClassPeriodsTemp
+            );
+            // cellClear(periodTemp, columnIndexTemp, false);
+          }
+        }
+      }
+      cell.target.classList.remove("cellHover");
     };
 
     const HandleCellDragStart = (cell, { row, column, cellIndex }) => {
@@ -726,32 +694,8 @@ export default {
     const HandleTargetCellDrop = (cell) => {
       let cellType = CurrentDragCellData.value.cellType;
       if (cellType === "tableCell") {
-        let periodTemp = CurrentDragCellData.value.period;
-        let columnIndexTemp = CurrentDragCellData.value.columnIndex;
         let cellId = CurrentDragCellData.value.cellData.cellId;
-        let teachingClassIdTemp =
-          CurrentDragCellData.value.cellData.teachingClassId;
-
-        scheduleStruct.value[periodTemp - 1].cellList[
-          columnIndexTemp
-        ].courseName = "";
-        scheduleStruct.value[periodTemp - 1].cellList[
-          columnIndexTemp
-        ].teacherName = "";
-        scheduleStruct.value[periodTemp - 1].cellList[
-          columnIndexTemp
-        ].teachingClassId = "";
-        scheduleStruct.value[periodTemp - 1].cellList[
-          columnIndexTemp
-        ].hasCourse = false;
-
-        const targetItem =
-          teachingClassList.value[
-            teachingClassList.value.findIndex(
-              (tc) => tc.id === teachingClassIdTemp
-            )
-          ];
-        targetItem.finishHour -= targetItem.consecutiveClassPeriods;
+        CurrentDragCellData.value.cellData.teachingClassId;
         HandleCellDelete(cellId);
       }
       cell.target.classList.remove("cellHover");
@@ -761,6 +705,8 @@ export default {
       if (node.select) {
         currentClassName.value = node.label;
         currentClassId.value = node.id;
+        scheduleStruct.value = [];
+        scheduleStructTemp.value = "";
         getTeachingClassList(taskId, node.id);
         getScheduleStruct(taskId, node.id).then((res) => {
           if (res) {
@@ -784,7 +730,7 @@ export default {
             List[i].cellList[j].cellIndex = cellIndexTemp;
             cellIndexTemp++;
           } else {
-            if (List[i].cellList[j].rowspan != 0) { 
+            if (List[i].cellList[j].rowspan != 0) {
               List[i].cellList[j].rowspan =
                 List[i].cellList[j].consecutiveClassPeriods;
               List[i].cellList[j].cellIndex = null;
@@ -841,34 +787,60 @@ export default {
     });
 
     const updateScheduleStruct = () => {
-      scheduleStruct.value = JSON.parse(scheduleStructTemp);
-      scheduleData.value.forEach((cell) => {
-        let teachersName = "";
-        cell.teacherList.forEach((teacher) => {
-          console.log(teacher);
-          teachersName += `#${teacher.teacherName}`;
+      scheduleStruct.value = JSON.parse(scheduleStructTemp.value);
+      if (scheduleData.value.length > 0) {
+        scheduleData.value.forEach((cell) => {
+          if (scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]) {
+            if (
+              scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]
+                .isAvailable
+            ) {
+              let teachersName = "";
+              cell.teacherList.forEach((teacher) => {
+                teachersName += `#${teacher.teacherName}`;
+              });
+              scheduleStruct.value[cell.period - 1].cellList[
+                cell.cellIndex
+              ].cellId = cell.cellId;
+              scheduleStruct.value[cell.period - 1].cellList[
+                cell.cellIndex
+              ].courseName = cell.teachingClassName;
+              scheduleStruct.value[cell.period - 1].cellList[
+                cell.cellIndex
+              ].teacherName = teachersName;
+              scheduleStruct.value[cell.period - 1].cellList[
+                cell.cellIndex
+              ].consecutiveClassPeriods = cell.consecutiveClassPeriods;
+              scheduleStruct.value[cell.period - 1].cellList[
+                cell.cellIndex
+              ].rowspan = cell.consecutiveClassPeriods;
+              scheduleStruct.value[cell.period - 1].cellList[
+                cell.cellIndex
+              ].hasCourse = true;
+            } else {
+              ElMessage.error(
+                `${cell.teachingClassName}  与排课设置冲突! 请修改排课设置后重试！`
+              );
+            }
+          }
         });
-        scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex].cellId =
-          cell.cellId;
-        scheduleStruct.value[cell.period - 1].cellList[
-          cell.cellIndex
-        ].courseName = cell.teachingClassName;
-        scheduleStruct.value[cell.period - 1].cellList[
-          cell.cellIndex
-        ].teacherName = teachersName;
-        scheduleStruct.value[cell.period - 1].cellList[
-          cell.cellIndex
-        ].consecutiveClassPeriods = cell.consecutiveClassPeriods;
-        scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex].rowspan =
-          cell.consecutiveClassPeriods;
-        scheduleStruct.value[cell.period - 1].cellList[
-          cell.cellIndex
-        ].hasCourse = true;
-      });
-      scheduleStruct.value = setListRowspan(scheduleStruct.value);
-      updateKey.value += 1;
+        scheduleStruct.value = setListRowspan(scheduleStruct.value);
+        updateKey.value += 1;
+      }
     };
 
+    const setRowClass = ({ row, rowIndex }) => {
+      if (row.isClassBreak) {
+        return "classBreakBorder";
+      }
+      if (row.isLunchBreak) {
+        return "lunchBreakBorder";
+      }
+      if (row.isAfternoonBreak) {
+        return "afternoonBreakBorder";
+      }
+      return "";
+    };
     //====================================下面是api数据获取部分======================================
 
     //根据tree选中的班级id请求对应班级的教学班
@@ -889,7 +861,7 @@ export default {
         .then((res) => {
           if (res) {
             if (res.meta.code == 200) {
-              scheduleStructTemp = JSON.stringify(res.data);
+              scheduleStructTemp.value = JSON.stringify(res.data);
               scheduleStruct.value = setListRowspan(res.data);
               isTableLoading.value = false;
               return true;
@@ -901,15 +873,13 @@ export default {
         });
     };
 
-    let scounter = 0;
     const getScheduleData = () => {
       getScheduleDataApi(taskId, currentClassId.value)
         .then((res) => {
           if (res) {
             if (res.meta.code == 200) {
-              if (scounter === 0) {
+              if (1) {
                 scheduleData.value = res.data;
-                scounter++;
               }
             }
           }
@@ -940,6 +910,7 @@ export default {
       oldPeriod,
       oldCellIndex
     ) => {
+      console.log("move!");
       cellMoveApi(
         taskId,
         currentClassId.value,
@@ -956,6 +927,31 @@ export default {
       });
     };
 
+    const HandleCellExchange = (
+      isTableCell,
+      firstCellId,
+      secondCellId,
+      exchangeCellData
+    ) => {
+      console.log("exchange!");
+      cellExchangeApi(
+        taskId,
+        currentClassId.value,
+        isTableCell,
+        firstCellId,
+        secondCellId,
+        exchangeCellData
+      ).then((res) => {
+        if (res) {
+          if (res.meta.code === 200) {
+            console.log(res);
+            getClassTree();
+            getScheduleData();
+          }
+        }
+      });
+    };
+
     const HandleCellCreate = (
       cellId,
       teachingClassId,
@@ -963,6 +959,7 @@ export default {
       cellIndex,
       consecutiveClassPeriods
     ) => {
+      console.log("create!");
       cellCreateApi(
         taskId,
         currentClassId.value,
@@ -982,10 +979,10 @@ export default {
     };
 
     const HandleCellDelete = (cellId) => {
+      console.log("delete!");
       cellDeleteApi(taskId, currentClassId.value, cellId).then((res) => {
         if (res) {
           if (res.meta.code === 200) {
-            console.log(res);
             getClassTree();
             getScheduleData();
           }
@@ -1041,6 +1038,7 @@ export default {
       HandleCellDelete,
       updateKey,
       tableRef,
+      setRowClass,
     };
   },
 };
@@ -1266,5 +1264,15 @@ export default {
 .targetCellDraging {
   opacity: 0.4;
   border: dashed 1px rgb(121.3, 187.1, 255);
+}
+
+.classBreakBorder {
+  border: solid 1px red;
+}
+.lunchBreakBorder {
+  border: solid 1px blue;
+}
+.afternoonBreakBorder {
+  border: solid 1px green;
 }
 </style>
