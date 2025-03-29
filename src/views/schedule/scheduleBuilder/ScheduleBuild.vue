@@ -1,7 +1,9 @@
 <template>
   <div class="scheduleBuildBody">
     <div class="controlPart">
-      <el-button type="warning" @click="HandleAiClick">自动排课</el-button>
+      <el-button size="small" type="warning" @click="HandleAiClick"
+        >自动排课</el-button
+      >
     </div>
     <div class="workPart">
       <div class="controlDiv">
@@ -77,11 +79,11 @@
                 <span class="teachingClassCellTextSpan">
                   {{ tc.courseName }}
                 </span>
-                <span class="teachingClassCellTextSpan"
-                  >{{ teacherNameFormatter(tc.teacherList) }}</span
-                >
                 <span class="teachingClassCellTextSpan">{{
-                 courseWeeksFormatter(tc.courseWeeks)
+                  teacherNameFormatter(tc.teacherList)
+                }}</span>
+                <span class="teachingClassCellTextSpan">{{
+                  weeksDataFormatter(tc.weeksData)
                 }}</span>
                 <span class="teachingClassCellTextSpan">{{
                   `(${tc.finishHour}/${tc.totalHour})`
@@ -108,10 +110,10 @@
                   {{ tc.courseName }}
                 </span>
                 <span class="teachingClassCellTextSpan">
-                {{ teacherNameFormatter(tc.teacherList) }}
+                  {{ teacherNameFormatter(tc.teacherList) }}
                 </span>
                 <span class="teachingClassCellTextSpan">{{
-                 courseWeeksFormatter(tc.courseWeeks)
+                  weeksDataFormatter(tc.weeksData)
                 }}</span>
                 <span class="teachingClassCellTextSpan">{{
                   `(${tc.finishHour}/${tc.totalHour})`
@@ -148,7 +150,7 @@
 
             <el-table-column
               class="courseColumn"
-              min-width="200px"
+              min-width="150px"
               v-for="item of tableHeader"
               :label="item.name"
             >
@@ -163,9 +165,7 @@
                     class="cellDiv"
                     v-for="course of scope.row.cellList[scope.column.no - 1]
                       .courseList"
-                    
                     v-show="scope.row.cellList[scope.column.no - 1].hasCourse"
-
                     :style="course.style"
                     :key="course"
                     :draggable="true"
@@ -188,9 +188,9 @@
                       v-show="scope.row.cellList[scope.column.no - 1].hasCourse"
                     >
                       {{ course.courseName }}<br />
-                      {{ course.teacherName }}
-                      <br />
-                      {{ course.weeks }}
+                      {{ course.teacherName }}<br />
+                      {{ course.weeks }}<br />
+                      {{ course.periodRange }}
                     </span>
                   </div>
                 </div>
@@ -224,8 +224,8 @@ export default {
   name: "ScheduleBuild",
   components: { aiScheduleDialogVue },
   setup() {
-    const cellWidth = 230
-    const cellHeight = 90
+    const cellWidth = 90;
+    const cellHeight = 90;
 
     const taskId = useRoute().query.id;
 
@@ -264,36 +264,43 @@ export default {
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: false,
+            weeksDataList: [],
             courseList: [],
           },
         ],
@@ -307,36 +314,43 @@ export default {
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: false,
+            weeksDataList: [],
             courseList: [],
           },
         ],
@@ -350,36 +364,43 @@ export default {
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: false,
+            weeksDataList: [],
             courseList: [],
           },
         ],
@@ -393,36 +414,43 @@ export default {
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: false,
+            weeksDataList: [],
             courseList: [],
           },
         ],
@@ -436,36 +464,43 @@ export default {
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: false,
+            weeksDataList: [],
             courseList: [],
           },
         ],
@@ -479,36 +514,43 @@ export default {
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: false,
+            weeksDataList: [],
             courseList: [],
           },
         ],
@@ -522,36 +564,43 @@ export default {
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: false,
+            weeksDataList: [],
             courseList: [],
           },
         ],
@@ -565,36 +614,43 @@ export default {
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: true,
+            weeksDataList: [],
             courseList: [],
           },
           {
             hasCourse: false,
             isAvailable: false,
+            weeksDataList: [],
             courseList: [],
           },
         ],
@@ -617,7 +673,7 @@ export default {
             teacherName: "宋浩",
           },
         ],
-        courseWeeks: [
+        weeksData: [
           {
             courseStartWeek: 3,
             courseEndWeek: 10,
@@ -637,7 +693,7 @@ export default {
             teacherName: "王红霞",
           },
         ],
-        courseWeeks: [
+        weeksData: [
           {
             courseStartWeek: 11,
             courseEndWeek: 18,
@@ -657,7 +713,7 @@ export default {
             teacherName: "黑马程序员",
           },
         ],
-        courseWeeks: [
+        weeksData: [
           {
             courseStartWeek: 3,
             courseEndWeek: 10,
@@ -681,7 +737,7 @@ export default {
             teacherName: "刘铁猛",
           },
         ],
-        courseWeeks: [
+        weeksData: [
           {
             courseStartWeek: 4,
             courseEndWeek: 12,
@@ -809,20 +865,21 @@ export default {
       treeRef.value.filter(val);
     });
 
-    const teacherNameFormatter = (teacherList)=>{
-      let names = ""
-      teacherList.forEach((teacher)=>{
-        names += `#${teacher.teacherName}`
-      })
-      return names
-    }
-    const courseWeeksFormatter = (courseWeeks)=>{
-      let weekStr = ""
-      courseWeeks.forEach((weeks)=>{
-         weekStr += `${weeks.courseStartWeek}-${weeks.courseEndWeek}周;`;
-      })
-      return weekStr
-    }
+    const teacherNameFormatter = (teacherList) => {
+      let names = "";
+      teacherList.forEach((teacher) => {
+        names += `#${teacher.teacherName}`;
+      });
+      return names;
+    };
+
+    const weeksDataFormatter = (weeksData) => {
+      let weekStr = "";
+      weeksData.forEach((weeks) => {
+        weekStr += `${weeks.courseStartWeek}-${weeks.courseEndWeek}周;`;
+      });
+      return weekStr;
+    };
 
     //周次冲突检测
     const isWeekConflict = (firstWeeks, secondWeeks) => {
@@ -836,6 +893,31 @@ export default {
           ) {
             return true;
           }
+        }
+      }
+      return false;
+    };
+    //检测教学班是否与单元格内的教学班有周次冲突
+    const isCellWeekConflict = (
+      period,
+      cellIndex,
+      weeksData,
+      consecutiveClassPeriods
+    ) => {
+      //courseList：单元格对象
+      //cellData:要对比的教学班
+      if (period + consecutiveClassPeriods > scheduleStruct.value.length) {
+        return true;
+      }
+      for (let i = 0; i < consecutiveClassPeriods; i++) {
+        if (
+          isWeekConflict(
+            scheduleStruct.value[period + i - 1].cellList[cellIndex]
+              .weeksDataList,
+            weeksData
+          )
+        ) {
+          return true;
         }
       }
       return false;
@@ -869,86 +951,95 @@ export default {
       course
     ) => {
       let ClassPeriodsTemp; //连排节次
-
-
       if (CurrentDragCellData.value.cellType == "targetCell") {
-      let cellData;
+        let cellData;
         ClassPeriodsTemp =
           CurrentDragCellData.value.cellData.consecutiveClassPeriods;
         cellData = CurrentDragCellData.value.cellData;
 
         if (cellData.id != course.teachingClassId) {
           //判断该教学班所在的单元格列表里的教学班是否与拖动的教学班周次冲突
-           let isWeekConflictBoolean = false;
-            for (
-              let i = 0;
-              i < row.cellList[column.no - 1].courseList.length;
-              i++
+
+          if (
+            isCellWeekConflict(
+              row.period,
+              column.no - 1,
+              cellData.weeksData,
+              cellData.consecutiveClassPeriods
+            )
+          ) {
+            //交换
+            if (
+              isCellWeekConflict(
+                row.period + course.consecutiveClassPeriods,
+                column.no - 1,
+                cellData.weeksData,
+                cellData.consecutiveClassPeriods -
+                  course.consecutiveClassPeriods
+              )
             ) {
-              if (
-                isWeekConflict(
-                  row.cellList[column.no - 1].courseList[i].weeksData,
-                  cellData.courseWeeks
-                )
-              ) {
-                isWeekConflictBoolean = true;
-              }
+              cell.target.classList.add("teachingClassExchangeHover");
+              cell.preventDefault(); //使单元格允许drop
             }
-          if (isWeekConflictBoolean){
-            //周次冲突,只能交换
-            cell.target.classList.add("teachingClassExchangeHover");
-            cell.preventDefault(); //使单元格允许drop
           } else {
             //周次不冲突,可以放入
-            console.log(cell.target.className);
-            if (cell.target.className.includes("cellDiv") || cell.target.className.includes("cellText") ) {
+            if (
+              cell.target.className.includes("cellDiv") ||
+              cell.target.className.includes("cellText")
+            ) {
               cell.preventDefault(); //使单元格允许drop
               cell.target.classList.add("cellHover");
             }
           }
         }
-
       }
 
       if (CurrentDragCellData.value.cellType == "tableCell") {
-      let courseData;
+        let courseData;
         //放入的是表格中已有的教学班
         ClassPeriodsTemp =
           CurrentDragCellData.value.courseData.consecutiveClassPeriods;
         courseData = CurrentDragCellData.value.courseData;
 
         if (courseData.cellId != course.cellId) {
-          let isWeekConflictBoolean = false;
-            for (
-              let i = 0;
-              i < row.cellList[column.no - 1].courseList.length;
-              i++
-            ) {
-              if (
-                isWeekConflict(
-                  row.cellList[column.no - 1].courseList[i].weeksData,
-                  courseData.weeksData
-                )
-              ) {
-                isWeekConflictBoolean = true;
-              }
-            }
-          if (isWeekConflictBoolean) {
+          if (
+            isCellWeekConflict(
+              row.period,
+              column.no - 1,
+              courseData.weeksData,
+              courseData.consecutiveClassPeriods
+            )
+          ) {
             //周次冲突,只能交换
-            cell.target.classList.add("teachingClassExchangeHover");
-            cell.preventDefault(); //使单元格允许drop
+            if (
+              isCellWeekConflict(
+                row.period + course.consecutiveClassPeriods,
+                column.no - 1,
+                courseData.weeksData,
+                courseData.consecutiveClassPeriods -
+                course.consecutiveClassPeriods
+              )
+              //检测交换之后的位置是否有冲突
+            ) {
+              cell.target.classList.add("cellHoverProhibited");
+            }else{
+              cell.target.classList.add("teachingClassExchangeHover");
+              cell.preventDefault(); //使单元格允许drop
+
+            }
           } else {
             //周次不冲突,可以放入
             console.log(cell.target.className);
-            if (cell.target.className.includes("cellDiv") ||cell.target.className.includes("cellText")) {
+            if (
+              cell.target.className.includes("cellDiv") ||
+              cell.target.className.includes("cellText")
+            ) {
               cell.preventDefault(); //使单元格允许drop
               cell.target.classList.add("cellHover");
             }
           }
         }
       }
-
-
     };
 
     //被拖动的教学班离开教学班单元格
@@ -975,7 +1066,14 @@ export default {
           CurrentDragCellData.value.cellData.consecutiveClassPeriods;
         cellData = CurrentDragCellData.value.cellData;
         if (cellData.id != course.teachingClassId) {
-          if (isWeekConflict(cellData.courseWeeks, course.weeksData)) {
+          if (
+            isCellWeekConflict(
+              row.period,
+              column.no - 1,
+              cellData.weeksData,
+              cellData.consecutiveClassPeriods
+            )
+          ) {
             //周次冲突,只能交换
             HandleCellExchange(
               false,
@@ -983,44 +1081,53 @@ export default {
               "",
               CurrentDragCellData.value.cellData
             );
-          }else{
+          } else {
             //周次不冲突,合并到一个单元格里
             //create
-            HandleCellCreate(CurrentDragCellData.value.cellData.id,row.period,column.no-1)
+            HandleCellCreate(
+              CurrentDragCellData.value.cellData.id,
+              row.period,
+              column.no - 1
+            );
           }
         }
       }
       if (CurrentDragCellData.value.cellType == "tableCell") {
-        ClassPeriodsTemp = 
+        ClassPeriodsTemp =
           CurrentDragCellData.value.courseData.consecutiveClassPeriods;
         courseData = CurrentDragCellData.value.courseData;
         cellData = CurrentDragCellData.value.cellData;
 
-
-         if (courseData.cellId != course.cellId) {
-        if (isWeekConflict(courseData.weeksData, course.weeksData)) {
-          //周次冲突,只能交换
-          HandleCellExchange(
-            true,
-            course.cellId,
-            CurrentDragCellData.value.courseData.cellId,
-            ""
-          );
-        }else{
-          //周次不冲突,合并到一个单元格里
-          console.log(cellData);
-           HandleCellMove(
-            courseData.cellId,
-            row.period,
-            column.no - 1,
-            cellData.period,
-            cellData.cellIndex,
-          );
+        if (courseData.cellId != course.cellId) {
+          if (
+            isCellWeekConflict(
+              row.period,
+              column.no - 1,
+              courseData.weeksData,
+              courseData.consecutiveClassPeriods
+            )
+          ) {
+            //周次冲突,只能交换
+            HandleCellExchange(
+              true,
+              course.cellId,
+              CurrentDragCellData.value.courseData.cellId,
+              ""
+            );
+          } else {
+            //周次不冲突,合并到一个单元格里
+            console.log(cellData);
+            HandleCellMove(
+              courseData.cellId,
+              row.period,
+              column.no - 1,
+              cellData.period,
+              cellData.cellIndex
+            );
+          }
         }
       }
-      }
 
-     
       cell.target.classList.remove("teachingClassExchangeHover");
       cell.target.classList.remove("cellHover");
     };
@@ -1031,13 +1138,17 @@ export default {
     const setCellColor = ({ row, column, rowIndex, columnIndex }) => {
       if (columnIndex > 0 && columnIndex < 8) {
         if (row.cellList[columnIndex - 1].isAvailable) {
-          return { padding: "0px", height: `${cellHeight}px`, width: `${cellWidth}px` };
+          return {
+            padding: "0px",
+            height: `${cellHeight}px`,
+            width: `${cellWidth}px`,
+          };
         } else {
           return {
             background: "#DCDFE6",
             padding: "0px",
             height: `${cellHeight}px`,
-            width:  `${cellWidth}px`,
+            width: `${cellWidth}px`,
           };
         }
       }
@@ -1368,25 +1479,52 @@ export default {
 
               let weeks = "";
 
-              cell.courseWeeks.forEach((time) => {
+              cell.weeksData.forEach((time) => {
+                scheduleStruct.value[cell.period - 1].cellList[
+                  cell.cellIndex
+                ].weeksDataList.push(time);
                 weeks += `${time.courseStartWeek}-${time.courseEndWeek}周;`;
               });
-              
+
+              let periodRange = "";
+
+              if (cell.consecutiveClassPeriods == 1) {
+                periodRange = `第${cell.period}节`;
+              } else {
+                periodRange = `第${cell.period}节-第${
+                  cell.period + cell.consecutiveClassPeriods - 1
+                }节`;
+              }
+              //更新scheduleStruct
               scheduleStruct.value[cell.period - 1].cellList[
                 cell.cellIndex
               ].courseList.push({
                 cellId: cell.cellId,
-                teachingClassId:cell.teachingClassId,
+                teachingClassId: cell.teachingClassId,
                 courseName: cell.teachingClassName,
                 teacherName,
                 weeks,
-                weeksData: cell.courseWeeks,
+                weeksData: cell.weeksData,
                 consecutiveClassPeriods: cell.consecutiveClassPeriods,
-                style:{height:`${cellHeight*cell.consecutiveClassPeriods}px`}
+                periodRange,
+                style: {
+                  height: `${cellHeight * cell.consecutiveClassPeriods}px`,
+                },
               });
               scheduleStruct.value[cell.period - 1].cellList[
                 cell.cellIndex
               ].hasCourse = true;
+
+              for (let i = 0; i < cell.consecutiveClassPeriods; i++) {
+                scheduleStruct.value[cell.period + i - 1].cellList[
+                  cell.cellIndex
+                ].weeksDataList = [
+                  ...scheduleStruct.value[cell.period + i - 1].cellList[
+                    cell.cellIndex
+                  ].weeksDataList,
+                  cell.weeksData,
+                ];
+              }
             } else {
               ElMessage.error(
                 `${cell.teachingClassName} 与排课设置冲突! 请修改排课设置后重试！`
@@ -1414,10 +1552,9 @@ export default {
 
     //====================================单元格动态高度===================================
 
-
-    const HandleTeachingClassCellStyle = ()=>{
-      return {background:"#000"}
-    }
+    const HandleTeachingClassCellStyle = () => {
+      return { background: "#000" };
+    };
     //====================================下面是api数据获取部分======================================
 
     //根据tree选中的班级id请求对应班级的教学班
@@ -1524,7 +1661,7 @@ export default {
     ) => {
       console.log("exchange!");
       //这里是手动改变scheduleData,之后要删掉
-      if (isTableCell){
+      if (isTableCell) {
         let temp;
         let firstCell =
           scheduleData.value[
@@ -1546,22 +1683,22 @@ export default {
         temp = secondCell.cellIndex;
         secondCell.cellIndex = firstCell.cellIndex;
         firstCell.cellIndex = temp;
-      }else{
+      } else {
         //targetCell
         let temp;
-          let firstCell =
-            scheduleData.value[
-              scheduleData.value.findIndex(
-                (course) => course.cellId == firstCellId
-              )
-            ];
+        let firstCell =
+          scheduleData.value[
+            scheduleData.value.findIndex(
+              (course) => course.cellId == firstCellId
+            )
+          ];
 
-          firstCell.consecutiveClassPeriods = exchangeCellData.consecutiveClassPeriods
-          firstCell.courseWeeks = exchangeCellData.courseWeeks
-          firstCell.teacherList = exchangeCellData.teacherList
-          firstCell.teachingClassId = exchangeCellData.id
-          firstCell.teachingClassName = exchangeCellData.courseName
-
+        firstCell.consecutiveClassPeriods =
+          exchangeCellData.consecutiveClassPeriods;
+        firstCell.weeksData = exchangeCellData.weeksData;
+        firstCell.teacherList = exchangeCellData.teacherList;
+        firstCell.teachingClassId = exchangeCellData.id;
+        firstCell.teachingClassName = exchangeCellData.courseName;
       }
       //----------------------------------
       cellExchangeApi(
@@ -1586,16 +1723,17 @@ export default {
       console.log("create!");
       //这里是手动改变scheduleData,之后要删掉
       console.log(CurrentDragCellData.value);
-       scheduleData.value.push({
+      scheduleData.value.push({
         cellId: Math.random(),
         teachingClassId,
         teachingClassName: CurrentDragCellData.value.cellData.courseName,
-        teacherList:CurrentDragCellData.value.cellData.teacherList,
-        courseWeeks:CurrentDragCellData.value.cellData.courseWeeks,
+        teacherList: CurrentDragCellData.value.cellData.teacherList,
+        weeksData: CurrentDragCellData.value.cellData.weeksData,
         period,
         cellIndex,
-        consecutiveClassPeriods: CurrentDragCellData.value.cellData.consecutiveClassPeriods
-      },)
+        consecutiveClassPeriods:
+          CurrentDragCellData.value.cellData.consecutiveClassPeriods,
+      });
       //--------------------------------
       cellCreateApi(
         taskId,
@@ -1616,9 +1754,9 @@ export default {
     const HandleCellDelete = (cellId) => {
       console.log("delete!");
       //这里是手动改变scheduleData,之后要删掉
-      scheduleData.value = scheduleData.value.filter((course)=>{
-        return course.cellId != cellId
-      })
+      scheduleData.value = scheduleData.value.filter((course) => {
+        return course.cellId != cellId;
+      });
       //--------------------------------------------------------------
       cellDeleteApi(taskId, currentClassId.value, cellId).then((res) => {
         if (res) {
@@ -1644,7 +1782,7 @@ export default {
       tableHeader,
       setCellColor,
       teacherNameFormatter,
-      courseWeeksFormatter,
+      weeksDataFormatter,
 
       HandleCellDrop,
       HandleCellDragOver,
@@ -1684,13 +1822,13 @@ export default {
       updateKey,
       tableRef,
       setRowClass,
-      HandleTeachingClassCellStyle
+      HandleTeachingClassCellStyle,
     };
   },
 };
 </script>
 
-<style>
+<style >
 .scheduleBuildBody {
   height: auto;
   margin: 10px 0px 0px 0px;
@@ -1704,7 +1842,7 @@ export default {
 }
 
 .controlPart {
-  height: 35px;
+  height: 20px;
   margin-bottom: 10px;
 }
 
@@ -1831,7 +1969,6 @@ export default {
   padding: 0px;
   margin: 0px;
   line-height: 15px;
-
 }
 .cell:has(.cellContainer) {
   height: 100%;
@@ -1866,7 +2003,7 @@ export default {
 }
 
 .cellHoverProhibited {
-  background: #ff4d5f;
+  background: #ff4d5f !important;
 }
 .teachingClassExchangeHover {
   background: #7dff7b !important;
@@ -1939,4 +2076,7 @@ export default {
   border: solid 1px green;
 }
 
+.scheduleTable.el-table--enable-row-hover .el-table__body tr:hover > td {
+  background-color: initial;
+}
 </style>
