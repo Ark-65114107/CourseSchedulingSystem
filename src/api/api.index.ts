@@ -37,10 +37,10 @@ export const coursedata = (date: Date, scheduleType: string = '') => {
     // 检查响应格式是否符合预期
     if (response && response.data && Array.isArray(response.data)) {
       // 处理meta中的状态码
-      if (response.meta && response.meta.code !== 200) {
-        console.warn('API返回非成功状态:', response.meta.message);
-        return [];
-      }
+      // if (response.meta && response.meta.code !== 200) {
+      //   console.warn('API返回非成功状态:', response.meta.message);
+      //   return [];
+      // }
 
       // 将后端返回的数据转换为前端需要的格式
       return response.data.map(course => ({

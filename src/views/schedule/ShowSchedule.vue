@@ -46,12 +46,79 @@ const selectedScheduleType = ref('')
 // 级联选择器选项数据
 const options = [
   {
-    value: '1',
-    label: '第1学期'
+    value: 'term1',
+    label: '第1学期',
+    children:[
+      {
+        value: 'academy1.1',
+        label: '计算机学院',
+        children:[
+          {
+            value: 'major1.1.1',
+            label: '软件工程',
+            children:[
+              {
+                value: 'class1.1.1.1',
+                label: '软工zb24-1'
+              },
+              {
+                value: 'class1.1.1.2',
+                label: '软工24-1'
+              }
+            ]
+          },
+          {
+            value: 'major1.1.2',
+            label: '物联网',
+            children:[
+              {
+                value: 'class1.1.2.1',
+                label: '物联网24-1'
+              },
+              {
+                value: 'class1.1.2.2',
+                label: '物联网24-2'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        value: 'academy1.2',
+        label: '水利工程学院'
+      }
+      ,
+      {
+        value: 'academy1.3',
+        label: '机械工程学院'
+      },
+      {
+        value: 'acamedy1.4',
+        label: '土木工程学院'
+      }
+    ]
   },
   {
-    value: '2',
-    label: '第2学期'
+    value: 'term2',
+    label: '第2学期',
+    children:[
+    {
+        value: 'academy2.1',
+        label: '计算机学院'
+      },
+      {
+        value: 'academy2.2',
+        label: '水利工程学院'
+      },
+      {
+        value: 'academy2.3',
+        label: '机械工程学院'
+      },
+      {
+        value: 'acamedy2.4',
+        label: '土木工程学院'
+      }
+    ]
   }
 ]
 
@@ -228,6 +295,7 @@ async function updateCalendarEvents() {
 }
 
 // 简化版的自定义渲染时间轴标签函数 - 修复节次显示问题
+// 简化版的自定义渲染时间轴标签函数 - 修复节次显示问题并删除多余单元格
 function customizeTimeGridAxis() {
   // 延迟执行以确保DOM已更新
   setTimeout(() => {
@@ -261,13 +329,47 @@ function customizeTimeGridAxis() {
     const slotsContainer = document.querySelector('.fc-timegrid-slots tbody')
     if (slotsContainer) {
       const rows = slotsContainer.querySelectorAll('tr')
-      // 计算适合的行高 (650px容器 - 头部约50px) / 12节课
+      // 计算适合的行高 (800px容器 - 头部约50px) / 12节课
       const rowHeight = Math.floor((800 - 50) / 12)
-      rows.forEach(row => {
-        if (row.querySelector('.fc-timegrid-slot-label-cushion')) {
-          row.style.height = `${rowHeight}px`
+      
+      // 处理所有行
+      rows.forEach((row, index) => {
+        if (index < periodMap.length) {
+          // 保留前12个节次行，设置高度
+          if (row.querySelector('.fc-timegrid-slot-label-cushion')) {
+            row.style.height = `${rowHeight}px`
+          }
+        } else {
+          // 隐藏第12节后的多余行
+          row.style.display = 'none'
         }
       })
+      
+      // 确保最后一行没有底部边框
+      if (rows.length >= periodMap.length) {
+        const lastRow = rows[periodMap.length - 1]
+        if (lastRow) {
+          lastRow.style.borderBottom = 'none'
+        }
+      }
+    }
+    
+    // 隐藏时间轴内的多余内容区域
+    const timeGridContent = document.querySelector('.fc-timegrid-body')
+    if (timeGridContent) {
+      // 设置明确的高度，防止显示多余内容
+      const totalHeight = periodMap.length * Math.floor((800 - 50) / 12)
+      const timeGridHtml = timeGridContent as HTMLElement
+      timeGridHtml.style.maxHeight = `${totalHeight}px`
+      
+      // 隐藏超出的内容
+      timeGridHtml.style.overflow = 'hidden'
+    }
+    
+    // 修复滚动行为
+    const scrollContainer = document.querySelector('.fc-scroller-liquid-absolute')
+    if (scrollContainer) {
+      scrollContainer.scrollTop = 0 // 确保滚动到顶部
     }
   }, 100)
 }
