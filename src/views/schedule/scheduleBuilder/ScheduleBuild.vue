@@ -136,7 +136,7 @@
             max-height="400px"
             :cell-style="setCellColor"
             v-loading="isTableLoading"
-            fit
+            :fit="false"
           >
             <el-table-column label="节次/周次" prop="periodColumn">
               <template #default="scope">
@@ -148,6 +148,7 @@
 
             <el-table-column
               class="courseColumn"
+              min-width="200px"
               v-for="item of tableHeader"
               :label="item.name"
             >
@@ -162,7 +163,10 @@
                     class="cellDiv"
                     v-for="course of scope.row.cellList[scope.column.no - 1]
                       .courseList"
+                    
                     v-show="scope.row.cellList[scope.column.no - 1].hasCourse"
+
+                    :style="course.style"
                     :key="course"
                     :draggable="true"
                     @dragstart="
@@ -220,6 +224,9 @@ export default {
   name: "ScheduleBuild",
   components: { aiScheduleDialogVue },
   setup() {
+    const cellWidth = 230
+    const cellHeight = 90
+
     const taskId = useRoute().query.id;
 
     const currentClassName = ref("");
@@ -866,25 +873,39 @@ export default {
 
       if (CurrentDragCellData.value.cellType == "targetCell") {
       let cellData;
-
         ClassPeriodsTemp =
           CurrentDragCellData.value.cellData.consecutiveClassPeriods;
         cellData = CurrentDragCellData.value.cellData;
 
         if (cellData.id != course.teachingClassId) {
-          if (isWeekConflict(course.weeksData,cellData.courseWeeks)) {
+          //判断该教学班所在的单元格列表里的教学班是否与拖动的教学班周次冲突
+           let isWeekConflictBoolean = false;
+            for (
+              let i = 0;
+              i < row.cellList[column.no - 1].courseList.length;
+              i++
+            ) {
+              if (
+                isWeekConflict(
+                  row.cellList[column.no - 1].courseList[i].weeksData,
+                  cellData.courseWeeks
+                )
+              ) {
+                isWeekConflictBoolean = true;
+              }
+            }
+          if (isWeekConflictBoolean){
             //周次冲突,只能交换
             cell.target.classList.add("teachingClassExchangeHover");
             cell.preventDefault(); //使单元格允许drop
           } else {
             //周次不冲突,可以放入
-            if (cell.target.className.includes("cellDiv")) {
+            console.log(cell.target.className);
+            if (cell.target.className.includes("cellDiv") || cell.target.className.includes("cellText") ) {
               cell.preventDefault(); //使单元格允许drop
               cell.target.classList.add("cellHover");
             }
           }
-        }else{
-          ElMessage.error("教学班相同，无法替换或添加!")
         }
 
       }
@@ -897,13 +918,29 @@ export default {
         courseData = CurrentDragCellData.value.courseData;
 
         if (courseData.cellId != course.cellId) {
-          if (isWeekConflict(courseData.weeksData, course.weeksData)) {
+          let isWeekConflictBoolean = false;
+            for (
+              let i = 0;
+              i < row.cellList[column.no - 1].courseList.length;
+              i++
+            ) {
+              if (
+                isWeekConflict(
+                  row.cellList[column.no - 1].courseList[i].weeksData,
+                  courseData.weeksData
+                )
+              ) {
+                isWeekConflictBoolean = true;
+              }
+            }
+          if (isWeekConflictBoolean) {
             //周次冲突,只能交换
             cell.target.classList.add("teachingClassExchangeHover");
             cell.preventDefault(); //使单元格允许drop
           } else {
             //周次不冲突,可以放入
-            if (cell.target.className.includes("cellDiv")) {
+            console.log(cell.target.className);
+            if (cell.target.className.includes("cellDiv") ||cell.target.className.includes("cellText")) {
               cell.preventDefault(); //使单元格允许drop
               cell.target.classList.add("cellHover");
             }
@@ -938,7 +975,7 @@ export default {
           CurrentDragCellData.value.cellData.consecutiveClassPeriods;
         cellData = CurrentDragCellData.value.cellData;
         if (cellData.id != course.teachingClassId) {
-          if (isWeekConflict(courseData.weeksData, course.weeksData)) {
+          if (isWeekConflict(cellData.courseWeeks, course.weeksData)) {
             //周次冲突,只能交换
             HandleCellExchange(
               false,
@@ -949,7 +986,7 @@ export default {
           }else{
             //周次不冲突,合并到一个单元格里
             //create
-            HandleCellCreate(CurrentDragCellData.cellData.id,row.period,column.no)
+            HandleCellCreate(CurrentDragCellData.value.cellData.id,row.period,column.no-1)
           }
         }
       }
@@ -957,18 +994,21 @@ export default {
         ClassPeriodsTemp = 
           CurrentDragCellData.value.courseData.consecutiveClassPeriods;
         courseData = CurrentDragCellData.value.courseData;
+        cellData = CurrentDragCellData.value.cellData;
+
 
          if (courseData.cellId != course.cellId) {
         if (isWeekConflict(courseData.weeksData, course.weeksData)) {
           //周次冲突,只能交换
           HandleCellExchange(
-            false,
+            true,
             course.cellId,
-            "",
-            CurrentDragCellData.value.cellData
+            CurrentDragCellData.value.courseData.cellId,
+            ""
           );
         }else{
           //周次不冲突,合并到一个单元格里
+          console.log(cellData);
            HandleCellMove(
             courseData.cellId,
             row.period,
@@ -991,13 +1031,13 @@ export default {
     const setCellColor = ({ row, column, rowIndex, columnIndex }) => {
       if (columnIndex > 0 && columnIndex < 8) {
         if (row.cellList[columnIndex - 1].isAvailable) {
-          return { padding: "0px", height: "100px", width: "250px" };
+          return { padding: "0px", height: `${cellHeight}px`, width: `${cellWidth}px` };
         } else {
           return {
             background: "#DCDFE6",
             padding: "0px",
-            height: "100px",
-            width: "250px",
+            height: `${cellHeight}px`,
+            width:  `${cellWidth}px`,
           };
         }
       }
@@ -1315,6 +1355,7 @@ export default {
       scheduleStruct.value = JSON.parse(scheduleStructTemp.value);
       if (scheduleData.value.length > 0) {
         scheduleData.value.forEach((cell) => {
+          //遍历教学班数组
           if (scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]) {
             if (
               scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]
@@ -1335,12 +1376,13 @@ export default {
                 cell.cellIndex
               ].courseList.push({
                 cellId: cell.cellId,
-                teachingClassId,
+                teachingClassId:cell.teachingClassId,
                 courseName: cell.teachingClassName,
                 teacherName,
                 weeks,
                 weeksData: cell.courseWeeks,
                 consecutiveClassPeriods: cell.consecutiveClassPeriods,
+                style:{height:`${cellHeight*cell.consecutiveClassPeriods}px`}
               });
               scheduleStruct.value[cell.period - 1].cellList[
                 cell.cellIndex
@@ -1369,6 +1411,13 @@ export default {
       }
       return "";
     };
+
+    //====================================单元格动态高度===================================
+
+
+    const HandleTeachingClassCellStyle = ()=>{
+      return {background:"#000"}
+    }
     //====================================下面是api数据获取部分======================================
 
     //根据tree选中的班级id请求对应班级的教学班
@@ -1475,8 +1524,7 @@ export default {
     ) => {
       console.log("exchange!");
       //这里是手动改变scheduleData,之后要删掉
-      console.log(scheduleData.value);
-      if (isTableCell) {
+      if (isTableCell){
         let temp;
         let firstCell =
           scheduleData.value[
@@ -1490,13 +1538,30 @@ export default {
               (course) => course.cellId == secondCellId
             )
           ];
+
         temp = secondCell.period;
         secondCell.period = firstCell.period;
         firstCell.period = temp;
+
         temp = secondCell.cellIndex;
         secondCell.cellIndex = firstCell.cellIndex;
         firstCell.cellIndex = temp;
-        console.log(scheduleData.value);
+      }else{
+        //targetCell
+        let temp;
+          let firstCell =
+            scheduleData.value[
+              scheduleData.value.findIndex(
+                (course) => course.cellId == firstCellId
+              )
+            ];
+
+          firstCell.consecutiveClassPeriods = exchangeCellData.consecutiveClassPeriods
+          firstCell.courseWeeks = exchangeCellData.courseWeeks
+          firstCell.teacherList = exchangeCellData.teacherList
+          firstCell.teachingClassId = exchangeCellData.id
+          firstCell.teachingClassName = exchangeCellData.courseName
+
       }
       //----------------------------------
       cellExchangeApi(
@@ -1619,6 +1684,7 @@ export default {
       updateKey,
       tableRef,
       setRowClass,
+      HandleTeachingClassCellStyle
     };
   },
 };
@@ -1744,7 +1810,9 @@ export default {
   height: 100%;
   background: #ebedf0;
   border: solid 1px #dcdfe6;
-  z-index: 15;
+  z-index: 114514;
+  display: flex;
+  position: relative;
 }
 
 .cellContainer {
@@ -1754,6 +1822,7 @@ export default {
   justify-content: flex-start;
   box-sizing: border-box;
   z-index: 10;
+  position: absolute;
 }
 
 .cell:has(.cellDiv) {
@@ -1762,6 +1831,7 @@ export default {
   padding: 0px;
   margin: 0px;
   line-height: 15px;
+
 }
 .cell:has(.cellContainer) {
   height: 100%;
@@ -1771,10 +1841,9 @@ export default {
   line-height: 15px;
 }
 .cellText {
-  font-size: 10px;
+  font-size: 11px;
   height: 100%;
   width: 100%;
-  margin: 5px;
   line-height: 20px;
   text-align: left;
   align-content: flex-start;
@@ -1832,7 +1901,6 @@ export default {
 }
 
 .cellOptionDiv {
-  height: max-content;
   width: max-content;
   min-width: 150px;
   margin: 5px;
@@ -1870,4 +1938,5 @@ export default {
 .afternoonBreakBorder {
   border: solid 1px green;
 }
+
 </style>
