@@ -1,8 +1,8 @@
 <template>
   <el-dialog
-    v-model="isDialogFormVisible"
-    :title= 'mode ? "添加":"修改"'
-    width="450"
+    v-model="isDialogVisiable"
+    title= "自动排课"
+    width="650px"
     class="dialog"
     :close-on-click-modal="false"
     :show-close="false"
@@ -17,27 +17,33 @@
 
 <script>
 
-import { reactive, ref, toRefs } from "vue";
+import { onMounted, reactive, ref, toRefs } from "vue";
 import bus from "@/bus/bus";
 
 export default {
   name: "AiScheduleDialog",
-  mounted() {
-    bus.on("showAiScheduleDialog", (value) => {
-      this.isDialogFormVisible = true; //List中按下按钮弹窗
-    });
-  },
-
   setup() {
 
     const data = reactive({
-      isDialogFormVisible: false, //是否弹窗
+      isDialogVisiable: false, //是否弹窗
       id: "",
       mode: false,
     });
 
+    onMounted(()=>{
+      bus.on("showAiScheduleDialog", (value) => {
+        data.isDialogVisiable = true; //List中按下按钮弹窗
+      });
+    })
+
+    const HandleCancelClick = ()=>{
+      // teachingClassFormRef.value.resetFields();
+      data.isDialogVisiable = false;
+    }
+
     return {
       ...toRefs(data),
+      HandleCancelClick,
     };
   },
 };

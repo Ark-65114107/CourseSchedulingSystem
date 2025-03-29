@@ -26,7 +26,7 @@
           >
             <el-table-column prop="perWeekCourseHour" label="周学时">
             </el-table-column>
-            <el-table-column prop="code" label="教学班编号"> </el-table-column>
+            <el-table-column prop="id" label="教学班编号"> </el-table-column>
             <el-table-column prop="name" label="教学班名称"> </el-table-column>
             <el-table-column label="组成班级" v-slot="scope" min-width="110px">
               <el-scrollbar height="60px">
@@ -35,6 +35,11 @@
                 }}</el-tag>
               </el-scrollbar>
             </el-table-column>
+            <el-table-column
+              label="上课周次"
+              prop="courseStartWeekHours"
+              :formatter="courseStartWeekHoursFormatter"
+            ></el-table-column>
             <el-table-column
               label="教学班人数"
               prop="teachingClassSize"
@@ -133,7 +138,6 @@ export default {
     const getTeachingClassList = () => {
       getListTeachingClassApi(taskId, currentCourse.value).then((res) => {
         if (res.meta.code === 200) {
-          console.log(res);
           currentTeachingClassList.value = setListRowspan(res.data);
         }
       });
@@ -144,7 +148,6 @@ export default {
     };
 
     const HandleEditClick = (row) => {
-      console.log(row);
       bus.emit("showSetTeachingClassDialog", row, currentCourse.value);
     };
 
@@ -175,6 +178,14 @@ export default {
       }
     };
 
+    const courseStartWeekHoursFormatter = (row,dom,value)=>{
+      let res = ""
+      value.forEach((time)=>{
+        res += `${time.courseStartWeeks}-${time.courseEndWeeks}周;`;
+      })
+      return res
+    }
+
     return {
       currentCourse,
       HandleEditClick,
@@ -182,6 +193,7 @@ export default {
       currentTeachingClassList,
       courseList,
       tableSpan,
+      courseStartWeekHoursFormatter
     };
   },
 };

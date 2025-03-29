@@ -2,7 +2,7 @@
   <el-dialog
     v-model="isDialogVisiable"
     title="编辑教学班"
-    width="500px"
+    width="520px"
     :show-close="false"
     :close-on-click-modal="false"
   >
@@ -26,9 +26,68 @@
             disabled
           ></el-input-number>
         </el-form-item>
+        <div class="courseWeekDiv">
+          <el-form-item
+            label="上课周次："
+            prop="courseWeekHours"
+            style="height: auto"
+          >
+            <div
+              class="courseWeekRow"
+              v-for="weeks of formInput.courseWeekHours"
+            >
+              <el-input-number
+                class="courseWeekInput"
+                v-model="weeks.courseStartWeeks"
+                controls-position="right"
+                :max="weeks.courseEndWeeks - 1"
+                min="1"
+              >
+                <template #prefix>
+                  <span>第</span>
+                </template>
+
+                <template #suffix>
+                  <span>周</span>
+                </template>
+              </el-input-number>
+
+              <el-text>到</el-text>
+
+              <el-input-number
+                class="courseWeekInput"
+                v-model="weeks.courseEndWeeks"
+                controls-position="right"
+                max="25"
+                :min="weeks.courseStartWeeks + 1"
+              >
+                <template #prefix>
+                  <span>第</span>
+                </template>
+                <template #suffix>
+                  <span>周</span>
+                </template>
+              </el-input-number>
+              <el-button
+                class="courseWeekDeleteButton"
+                size="small"
+                type="danger"
+                @click="HandleCourseWeekDelete(weeks)"
+                >删除</el-button
+              >
+            </div>
+            <el-button
+              type="primary"
+              size="small"
+              class="courseWeekInputAddButton"
+              @click="HandleCourseWeekInputAdd"
+              >添加</el-button
+            >
+          </el-form-item>
+        </div>
 
         <el-form-item
-          label="教学班组成:"
+          label="合并教学班:"
           style="max-height: 150px"
           prop="classList"
         >
@@ -37,20 +96,32 @@
               <el-autocomplete
                 class="searchClassinput"
                 size="small"
-                placeholder="搜索周学时相同的班级"
+                placeholder="搜索周学时相同且在同一校区的教学班"
                 v-model="searchClassKeyword"
                 :fetch-suggestions="getClassSuggestions"
                 @select="HandleOptionSelect"
                 @clear="HandleInputClear"
                 clearable
-              ></el-autocomplete>
+              >
+                <template #default="{ item }">
+                  {{ item.value }}
+                  <div class="tagContainer">
+                    <el-tag
+                      class="classTag"
+                      size="small"
+                      v-for="cl of item.data.classList"
+                      >{{ cl.name }}</el-tag
+                    >
+                  </div>
+                </template>
+              </el-autocomplete>
               <el-button
                 class="classAddButton"
                 type="primary"
                 size="small"
                 style="margin-left: 5px"
                 @click="HandleClassAdd"
-                >添加</el-button
+                >合并</el-button
               >
             </div>
             <el-scrollbar class="classListScrollbar" height="100px">
@@ -76,54 +147,15 @@
           <el-input-number
             max="9999"
             min="0"
-            v-model="teachingClassSize"
+            v-model="formInput.teachingClassSize"
             controls-position="right"
             disabled
           />
         </el-form-item>
 
-        <div class="courseWeek">
-          <el-form-item label="上课周次：" prop="courseStartWeeks">
-            <el-input-number
-              class="courseWeekInput"
-              v-model="formInput.courseStartWeeks"
-              controls-position="right"
-              :max="formInput.courseEndWeeks - 1"
-              min="1"
-            >
-              <template #prefix>
-                <span>第</span>
-              </template>
-
-              <template #suffix>
-                <span>周</span>
-              </template>
-            </el-input-number>
-          </el-form-item>
-
-          <el-text>到</el-text>
-
-          <el-form-item prop="courseEndWeeks">
-            <el-input-number
-              class="courseWeekInput"
-              v-model="formInput.courseEndWeeks"
-              controls-position="right"
-              max="25"
-              :min="formInput.courseStartWeeks + 1"
-            >
-              <template #prefix>
-                <span>第</span>
-              </template>
-              <template #suffix>
-                <span>周</span>
-              </template>
-            </el-input-number>
-          </el-form-item>
-        </div>
-
         <el-form-item label="排课学时：">
           <el-input-number
-            v-model="scheduledCourseHours"
+            v-model="formInput.scheduledCourseHours"
             controls-position="right"
             disabled
           />
@@ -138,21 +170,58 @@
           />
         </el-form-item>
         <el-form-item label="教室类型：">
-          <el-select>
-            <el-option />
+          <el-select
+            v-model="formInput.assignedClassroomType"
+            filterable
+            remote
+            :remote-method="classroomTypeRemoteMethod"
+            placeholder="搜索教室类型"
+          >
+            <el-option
+              v-for="opt of classroomTypeList"
+              :label="opt.name"
+              :value="opt.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="指定教室：">
-          <el-select>
-            <el-option />
+          <el-select
+            v-model="formInput.assignedClassroom"
+            filterable
+            remote
+            :remote-method="classroomRemoteMethod"
+            placeholder="搜索教室"
+          >
+            <el-option
+              v-for="opt of classroomList"
+              :label="opt.name"
+              :value="opt.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="指定教学楼：">
-          <el-select>
-            <el-option />
+          <el-select
+            v-model="formInput.assignedBuilding"
+            filterable
+            remote
+            :remote-method="buildingRemoteMethod"
+            placeholder="搜索教学楼"
+          >
+            <el-option
+              v-for="opt of buildingList"
+              :label="opt.name"
+              :value="opt.id"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="指定时间："> </el-form-item>
+        <el-form-item label="指定时间：">
+          <el-time-picker
+            is-range
+            range-separator="到"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+          ></el-time-picker>
+        </el-form-item>
 
         <el-form-item label="排课优先级：" prop="priorityLevel">
           <el-input-number
@@ -179,11 +248,16 @@
 <script>
 import { computed, onMounted, ref, watch } from "vue";
 import bus from "@/bus/bus";
-import { getSingleTeachingClassApi } from "@/api/schedule/setTeachingClass/teachingClass.api";
-import { getListClassByCourseHour } from "@/api/schedule/setCourseHour/getListClassByCourseHour.api";
+import {
+  getSingleTeachingClassApi,
+  updateTeachingClassApi,
+} from "@/api/schedule/setTeachingClass/teachingClass.api";
+import { getListTeachingClassbyHourAndCampusApi } from "@/api/schedule/setCourseHour/getListTeachingClassbyHourAndCampus.api";
 import { useRoute } from "vue-router";
 import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { getTeachingBuildingListApi } from "@/api/basicData/teachingbuilding.api";
+import { getClassroomListApi } from "@/api/basicData/classroom.api";
 
 export default {
   name: "SetTeachingClassDialog",
@@ -201,8 +275,21 @@ export default {
     const formInput = ref({
       name: "",
       perWeekCourseHour: "",
-      courseStartWeeks: 0,
-      courseEndWeeks: 2,
+      courseWeekHours: [],
+      scheduledCourseHours: computed(() => {
+        let totalHour = 0;
+        formInput.value.courseWeekHours.forEach((weeks) => {
+          totalHour +=
+            formInput.value.perWeekCourseHour *
+            (weeks.courseEndWeeks - weeks.courseStartWeeks + 1);
+        });
+        return totalHour;
+      }),
+      courseWeekNum: 1,
+      // {
+      //     courseStartWeeks: 1,
+      //     courseEndWeeks: 18,
+      // },
       classPeriods: "",
       classList: [],
       assignedClassroomType: "",
@@ -210,12 +297,15 @@ export default {
       assignedBuilding: "",
       assignedDate: "",
       priorityLevel: 1,
-    });
-    const scheduledCourseHours = computed(() => {
-      return (
-        formInput.value.perWeekCourseHour *
-        (formInput.value.courseEndWeeks - formInput.value.courseStartWeeks + 1)
-      );
+      teachingClassSize: computed(() => {
+        let temp = 0;
+        formInput.value.classList.forEach((cl) => {
+          temp += cl.size;
+        });
+        return temp;
+      }),
+      deletedClasses: [],
+      mergedTeachingClasses: [],
     });
 
     const maxClassPeriods = computed(() => {
@@ -226,16 +316,41 @@ export default {
       }
     });
 
-    const teachingClassSize = computed(() => {
-      let temp = 0;
-      formInput.value.classList.forEach((cl) => {
-        temp += cl.size;
+    const buildingList = ref([]);
+    const classroomTypeList = ref([]);
+    const classroomList = ref([]);
+
+    const getBuildingList = (taskId) => {
+      getTeachingBuildingListApi(id).then((res) => {
+        if (res) {
+          if (res.meta.code == 200) {
+            buildingList.value = res.data;
+          }
+        }
       });
-      return temp;
-    });
+    };
+    const getClassroomList = (id) => {
+      getClassroomListApi(id).then((res) => {
+        if (res) {
+          if (res.meta.code == 200) {
+            classroomList.value = res.data;
+          }
+        }
+      });
+    };
+    const getBuildingLists = (id) => {
+      getTeachingBuildingListApi(id).then((res) => {
+        if (res) {
+          if (res.meta.code == 200) {
+            buildingList.value = res.data;
+          }
+        }
+      });
+    };
 
     onMounted(() => {
       bus.on("showSetTeachingClassDialog", (row, currentCourseId) => {
+        teachingClassId.value = row.id;
         getSingleTeachingClassApi(taskId, row.id).then(
           (res) => {
             if (res) {
@@ -243,8 +358,7 @@ export default {
                 currentCourse.value = currentCourseId;
                 formInput.value.name = res.data.name;
                 formInput.value.perWeekCourseHour = res.data.perWeekCourseHour;
-                formInput.value.courseStartWeeks = res.data.courseStartWeeks;
-                formInput.value.courseEndWeeks = res.data.courseEndWeeks;
+                formInput.value.courseWeekHours = res.data.courseStartWeekHours;
                 formInput.value.classList = res.data.classList;
                 formInput.value.assignedClassroom = res.data.assignedClassroom;
                 formInput.value.assignedBuilding = res.data.assignedBuilding;
@@ -266,13 +380,20 @@ export default {
         if (validate) {
           buttonIsLoading.value = true;
           //更新教学班数据
-          setTimeout(() => {
-            buttonIsLoading.value = false;
-            teachingClassFormRef.value.resetFields();
-            scrollBarRef.value.scrollTo(0, 0);
-            isDialogVisiable.value = false;
-            ElMessage.success("操作成功!");
-          }, 1000);
+          updateTeachingClassApi(taskId, teachingClassId.value, {
+            ...formInput.value,
+          }).then((res) => {
+            if (res) {
+              if (res.meta.code == 200) {
+                console.log(res);
+                ElMessage.success("操作成功!");
+                buttonIsLoading.value = false;
+                teachingClassFormRef.value.resetFields();
+                scrollBarRef.value.scrollTo(0, 0);
+                isDialogVisiable.value = false;
+              }
+            }
+          });
         }
       });
     };
@@ -286,19 +407,28 @@ export default {
 
     const HandleClassAdd = () => {
       if (selectedClass.value) {
-        formInput.value.classList.push({
-          name: selectedClass.value.value,
-          id: selectedClass.value.id,
-          size: selectedClass.value.size,
+        ElMessageBox.confirm(
+          "合并教学班后，被合并的教学班已有的设置会被清空，确定要合并吗?",
+          {
+            confirmButtonText: "确认",
+            cancelButtonText: "取消",
+            type: "warning",
+          }
+        ).then(() => {
+          formInput.value.classList = [
+            ...formInput.value.classList,
+            ...selectedClass.value.data.classList,
+          ];
+          formInput.value.mergedTeachingClasses.push(selectedClass.value.data);
+          selectedClass.value = "";
+          searchClassKeyword.value = "";
         });
-        selectedClass.value = "";
-        searchClassKeyword.value = "";
       }
     };
 
     const HandleTagClose = (item) => {
       ElMessageBox.confirm(
-        "删除班级会使其变回一个单独的教学班,设置会被清空，确定删除吗?",
+        "删除班级会使其变成一个独立的教学班,已有的设置会被清空，确定删除吗?",
         "温馨提示",
         {
           confirmButtonText: "确认删除",
@@ -306,6 +436,7 @@ export default {
           type: "warning",
         }
       ).then(() => {
+        formInput.value.deletedClasses.push(item);
         formInput.value.classList = formInput.value.classList.filter((tag) => {
           return tag != item;
         });
@@ -321,15 +452,19 @@ export default {
     };
 
     const getClassSuggestions = (query, callback) => {
-      getListClassByCourseHour(
+      getListTeachingClassbyHourAndCampusApi(
         taskId,
-        currentCourse.value,
-        formInput.value.perWeekCourseHour,
+        teachingClassId.value,
         query
       ).then((res) => {
         if (res.meta.code === 200) {
           callback(
-            res.data.map((c) => ({ value: c.name, id: c.id, size: c.size }))
+            res.data.map((tc) => ({
+              value: tc.name,
+              id: tc.id,
+              size: tc.size,
+              data: tc,
+            }))
           );
         }
       });
@@ -343,6 +478,24 @@ export default {
         return false;
       }
     });
+
+    const courseWeeksValidator = (rule, value, callback) => {
+      if (value.length == 0) {
+        //如果输入为空直接返回
+        ElMessage.error("请添加至少一个周次!");
+        callback(new Error("请添加至少一个周次!"));
+      } else {
+        let temp = value[0].courseEndWeeks;
+        for (let i = 1; i < value.length; i++) {
+          if (value[i].courseStartWeeks <= temp) {
+            ElMessage.error("后填入的周次不能小于或等于之前填入的周次!");
+            callback(new Error("后填入的周次不能小于或等于之前填入的周次!"));
+          }
+          temp = value[i].courseEndWeeks + 1;
+        }
+      }
+      callback();
+    };
 
     const inputRules = {
       name: [
@@ -358,18 +511,11 @@ export default {
           required: false,
         },
       ],
-      courseStartWeeks: [
+      courseWeekHours: [
         {
           required: true,
           trigger: "change",
-          message: "请输入开始周次!",
-        },
-      ],
-      courseEndWeeks: [
-        {
-          required: true,
-          trigger: "change",
-          message: "请输入结束周次!",
+          validator: courseWeeksValidator,
         },
       ],
       classList: [
@@ -411,6 +557,54 @@ export default {
       ],
     };
 
+    const HandleCourseWeekInputAdd = () => {
+      if (
+        formInput.value.courseWeekHours.length < 13 &&
+        formInput.value.courseWeekHours.length >= 0
+      ) {
+        formInput.value.courseWeekHours.push({
+          courseStartWeeks: 3,
+          courseEndWeeks: 2,
+        });
+      }
+    };
+
+    const HandleCourseWeekDelete = (weeks) => {
+      formInput.value.courseWeekHours = formInput.value.courseWeekHours.filter(
+        (week) => {
+          return week != weeks;
+        }
+      );
+    };
+
+    const classroomRemoteMethod = (keyword) => {
+      getClassroomListApi(keyword).then((res) => {
+        if (res) {
+          if (res.meta.code == 200) {
+            classroomList.value = res.data;
+          }
+        }
+      });
+    };
+    const classroomTypeRemoteMethod = (keyword) => {
+      getClassroomListApi(keyword).then((res) => {
+        if (res) {
+          if (res.meta.code == 200) {
+            classroomTypeList.value = res.data;
+          }
+        }
+      });
+    };
+    const buildingRemoteMethod = (keyword) => {
+      getTeachingBuildingListApi(keyword).then((res) => {
+        if (res) {
+          if (res.meta.code == 200) {
+            buildingList.value = res.data;
+          }
+        }
+      });
+    };
+
     return {
       formInput,
       isDialogVisiable,
@@ -420,7 +614,6 @@ export default {
       getClassSuggestions,
       searchClassKeyword,
       inputRules,
-      scheduledCourseHours,
       isClassPeriodsDisabled,
       maxClassPeriods,
       teachingClassFormRef,
@@ -430,7 +623,14 @@ export default {
       HandleOptionSelect,
       HandleInputClear,
       scrollBarRef,
-      teachingClassSize,
+      HandleCourseWeekInputAdd,
+      HandleCourseWeekDelete,
+      buildingList,
+      classroomTypeList,
+      classroomList,
+      classroomRemoteMethod,
+      classroomTypeRemoteMethod,
+      buildingRemoteMethod,
     };
   },
 };
@@ -448,6 +648,7 @@ export default {
 
 .classTag {
   margin: 5px;
+  width: min-content;
 }
 
 .addClassTag {
@@ -460,15 +661,25 @@ export default {
   color: rgb(121.3, 187.1, 255);
 }
 
-.courseWeek {
+.courseWeekDiv {
   display: flex;
-  justify-content: space-between;
-  height: 60px;
+  flex-direction: column;
+  height: auto;
+  border-radius: 8px;
+  padding-right: 10px;
+  margin-bottom: 10px;
+}
+.courseWeekRow {
+  display: flex;
+  align-content: center;
+  width: 100%;
+  height: max-content;
 }
 
 .courseWeekInput {
-  margin: 10px;
+  margin: 10px 5px;
   width: 120px;
+  height: 30px;
 }
 
 .el-input,
@@ -499,5 +710,20 @@ export default {
   margin: auto;
   display: flex;
   justify-content: center;
+}
+
+.courseWeekInputAddButton {
+  display: flex;
+  justify-self: center;
+  width: 100%;
+}
+
+.courseWeekDeleteButton {
+  margin: auto 0px auto auto;
+}
+
+.tagContainer {
+  display: flex;
+  flex-direction: column;
 }
 </style>

@@ -201,12 +201,18 @@
               class="cellLink"
               type="primary"
               @click="HandleEditLinkClick(scope)"
+              v-show="
+                scope.row.cellList[scope.column.no - 2].isHover &&
+                !scope.row.cellList[scope.column.no - 2].isEdit
+              "
               >修改</el-link
             >
             <el-select
+              v-model="scope.row.cellList[scope.column.no - 2].type"
               class="cellSelect"
               size="small"
               ref="currentCellRef"
+              v-if="scope.row.cellList[scope.column.no - 2].isEdit"
               @change="HandleCellSelectChange(scope)"
               @blur="HandleCellSelectBlur(scope)"
             >
@@ -340,6 +346,8 @@ export default {
       { name: "星期日", prop: "SunData" },
     ];
 
+    const currentSelectValue = ref()
+
     const scheduleData = ref([
       {
         period: 1,
@@ -425,7 +433,263 @@ export default {
           },
         ],
       },
+      {
+        period: 3,
+        dayPeriod: "上午",
+        timeRange: ["8:10", "9:35"],
+        cellList: [
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 2,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+        ],
+      },
+      {
+        period: 4,
+        dayPeriod: "上午",
+        timeRange: ["8:10", "9:35"],
+        cellList: [
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 2,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+        ],
+      },
+      {
+        period: 5,
+        dayPeriod: "下午",
+        timeRange: ["8:10", "9:35"],
+        cellList: [
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 2,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+        ],
+      },
+      {
+        period: 6,
+        dayPeriod: "下午",
+        timeRange: ["8:10", "9:35"],
+        cellList: [
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 2,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+        ],
+      },
+      {
+        period: 7,
+        dayPeriod: "晚上",
+        timeRange: ["8:10", "9:35"],
+        cellList: [
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 2,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+        ],
+      },
+      {
+        period: 8,
+        dayPeriod: "晚上",
+        timeRange: ["8:10", "9:35"],
+        cellList: [
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 2,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+          {
+            type: 1,
+            isHover: false,
+            isEdit: false,
+          },
+        ],
+      },
     ]);
+
+    onMounted(() => {
+      scheduleData.value = setListRowspan(scheduleData.value);
+    });
 
     //type  1:正课  2:补课  3:早自习  4:晚自习
     // const scheduleData = computed(() => {
@@ -681,55 +945,65 @@ export default {
       return dayjs(datyObj).format("H:m");
     };
 
-    // switch (cell.row.MonData.type) {
-    //         case 1:
-    //           return { background: "#ffa8a8" };
-    //         case 2:
-    //           return { background: "#add8ff" };
-    //         case 3:
-    //           return { background: "#fffb06" };
-    //         case 4:
-    //           return { background: "#0065bd" };
-    //         default:
-    //           return "";
-    //       }
-
     const setCellColor = (cell) => {
-      console.log(cell);
+      if (cell.columnIndex >= 2) {
+        switch (
+          scheduleData.value[cell.rowIndex].cellList[cell.columnIndex - 2].type
+        ) {
+          case 3:
+            return { background: "#ffa8a8" };
+          case 2:
+            return { background: "#add8ff" };
+          case 1:
+            return { background: "#fffb06" };
+          case 4:
+            return { background: "#0065bd" };
+          default:
+            return "";
+        }
+      }
     };
 
     const HandleEnterHover = (row, column, cell, event) => {
-      if (column.property != "periodColumn" && column.property != "dayPeriod") {
-        let temp = scheduleConditions.typeList[column.property];
-        temp[row.period - 1].isHover = true;
+      if (row.period >= 1 && column.no >= 2) {
+        scheduleData.value[row.period - 1].cellList[
+          column.no - 2
+        ].isHover = true;
       }
     };
     const HandleLeaveHover = (row, column, cell, event) => {
-      if (column.property != "periodColumn" && column.property != "dayPeriod") {
-        let temp = scheduleConditions.typeList[column.property];
-        temp[row.period - 1].isHover = false;
+      if (row.period >= 1 && column.no >= 2) {
+        scheduleData.value[row.period - 1].cellList[
+          column.no - 2
+        ].isHover = false;
       }
     };
 
     const HandleEditLinkClick = (scope) => {
-      let temp = scheduleConditions.typeList[scope.column.property];
-      temp[scope.row.period - 1].isEdit = true;
-      temp = scheduleConditions.typeList[scope.column.property];
-      temp[scope.row.period - 1].isHover = false;
+      let temp =
+      scheduleData.value[scope.row.period - 1].cellList[scope.column.no - 2];
+
+      temp.isEdit = true;
+      temp.isHover = false;
       nextTick(() => {
-        currentCellRef.value.focus();
+        currentCellRef.value[0].focus();
       });
     };
 
     const HandleCellSelectChange = (scope) => {
-      console.log(scope);
-      let temp = scheduleConditions.typeList[scope.column.property];
-      temp[scope.row.period - 1].isEdit = false;
+      let temp = scheduleData.value[scope.row.period - 1];
+      temp.cellList[scope.column.no - 2].isEdit = false;
+      temp.cellList[scope.column.no - 2].isHover = false;
+
     };
+
     const HandleCellSelectBlur = (scope) => {
-      let temp = scheduleConditions.typeList[scope.column.property];
-      temp[scope.row.period - 1].isEdit = false;
+      let temp = scheduleData.value[scope.row.period - 1];
+      temp.cellList[scope.column.no - 2].isEdit = false;
+      temp.cellList[scope.column.no - 2].isHover = false;
+      currentCellRef.value = {};
     };
+
     const HandleCellRightClick = (row, column, cell, event) => {};
 
     return {
@@ -751,6 +1025,7 @@ export default {
       currentCellRef,
       currentTab,
       tableHeader,
+      setListRowspan,
     };
   },
 };
