@@ -45,8 +45,8 @@
         <!-- 
       <div>   :draggable="scope.row.cellList[scope.column.no - 1].hasCourse"
               @drop="(cell) => HandleCellDrop(cell, scope)"
-              @dragstart="(cell) => HandleCellDragStart(cell, scope)"
-              @dragend="(cell) => HandleCellDragEnd(cell, scope)"
+              @dragstart="(cell) => HandleTeachingClassDragStart(cell, scope)"
+              @dragend="(cell) => HandleTeachingClassDragEnd(cell, scope)"
               @dragover="(cell) => HandleCellDragOver(cell, scope)"
               @dragleave="(cell) => HandleCellDragLeave(cell, scope)"
 
@@ -159,6 +159,7 @@
                   class="cellContainer"
                   @drop="(cell) => HandleCellDrop(cell, scope)"
                   @dragover="(cell) => HandleCellDragOver(cell, scope)"
+                  @dragenter="(cell) => HandleCellDragEnter(cell, scope)"
                   @dragleave="(cell) => HandleCellDragLeave(cell, scope)"
                 >
                   <div
@@ -170,11 +171,17 @@
                     :key="course"
                     :draggable="true"
                     @dragstart="
-                      (cell) => HandleCellDragStart(cell, scope, course)
+                      (cell) =>
+                        HandleTeachingClassDragStart(cell, scope, course)
                     "
-                    @dragend="(cell) => HandleCellDragEnd(cell, scope, course)"
+                    @dragend="
+                      (cell) => HandleTeachingClassDragEnd(cell, scope, course)
+                    "
                     @dragover="
                       (cell) => HandleTeachingClassDragOver(cell, scope, course)
+                    "
+                    @dragenter="
+                      (cell) => HandleTeachingClassEnter(cell, scope, course)
                     "
                     @dragleave="
                       (cell) => HandleTeachingClassLeave(cell, scope, course)
@@ -224,7 +231,7 @@ export default {
   name: "ScheduleBuild",
   components: { aiScheduleDialogVue },
   setup() {
-    const cellWidth = 90;
+    const cellWidth = 150;
     const cellHeight = 90;
 
     const taskId = useRoute().query.id;
@@ -902,21 +909,28 @@ export default {
       period,
       cellIndex,
       weeksData,
-      consecutiveClassPeriods
+      consecutiveClassPeriods,
+      whiteList
     ) => {
-      //courseList：单元格对象
       //cellData:要对比的教学班
-      if (period + consecutiveClassPeriods > scheduleStruct.value.length) {
+      if (period + consecutiveClassPeriods - 1 > scheduleStruct.value.length) {
         return true;
       }
       for (let i = 0; i < consecutiveClassPeriods; i++) {
-        if (
-          isWeekConflict(
+        let temp;
+        if (whiteList && whiteList.length > 0) {
+          temp = scheduleStruct.value[period + i - 1].cellList[
+            cellIndex
+          ].weeksDataList.filter((weeks) => {
+            return !whiteList.includes(weeks);
+          });
+        } else {
+          temp =
             scheduleStruct.value[period + i - 1].cellList[cellIndex]
-              .weeksDataList,
-            weeksData
-          )
-        ) {
+              .weeksDataList;
+        }
+
+        if (isWeekConflict(temp, weeksData)) {
           return true;
         }
       }
@@ -926,7 +940,11 @@ export default {
     //<--------------------------------下面是教学班拖拽处理---------------------------------->
 
     //开始拖动
-    const HandleCellDragStart = (cell, { row, column, cellIndex }, course) => {
+    const HandleTeachingClassDragStart = (
+      cell,
+      { row, column, cellIndex },
+      course
+    ) => {
       // CurrentDragCell.value.consecutiveClassPeriods =
       //   row.cellList[column.no - 1].consecutiveClassPeriods;
       CurrentDragCellData.value.cellType = "tableCell";
@@ -935,17 +953,29 @@ export default {
       CurrentDragCellData.value.period = row.period;
       CurrentDragCellData.value.columnIndex = column.no - 1;
       CurrentDragCellData.value.courseData = course;
+      CurrentDragCellData.value.isDropable = false;
       cell.target.classList.add("cellDraging");
     };
 
     //被拖动的教学班结束拖动
-    const HandleCellDragEnd = (cell, { row, column, cellIndex }) => {
+    const HandleTeachingClassDragEnd = (cell, { row, column, cellIndex }) => {
       cell.target.classList.remove("cellDraging");
       CurrentDragCellData.value = {};
     };
 
     //被拖动的教学班经过教学班单元格
     const HandleTeachingClassDragOver = (
+      cell,
+      { row, column, cellIndex },
+      course
+    ) => {
+      if (CurrentDragCellData.value.isDropable) {
+        cell.preventDefault(); //使单元格允许drop
+      }
+    };
+
+    //被拖动的教学班进入教学班单元格
+    const HandleTeachingClassEnter = (
       cell,
       { row, column, cellIndex },
       course
@@ -959,35 +989,63 @@ export default {
 
         if (cellData.id != course.teachingClassId) {
           //判断该教学班所在的单元格列表里的教学班是否与拖动的教学班周次冲突
-
           if (
             isCellWeekConflict(
               row.period,
               column.no - 1,
               cellData.weeksData,
-              cellData.consecutiveClassPeriods
+              cellData.consecutiveClassPeriods,
+              []
             )
           ) {
-            //交换
             if (
               isCellWeekConflict(
-                row.period + course.consecutiveClassPeriods,
+                row.period,
                 column.no - 1,
                 cellData.weeksData,
-                cellData.consecutiveClassPeriods -
-                  course.consecutiveClassPeriods
+                cellData.consecutiveClassPeriods,
+                course.weeksData
               )
             ) {
-              cell.target.classList.add("teachingClassExchangeHover");
-              cell.preventDefault(); //使单元格允许drop
+              cell.target.classList.add("cellHoverProhibited");
+              CurrentDragCellData.value.isDropable = false;
+            } else {
+              if (
+                !isCellWeekConflict(
+                  row.period + course.consecutiveClassPeriods,
+                  column.no - 1,
+                  cellData.weeksData,
+                  cellData.consecutiveClassPeriods -
+                    course.consecutiveClassPeriods,
+                  course.weeksData
+                ) &&
+                !isCellWeekConflict(
+                  CurrentDragCellData.value.period +
+                    cellData.consecutiveClassPeriods,
+                  CurrentDragCellData.value.columnIndex,
+                  course.weeksData,
+                  course.consecutiveClassPeriods -
+                    cellData.consecutiveClassPeriods,
+                  course.weeksData
+                )
+                //检测交换之后的位置是否有冲突
+              ) {
+                cell.target.classList.add("teachingClassExchangeHover");
+                cell.preventDefault(); //使单元格允许drop
+                CurrentDragCellData.value.isDropable = true;
+              } else {
+                cell.target.classList.add("cellHoverProhibited");
+                CurrentDragCellData.value.isDropable = false;
+              }
             }
+            //周次冲突,只能交换
           } else {
             //周次不冲突,可以放入
             if (
               cell.target.className.includes("cellDiv") ||
               cell.target.className.includes("cellText")
             ) {
-              cell.preventDefault(); //使单元格允许drop
+              CurrentDragCellData.value.isDropable = true;
               cell.target.classList.add("cellHover");
             }
           }
@@ -995,53 +1053,80 @@ export default {
       }
 
       if (CurrentDragCellData.value.cellType == "tableCell") {
-        let courseData;
         //放入的是表格中已有的教学班
         ClassPeriodsTemp =
           CurrentDragCellData.value.courseData.consecutiveClassPeriods;
-        courseData = CurrentDragCellData.value.courseData;
+        let courseData = CurrentDragCellData.value.courseData;
+        let cellData = CurrentDragCellData.value.cellData;
 
-        if (courseData.cellId != course.cellId) {
+        if (
+          courseData.cellId != course.cellId &&
+          courseData.teachingClassId != course.teachingClassId
+        ) {
+          console.log(courseData);
           if (
             isCellWeekConflict(
               row.period,
               column.no - 1,
               courseData.weeksData,
-              courseData.consecutiveClassPeriods
+              courseData.consecutiveClassPeriods,
+              []
             )
           ) {
-            //周次冲突,只能交换
             if (
               isCellWeekConflict(
-                row.period + course.consecutiveClassPeriods,
+                row.period,
                 column.no - 1,
                 courseData.weeksData,
-                courseData.consecutiveClassPeriods -
-                course.consecutiveClassPeriods
+                courseData.consecutiveClassPeriods,
+                course.weeksData
               )
-              //检测交换之后的位置是否有冲突
             ) {
               cell.target.classList.add("cellHoverProhibited");
-            }else{
-              cell.target.classList.add("teachingClassExchangeHover");
-              cell.preventDefault(); //使单元格允许drop
-
+              CurrentDragCellData.value.isDropable = false;
+            } else {
+              //周次冲突,只能交换
+              if (
+                !isCellWeekConflict(
+                  row.period + course.consecutiveClassPeriods,
+                  column.no - 1,
+                  courseData.weeksData,
+                  courseData.consecutiveClassPeriods -
+                    course.consecutiveClassPeriods,
+                  course.weeksData
+                ) &&
+                !isCellWeekConflict(
+                  CurrentDragCellData.value.period +
+                    courseData.consecutiveClassPeriods,
+                  CurrentDragCellData.value.columnIndex,
+                  course.weeksData,
+                  course.consecutiveClassPeriods -
+                    courseData.consecutiveClassPeriods,
+                  course.weeksData
+                )
+                //检测交换之后的位置是否有冲突
+              ) {
+                cell.target.classList.add("teachingClassExchangeHover");
+                CurrentDragCellData.value.isDropable = true;
+              } else {
+                cell.target.classList.add("cellHoverProhibited");
+                CurrentDragCellData.value.isDropable = false;
+              }
             }
           } else {
             //周次不冲突,可以放入
-            console.log(cell.target.className);
             if (
               cell.target.className.includes("cellDiv") ||
               cell.target.className.includes("cellText")
             ) {
-              cell.preventDefault(); //使单元格允许drop
+              console.log(222);
+              CurrentDragCellData.value.isDropable = true;
               cell.target.classList.add("cellHover");
             }
           }
         }
       }
     };
-
     //被拖动的教学班离开教学班单元格
     const HandleTeachingClassLeave = (
       cell,
@@ -1160,92 +1245,79 @@ export default {
       if (cell.target.className.includes("cellContainer")) {
         let ClassPeriodsTemp; //连排节次
         let courseData;
+        let cellData;
         if (CurrentDragCellData.value.cellType == "targetCell") {
           ClassPeriodsTemp =
             CurrentDragCellData.value.cellData.consecutiveClassPeriods;
-        }
-        if (CurrentDragCellData.value.cellType == "tableCell") {
-          ClassPeriodsTemp =
-            CurrentDragCellData.value.courseData.consecutiveClassPeriods;
-          courseData = CurrentDragCellData.value.courseData;
-        }
+          cellData = CurrentDragCellData.value.cellData;
 
-        if (CurrentDragCellData.value.cellData) {
-          //检查被拖动的单元格是否是自己
-          if (
-            !row.cellList[column.no - 1].courseList.includes(
-              CurrentDragCellData.value.cellData.courseId
-            )
-          ) {
-            let isWeekConflictBoolean = false;
-            for (
-              let i = 0;
-              i < row.cellList[column.no - 1].courseList.length;
-              i++
+          if (CurrentDragCellData.value.cellData) {
+            //检查被拖动的单元格是否是自己
+            if (
+              !row.cellList[column.no - 1].courseList.includes(
+                CurrentDragCellData.value.cellData.courseId
+              )
             ) {
               if (
-                isWeekConflict(
-                  row.cellList[column.no - 1].courseList[i].weeksData,
-                  courseData.weeksData
+                isCellWeekConflict(
+                  row.period,
+                  column.no - 1,
+                  cellData.weeksData,
+                  cellData.consecutiveClassPeriods
                 )
               ) {
-                isWeekConflictBoolean = true;
-              }
-            }
-
-            if (isWeekConflictBoolean) {
-              //周次冲突
-            } else {
-              //周次不冲突
-              if (ClassPeriodsTemp == 1) {
-                if (row.cellList[column.no - 1].isAvailable) {
-                  cell.preventDefault(); //使单元格允许drop
-                  cell.target.classList.add("cellHover"); //如果当前单元格没有课程且可用改变背景
-                }
+                //周次冲突
+                cell.target.classList.add("cellHoverProhibited");
               } else {
-                if (
-                  row.period <
-                  scheduleStruct.value.length - ClassPeriodsTemp + 2
-                ) {
-                  let counter = 0;
-                  for (let p = 0; p < ClassPeriodsTemp; p++) {
-                    if (p == 0) {
-                      if (
-                        row.cellList[column.no - 1].isAvailable &&
-                        !row.cellList[column.no - 1].hasCourse
-                      ) {
-                        counter++;
-                        continue;
-                      }
-                    } else {
-                      if (
-                        scheduleStruct.value[row.period + p - 1].cellList[
-                          column.no - 1
-                        ].isAvailable &&
-                        !scheduleStruct.value[row.period + p - 1].cellList[
-                          column.no - 1
-                        ].hasCourse
-                      ) {
-                        counter++;
-                        continue;
+                //周次不冲突
+                if (ClassPeriodsTemp == 1) {
+                  if (row.cellList[column.no - 1].isAvailable) {
+                    cell.preventDefault(); //使单元格允许drop
+                    cell.target.classList.add("cellHover"); //如果当前单元格没有课程且可用改变背景
+                  }
+                } else {
+                  if (
+                    row.period <
+                    scheduleStruct.value.length - ClassPeriodsTemp + 2
+                  ) {
+                    let counter = 0;
+                    for (let p = 0; p < ClassPeriodsTemp; p++) {
+                      if (p == 0) {
+                        if (row.cellList[column.no - 1].isAvailable) {
+                          counter++;
+                          continue;
+                        }
+                      } else {
+                        if (
+                          scheduleStruct.value[row.period + p - 1].cellList[
+                            column.no - 1
+                          ].isAvailable
+                        ) {
+                          counter++;
+                          continue;
+                        }
                       }
                     }
-                  }
 
-                  if (counter == ClassPeriodsTemp) {
-                    cell.preventDefault(); //使单元格允许drop
-                    cell.target.classList.add("cellHover");
+                    if (counter == ClassPeriodsTemp) {
+                      cell.preventDefault(); //使单元格允许drop
+                      cell.target.classList.add("cellHover");
 
-                    //根据连排节次改变下面的单元格样式
-                    let currentRow = cell.target.closest("tr");
-                    for (let p = 1; p < ClassPeriodsTemp; p++) {
-                      if (currentRow) {
-                        if (currentRow.nextElementSibling) {
-                          currentRow.nextElementSibling.cells[
-                            column.no
-                          ].classList.add("cellHover");
+                      //根据连排节次改变下面的单元格样式
+                      let currentRow = cell.target.closest("tr");
+                      for (let p = 1; p < ClassPeriodsTemp; p++) {
+                        if (currentRow) {
+                          if (currentRow.nextElementSibling) {
+                            currentRow.nextElementSibling.cells[
+                              column.no
+                            ].classList.add("cellHover");
+                          }
+                          currentRow = currentRow.nextElementSibling;
                         }
-                        currentRow = currentRow.nextElementSibling;
+                      }
+                    } else {
+                      if (row.cellList[column.no - 1].isAvailable) {
+                        cell.target.classList.add("cellHoverProhibited");
                       }
                     }
                   } else {
@@ -1253,9 +1325,89 @@ export default {
                       cell.target.classList.add("cellHoverProhibited");
                     }
                   }
-                } else {
+                }
+              }
+            }
+          }
+        }
+        if (CurrentDragCellData.value.cellType == "tableCell") {
+          ClassPeriodsTemp =
+            CurrentDragCellData.value.courseData.consecutiveClassPeriods;
+          courseData = CurrentDragCellData.value.courseData;
+
+          if (CurrentDragCellData.value.cellData) {
+            //检查被拖动的单元格是否是自己
+            if (
+              !row.cellList[column.no - 1].courseList.includes(
+                CurrentDragCellData.value.cellData.courseId
+              )
+            ) {
+              if (
+                isCellWeekConflict(
+                  row.period,
+                  column.no - 1,
+                  courseData.weeksData,
+                  courseData.consecutiveClassPeriods
+                )
+              ) {
+                //周次冲突
+                cell.target.classList.add("cellHoverProhibited");
+              } else {
+                //周次不冲突
+                if (ClassPeriodsTemp == 1) {
                   if (row.cellList[column.no - 1].isAvailable) {
-                    cell.target.classList.add("cellHoverProhibited");
+                    cell.preventDefault(); //使单元格允许drop
+                    cell.target.classList.add("cellHover"); //如果当前单元格没有课程且可用改变背景
+                  }
+                } else {
+                  if (
+                    row.period <
+                    scheduleStruct.value.length - ClassPeriodsTemp + 2
+                  ) {
+                    let counter = 0;
+                    for (let p = 0; p < ClassPeriodsTemp; p++) {
+                      if (p == 0) {
+                        if (row.cellList[column.no - 1].isAvailable) {
+                          counter++;
+                          continue;
+                        }
+                      } else {
+                        if (
+                          scheduleStruct.value[row.period + p - 1].cellList[
+                            column.no - 1
+                          ].isAvailable
+                        ) {
+                          counter++;
+                          continue;
+                        }
+                      }
+                    }
+
+                    if (counter == ClassPeriodsTemp) {
+                      cell.preventDefault(); //使单元格允许drop
+                      cell.target.classList.add("cellHover");
+
+                      //根据连排节次改变下面的单元格样式
+                      let currentRow = cell.target.closest("tr");
+                      for (let p = 1; p < ClassPeriodsTemp; p++) {
+                        if (currentRow) {
+                          if (currentRow.nextElementSibling) {
+                            currentRow.nextElementSibling.cells[
+                              column.no
+                            ].classList.add("cellHover");
+                          }
+                          currentRow = currentRow.nextElementSibling;
+                        }
+                      }
+                    } else {
+                      if (row.cellList[column.no - 1].isAvailable) {
+                        cell.target.classList.add("cellHoverProhibited");
+                      }
+                    }
+                  } else {
+                    if (row.cellList[column.no - 1].isAvailable) {
+                      cell.target.classList.add("cellHoverProhibited");
+                    }
                   }
                 }
               }
@@ -1264,6 +1416,8 @@ export default {
         }
       }
     };
+
+    const HandleCellDragEnter = (cell, { row, column, cellIndex }) => {};
 
     //被拖动的教学班离开单元格
     const HandleCellDragLeave = (cell, { row, column, cellIndex }) => {
@@ -1358,6 +1512,7 @@ export default {
 
     const HandleTargetCellDragStart = (cell, data) => {
       CurrentDragCellData.value = { cellType: "targetCell", cellData: data };
+      CurrentDragCellData.value.isDropable = false;
       // CurrentDragCell.value.consecutiveClassPeriods =data.consecutiveClassPeriods;
       cell.target.classList.add("targetCellDraging");
     };
@@ -1496,6 +1651,7 @@ export default {
                 }节`;
               }
               //更新scheduleStruct
+
               scheduleStruct.value[cell.period - 1].cellList[
                 cell.cellIndex
               ].courseList.push({
@@ -1522,9 +1678,18 @@ export default {
                   ...scheduleStruct.value[cell.period + i - 1].cellList[
                     cell.cellIndex
                   ].weeksDataList,
-                  cell.weeksData,
+                  ...cell.weeksData,
                 ];
               }
+              scheduleStruct.value[cell.period - 1].cellList[
+                cell.cellIndex
+              ].courseList.forEach((course) => {
+                course.style.width = `${
+                  cellWidth /
+                  scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]
+                    .courseList.length
+                }px`;
+              });
             } else {
               ElMessage.error(
                 `${cell.teachingClassName} 与排课设置冲突! 请修改排课设置后重试！`
@@ -1787,15 +1952,18 @@ export default {
       HandleCellDrop,
       HandleCellDragOver,
       HandleCellDragLeave,
-      HandleCellDragStart,
-      HandleCellDragEnd,
+      HandleCellDragEnter,
+
       HandleTargetCellDragStart,
       HandleTargetCellDragEnd,
       HandleTargetCellDrop,
       HandleTargetCellDragOver,
       HandleListDragOver,
 
+      HandleTeachingClassDragStart,
+      HandleTeachingClassDragEnd,
       HandleTeachingClassDragOver,
+      HandleTeachingClassEnter,
       HandleTeachingClassLeave,
       HandleTeachingClassDrop,
 
@@ -1978,7 +2146,7 @@ export default {
   line-height: 15px;
 }
 .cellText {
-  font-size: 11px;
+  font-size: 10px;
   height: 100%;
   width: 100%;
   line-height: 20px;
