@@ -190,6 +190,8 @@
                       (cell) => HandleTeachingClassDrop(cell, scope, course)
                     "
                   >
+                    {{ scope.row.cellList[scope.column.no - 1].courseNum }}
+
                     <span
                       class="cellText"
                       v-show="scope.row.cellList[scope.column.no - 1].hasCourse"
@@ -273,42 +275,52 @@ export default {
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: false,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
         ],
       },
@@ -323,42 +335,49 @@ export default {
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: false,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
         ],
       },
@@ -373,42 +392,49 @@ export default {
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: false,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
         ],
       },
@@ -423,42 +449,49 @@ export default {
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: false,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
         ],
       },
@@ -473,42 +506,49 @@ export default {
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: false,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
         ],
       },
@@ -523,42 +563,49 @@ export default {
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: false,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
         ],
       },
@@ -573,42 +620,49 @@ export default {
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: false,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
         ],
       },
@@ -623,42 +677,49 @@ export default {
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: true,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
           {
             hasCourse: false,
             isAvailable: false,
             weeksDataList: [],
             courseList: [],
+            courseNum: 0,
           },
         ],
       },
@@ -893,10 +954,8 @@ export default {
       for (let i = 0; i < firstWeeks.length; i++) {
         for (let j = 0; j < secondWeeks.length; j++) {
           if (
-            (firstWeeks[i].courseEndWeek >= secondWeeks[j].courseStartWeek &&
-              firstWeeks[i].courseEndWeek <= secondWeeks[j].courseEndWeek) ||
-            (firstWeeks[i].courseStartWeek >= secondWeeks[j].courseStartWeek &&
-              firstWeeks[i].courseStartWeek <= secondWeeks[j].courseEndWeek)
+            firstWeeks[i].courseStartWeek <= secondWeeks[j].courseEndWeek &&
+            secondWeeks[j].courseStartWeek <= firstWeeks[i].courseEndWeek
           ) {
             return true;
           }
@@ -986,7 +1045,6 @@ export default {
         ClassPeriodsTemp =
           CurrentDragCellData.value.cellData.consecutiveClassPeriods;
         cellData = CurrentDragCellData.value.cellData;
-
         if (cellData.id != course.teachingClassId) {
           //判断该教学班所在的单元格列表里的教学班是否与拖动的教学班周次冲突
           if (
@@ -1017,15 +1075,6 @@ export default {
                   cellData.weeksData,
                   cellData.consecutiveClassPeriods -
                     course.consecutiveClassPeriods,
-                  course.weeksData
-                ) &&
-                !isCellWeekConflict(
-                  CurrentDragCellData.value.period +
-                    cellData.consecutiveClassPeriods,
-                  CurrentDragCellData.value.columnIndex,
-                  course.weeksData,
-                  course.consecutiveClassPeriods -
-                    cellData.consecutiveClassPeriods,
                   course.weeksData
                 )
                 //检测交换之后的位置是否有冲突
@@ -1119,7 +1168,6 @@ export default {
               cell.target.className.includes("cellDiv") ||
               cell.target.className.includes("cellText")
             ) {
-              console.log(222);
               CurrentDragCellData.value.isDropable = true;
               cell.target.classList.add("cellHover");
             }
@@ -1617,6 +1665,21 @@ export default {
       console.log("up!");
     });
 
+    function sortByPeriod() {
+      console.log("sort!");
+      return function (a, b) {
+        a = a[consecutiveClassPeriods];
+        b = b[consecutiveClassPeriods];
+        if (a < b) {
+          return -1;
+        }
+        if (a > b) {
+          return 1;
+        }
+        return 0;
+      };
+    }
+
     const updateScheduleStruct = () => {
       scheduleStruct.value = JSON.parse(scheduleStructTemp.value);
       if (scheduleData.value.length > 0) {
@@ -1635,9 +1698,9 @@ export default {
               let weeks = "";
 
               cell.weeksData.forEach((time) => {
-                scheduleStruct.value[cell.period - 1].cellList[
-                  cell.cellIndex
-                ].weeksDataList.push(time);
+                // scheduleStruct.value[cell.period - 1].cellList[
+                //   cell.cellIndex
+                // ].weeksDataList.push(time);
                 weeks += `${time.courseStartWeek}-${time.courseEndWeek}周;`;
               });
 
@@ -1650,6 +1713,7 @@ export default {
                   cell.period + cell.consecutiveClassPeriods - 1
                 }节`;
               }
+
               //更新scheduleStruct
 
               scheduleStruct.value[cell.period - 1].cellList[
@@ -1671,7 +1735,11 @@ export default {
                 cell.cellIndex
               ].hasCourse = true;
 
+              //为每个单元格添加周次信息
               for (let i = 0; i < cell.consecutiveClassPeriods; i++) {
+                scheduleStruct.value[cell.period + i - 1].cellList[
+                  cell.cellIndex
+                ].courseNum++;
                 scheduleStruct.value[cell.period + i - 1].cellList[
                   cell.cellIndex
                 ].weeksDataList = [
@@ -1681,13 +1749,24 @@ export default {
                   ...cell.weeksData,
                 ];
               }
+              //添加宽度样式
+
+
+              scheduleStruct.value[cell.period - 1].cellList[
+                cell.cellIndex
+              ].courseList.sort(
+                (a, b) => a.consecutiveClassPeriods - b.consecutiveClassPeriods
+              );
+
               scheduleStruct.value[cell.period - 1].cellList[
                 cell.cellIndex
               ].courseList.forEach((course) => {
                 course.style.width = `${
                   cellWidth /
-                  scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]
-                    .courseList.length
+                    scheduleStruct.value[cell.period - 1].cellList[
+                      cell.cellIndex
+                    ].courseNum +
+                  1
                 }px`;
               });
             } else {
@@ -2116,9 +2195,12 @@ export default {
   height: 100%;
   background: #ebedf0;
   border: solid 1px #dcdfe6;
-  z-index: 114514;
+  box-sizing: border-box;
+  z-index: 11;
   display: flex;
   position: relative;
+  left: 0px;
+  cursor: move;
 }
 
 .cellContainer {
@@ -2129,6 +2211,7 @@ export default {
   box-sizing: border-box;
   z-index: 10;
   position: absolute;
+  overflow: visible;
 }
 
 .cell:has(.cellDiv) {
