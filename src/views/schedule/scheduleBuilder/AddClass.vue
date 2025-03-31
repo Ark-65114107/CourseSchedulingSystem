@@ -29,7 +29,7 @@
         @check-change="HandleCheckChange"
         show-checkbox
         default-expand-all
-        :default-checked-keys="defaultChecked"  
+        :default-checked-keys="defaultChecked"
         ref="treeRef"
       />
     </el-scrollbar>
@@ -55,23 +55,12 @@ export default {
     const keyWord = ref();
     const treeRef = ref();
     let res = ref([]);
-    const data = ref([]);//班级tree的数据
+    const data = ref([]); //班级tree的数据
     const isLoading = ref(false);
     let defaultChecked = ref([]);
 
     onMounted(() => {
-      isLoading.value = true;
-      getClassTreeApi()
-        .then((res) => {
-          if (res.meta.code === 200) {
-            isLoading.value = false;
-            data.value = res.data;
-          }
-        })
-        .finally(() => {
-          isLoading.value = false;
-        });
-      getClassList()
+      getClassTree()
     });
 
     const setClassTree = () => {
@@ -81,17 +70,33 @@ export default {
       });
     };
 
+    const getClassTree = () => {
+      isLoading.value = true;
+      getClassTreeApi()
+        .then((res) => {
+          if (res.meta.code === 200) {
+            isLoading.value = false;
+            data.value = res.data.tree;
+          }
+        })
+        .finally(() => {
+          isLoading.value = false;
+        });
+      getClassList();
+    };
+
     const getClassList = () => {
-      getClassListApi(route.query.id).then(res=>{
-        defaultChecked.value = res.data.map((c)=>c.id)
-      })
+      getClassListApi(route.query.id).then((res) => {
+        defaultChecked.value = res.data.map((c) => c.id);
+      });
     };
 
     watch(keyWord, (value) => {
       treeRef.value.filter(value);
     });
 
-    const treeFilter = (value, data) => {//搜索过虑
+    const treeFilter = (value, data) => {
+      //搜索过虑
       if (!value) return true;
       return data.label.includes(value);
     };

@@ -66,7 +66,7 @@
             @dragover="HandleListDragOver"
             @drop="HandleTargetCellDrop"
           >
-            <el-scrollbar class="teachingClassListScrollBar" height="150px">
+            <el-scrollbar class="teachingClassListScrollBar" height="200px">
               <div
                 class="cellOptionDiv"
                 v-for="tc of teachingClassList"
@@ -82,6 +82,9 @@
                 <span class="teachingClassCellTextSpan">{{
                   teacherNameFormatter(tc.teacherList)
                 }}</span>
+                <span class="teachingClassCellTextSpan"
+                  >连排节次:{{ tc.consecutiveClassPeriods }}</span
+                >
                 <span class="teachingClassCellTextSpan">{{
                   weeksDataFormatter(tc.weeksData)
                 }}</span>
@@ -96,7 +99,7 @@
             @dragover="HandleListDragOver"
             @drop="HandleTargetCellDrop"
           >
-            <el-scrollbar class="teachingClassListScrollBar" height="150px">
+            <el-scrollbar class="teachingClassListScrollBar" height="200px">
               <div
                 class="cellOptionDiv"
                 v-for="tc of teachingClassList"
@@ -126,7 +129,22 @@
 
       <div class="scheduleDiv">
         <el-text class="className">班级名:{{ currentClassName }}</el-text>
-        <div class="navDiv"></div>
+        <div class="navDiv">
+          <el-select
+            class="weekSelect"
+            size="small"
+            placeholder="请选择周次"
+            v-model="currentWeek"
+            @change="HandleWeekSelect"
+          >
+            <el-option label="全部周次" :value="-1" />
+            <el-option
+              v-for="week of maxWeek"
+              :label="`第${week}周`"
+              :value="week"
+            />
+          </el-select>
+        </div>
         <div class="scheduleTableDiv">
           <!-- <span> </span> -->
 
@@ -137,6 +155,7 @@
             :border="true"
             max-height="400px"
             :cell-style="setCellColor"
+            header-cell-class-name="headerCell"
             v-loading="isTableLoading"
             :fit="false"
           >
@@ -166,7 +185,7 @@
                     class="cellDiv"
                     v-for="course of scope.row.cellList[scope.column.no - 1]
                       .courseList"
-                    v-show="scope.row.cellList[scope.column.no - 1].hasCourse"
+                    v-show="course.isShow"
                     :style="course.style"
                     :key="course"
                     :draggable="true"
@@ -190,12 +209,7 @@
                       (cell) => HandleTeachingClassDrop(cell, scope, course)
                     "
                   >
-                    {{ scope.row.cellList[scope.column.no - 1].courseNum }}
-
-                    <span
-                      class="cellText"
-                      v-show="scope.row.cellList[scope.column.no - 1].hasCourse"
-                    >
+                    <span class="cellText">
                       {{ course.courseName }}<br />
                       {{ course.teacherName }}<br />
                       {{ course.weeks }}<br />
@@ -242,6 +256,8 @@ export default {
 
     const currentClassId = ref("");
 
+    const currentWeek = ref(-1);
+
     const classTree = ref([]); //班级tree的数据
 
     const firstClassId = ref("");
@@ -263,6 +279,11 @@ export default {
       { name: "星期六", prop: "SatData" },
       { name: "星期日", prop: "SunData" },
     ];
+
+    const maxWeek = [
+      0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+    ];
+
     const scheduleStruct = ref([
       {
         period: 1,
@@ -750,6 +771,7 @@ export default {
         period: 1,
         cellIndex: 1,
         consecutiveClassPeriods: 2,
+        type:"lab"
       },
       {
         cellId: "c2",
@@ -820,6 +842,7 @@ export default {
         consecutiveClassPeriods: 1,
       },
     ]);
+    const scheduleDataTemp = ref();
 
     const teachingClassList = ref([
       // {
@@ -1112,7 +1135,6 @@ export default {
           courseData.cellId != course.cellId &&
           courseData.teachingClassId != course.teachingClassId
         ) {
-          console.log(courseData);
           if (
             isCellWeekConflict(
               row.period,
@@ -1249,7 +1271,6 @@ export default {
             );
           } else {
             //周次不冲突,合并到一个单元格里
-            console.log(cellData);
             HandleCellMove(
               courseData.cellId,
               row.period,
@@ -1597,6 +1618,9 @@ export default {
         currentClassName.value = node.label;
         currentClassId.value = node.id;
         scheduleStruct.value = [];
+        scheduleDataTemp.value = [];
+        scheduleData.value = [];
+        currentWeek.value = -1;
         scheduleStructTemp.value = "";
         getTeachingClassList(taskId, node.id);
         getScheduleStruct(taskId, node.id).then((res) => {
@@ -1665,21 +1689,6 @@ export default {
       console.log("up!");
     });
 
-    function sortByPeriod() {
-      console.log("sort!");
-      return function (a, b) {
-        a = a[consecutiveClassPeriods];
-        b = b[consecutiveClassPeriods];
-        if (a < b) {
-          return -1;
-        }
-        if (a > b) {
-          return 1;
-        }
-        return 0;
-      };
-    }
-
     const updateScheduleStruct = () => {
       scheduleStruct.value = JSON.parse(scheduleStructTemp.value);
       if (scheduleData.value.length > 0) {
@@ -1714,8 +1723,39 @@ export default {
                 }节`;
               }
 
-              //更新scheduleStruct
+              let isShow = true;
+              if (currentWeek.value != -1) {
+                if (
+                  !isWeekConflict(
+                    [
+                      {
+                        courseStartWeek: currentWeek.value,
+                        courseEndWeek: currentWeek.value,
+                      },
+                    ],
+                    cell.weeksData
+                  )
+                ) {
+                  isShow = false;
+                }
+              }
 
+              let backgroundcolor
+              switch (cell.type) {
+                case "lab":
+                  backgroundcolor = "rgb(148.6, 212.3, 117.1)"; //绿色
+                  break
+                case "seminar":
+                  backgroundcolor = "#ffca77"; //橙色
+                  break
+                case "exam":
+                  backgroundcolor = "#ff9f9f";
+                  break
+                default:
+                  backgroundcolor = "rgb(159.5, 206.5, 255)";
+              }
+
+              //更新scheduleStruct
               scheduleStruct.value[cell.period - 1].cellList[
                 cell.cellIndex
               ].courseList.push({
@@ -1729,17 +1769,13 @@ export default {
                 periodRange,
                 style: {
                   height: `${cellHeight * cell.consecutiveClassPeriods}px`,
+                  background:backgroundcolor
                 },
+                isShow,
               });
-              scheduleStruct.value[cell.period - 1].cellList[
-                cell.cellIndex
-              ].hasCourse = true;
 
               //为每个单元格添加周次信息
               for (let i = 0; i < cell.consecutiveClassPeriods; i++) {
-                scheduleStruct.value[cell.period + i - 1].cellList[
-                  cell.cellIndex
-                ].courseNum++;
                 scheduleStruct.value[cell.period + i - 1].cellList[
                   cell.cellIndex
                 ].weeksDataList = [
@@ -1749,9 +1785,15 @@ export default {
                   ...cell.weeksData,
                 ];
               }
+              if (isShow) {
+                for (let i = 0; i < cell.consecutiveClassPeriods; i++) {
+                  scheduleStruct.value[cell.period + i - 1].cellList[
+                    cell.cellIndex
+                  ].courseNum++;
+                }
+              }
+
               //添加宽度样式
-
-
               scheduleStruct.value[cell.period - 1].cellList[
                 cell.cellIndex
               ].courseList.sort(
@@ -1763,10 +1805,8 @@ export default {
               ].courseList.forEach((course) => {
                 course.style.width = `${
                   cellWidth /
-                    scheduleStruct.value[cell.period - 1].cellList[
-                      cell.cellIndex
-                    ].courseNum +
-                  1
+                  scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]
+                    .courseNum
                 }px`;
               });
             } else {
@@ -1839,6 +1879,7 @@ export default {
             if (res.meta.code == 200) {
               isTableLoading.value = false;
               // scheduleData.value = res.data;
+              scheduleDataTemp.value = JSON.stringify(scheduleData.value);
             }
           }
         })
@@ -1966,7 +2007,6 @@ export default {
     const HandleCellCreate = (teachingClassId, period, cellIndex) => {
       console.log("create!");
       //这里是手动改变scheduleData,之后要删掉
-      console.log(CurrentDragCellData.value);
       scheduleData.value.push({
         cellId: Math.random(),
         teachingClassId,
@@ -2014,6 +2054,10 @@ export default {
 
     const HandleAiClick = () => {
       bus.emit("showAiScheduleDialog");
+    };
+
+    const HandleWeekSelect = () => {
+      updateScheduleStruct();
     };
 
     return {
@@ -2070,6 +2114,9 @@ export default {
       tableRef,
       setRowClass,
       HandleTeachingClassCellStyle,
+      maxWeek,
+      currentWeek,
+      HandleWeekSelect,
     };
   },
 };
@@ -2176,7 +2223,7 @@ export default {
 
 .navDiv {
   width: 100%;
-  height: 20px;
+  height: max-content;
   margin: 10px 0px;
   display: flex;
   flex-direction: row;
@@ -2193,10 +2240,10 @@ export default {
 .cellDiv {
   width: 100%;
   height: 100%;
-  background: #ebedf0;
+  background: rgb(159.5, 206.5, 255);
   border: solid 1px #dcdfe6;
   box-sizing: border-box;
-  z-index: 11;
+  z-index: 999;
   display: flex;
   position: relative;
   left: 0px;
@@ -2220,6 +2267,7 @@ export default {
   padding: 0px;
   margin: 0px;
   line-height: 15px;
+  z-index: -1;
 }
 .cell:has(.cellContainer) {
   height: 100%;
@@ -2227,6 +2275,7 @@ export default {
   padding: 0px;
   margin: 0px;
   line-height: 15px;
+  z-index: -1;
 }
 .cellText {
   font-size: 10px;
@@ -2238,6 +2287,8 @@ export default {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  color: white;
+  z-index: 1000;
 }
 
 .cellText * {
@@ -2296,7 +2347,22 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  box-sizing: border-box;
   border: solid 1px #dcdfe6;
+  border-radius: 8px;
+  cursor: move;
+}
+.cellOptionDiv:hover {
+  width: max-content;
+  min-width: 150px;
+  margin: 5px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  border: solid 1px rgb(197.7, 225.9, 255);
+  background: rgb(235.9, 245.3, 255);
   border-radius: 8px;
 }
 
@@ -2329,5 +2395,18 @@ export default {
 
 .scheduleTable.el-table--enable-row-hover .el-table__body tr:hover > td {
   background-color: initial;
+}
+
+.weekSelect {
+  width: 250px;
+}
+
+.headerCell {
+  height: 30px;
+  padding: 0px !important;
+}
+
+::v-deep .el-table td::after {
+  z-index: -1; /* 根据实际情况调整 */
 }
 </style>
