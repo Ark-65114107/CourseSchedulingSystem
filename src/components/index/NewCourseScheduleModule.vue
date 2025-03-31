@@ -34,7 +34,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, computed, watch, onMounted, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElLoading } from 'element-plus'
 import { ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 import type { CalendarApi, EventApi } from '@fullcalendar/core'
 import FullCalendar from '@fullcalendar/vue3'
@@ -83,17 +83,28 @@ const calendarRef = ref()
 // 当前日期范围
 const currentDateRange = computed(() => {
   const date = new Date(currentDate.value)
-  const dayOfWeek = date.getDay()
-  const monday = new Date(date)
-  monday.setDate(date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1))
-  const sunday = new Date(date)
-  sunday.setDate(date.getDate() + (7 - dayOfWeek) - (dayOfWeek === 0 ? 7 : 0))
   
-  const formatDate = (date: Date) => {
+  // 根据当前视图类型计算日期范围
+  if (currentView.value === 'dayGridMonth') {
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    return `${year}年${month}月`
+  } else if (currentView.value === 'timeGridDay') {
     return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
+  } else {
+    // 周视图
+    const dayOfWeek = date.getDay()
+    const monday = new Date(date)
+    monday.setDate(date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1))
+    const sunday = new Date(date)
+    sunday.setDate(date.getDate() + (7 - dayOfWeek) - (dayOfWeek === 0 ? 7 : 0))
+    
+    const formatDate = (date: Date) => {
+      return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`
+    }
+    
+    return `${formatDate(monday)} – ${formatDate(sunday)}`
   }
-  
-  return `${formatDate(monday)} – ${formatDate(sunday)}`
 })
 
 const selectedWeekRange = computed(() => {
@@ -109,7 +120,21 @@ const selectedWeekRange = computed(() => {
 // 获取课程数据并转换为日历事件
 async function fetchCalendarEvents() {
   try {
+    const loading = ElLoading.service({
+      target: '.calendar-wrapper',
+      text: '加载课表中...',
+      background: 'rgba(255, 255, 255, 0.7)'
+    })
+    
     const courses = await fetchCourseData(currentDate.value)
+    
+    loading.close()
+    
+    // 如果是月视图，可能需要更多的课程数据
+    if (currentView.value === 'dayGridMonth') {
+      // 这里可以添加月视图特殊处理逻辑
+    }
+    
     const events: CalendarEvent[] = courses.map((course: any) => {
       // 获取当前周的日期
       const weekStart = new Date(selectedWeekRange.value[0])
@@ -152,6 +177,7 @@ async function fetchCalendarEvents() {
     return events
   } catch (error) {
     console.error('获取日历事件失败:', error)
+    ElMessage.error('加载课表失败，请稍后重试')
     return []
   }
 }
@@ -160,7 +186,7 @@ async function fetchCalendarEvents() {
 const calendarOptions = reactive({
   plugins: [dayGridPlugin, interactionPlugin, timeGridPlugin],
   initialView: 'timeGridWeek',
-  height: '100%', // 改为100%以填充容器
+  height: '100%',
   locale: zhCn,
   selectable: true,
   editable: false,
@@ -170,17 +196,17 @@ const calendarOptions = reactive({
   headerToolbar: {
     left: '',
     center: '',
-    right: 'myCustomButton'
+    right: ''
   },
-  customButtons: {
-    myCustomButton: {
-      text: '看板',
-      click: () => {
-        isWeekViewVisible.value = true
-        updateWeekViewData()
-      }
-    }
-  },
+  // customButtons: {
+  //   myCustomButton: {
+  //     text: '看板',
+  //     click: () => {
+  //       isWeekViewVisible.value = true
+  //       updateWeekViewData()
+  //     }
+  //   }
+  // },
   events: [] as CalendarEvent[],
   eventTimeFormat: {
     hour: '2-digit',
@@ -204,6 +230,28 @@ const calendarOptions = reactive({
           <div class="fc-event-time">${timeText}</div>
         </div>
       `
+    }
+  },
+  // 添加视图特定配置
+  views: {
+    dayGridMonth: {
+      // 月视图特定配置
+      dayMaxEvents: 3, // 限制每天显示的事件数，超出显示"+更多"
+      eventTimeFormat: {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      }
+    },
+    timeGridWeek: {
+      // 周视图特定配置
+      slotDuration: '00:30:00',
+      slotLabelInterval: '01:00'
+    },
+    timeGridDay: {
+      // 日视图特定配置
+      slotDuration: '00:30:00',
+      slotLabelInterval: '01:00'
     }
   }
 })
@@ -234,19 +282,30 @@ const handleViewChange = (view: string) => {
   if (!api) return
   
   api.changeView(view)
+  currentDate.value = api.getDate() // 更新当前日期，确保日期范围显示正确
   updateCalendarEvents()
 }
 
 // 更新日历事件
 async function updateCalendarEvents() {
-  const events = await fetchCalendarEvents()
-  const api = calendarRef.value?.getApi()
-  if (!api) return
-  
-  api.removeAllEvents()
-  events.forEach(event => {
-    api.addEvent(event)
-  })
+  try {
+    const events = await fetchCalendarEvents()
+    const api = calendarRef.value?.getApi()
+    if (!api) return
+    
+    api.removeAllEvents()
+    events.forEach(event => {
+      api.addEvent(event)
+    })
+    
+    // 如果没有事件，显示提示
+    if (events.length === 0) {
+      ElMessage.info('当前没有课程安排')
+    }
+  } catch (error) {
+    console.error('更新日历事件失败:', error)
+    ElMessage.error('加载课表失败')
+  }
 }
 
 // 更新看板数据
@@ -272,6 +331,7 @@ onMounted(async () => {
   if (calendarApi) {
     calendarApi.updateSize()
     currentDate.value = calendarApi.getDate()
+    currentView.value = calendarApi.view.type // 确保视图类型同步
     updateCalendarEvents()
   }
 })
@@ -338,7 +398,7 @@ watch(currentView, (newView) => {
 
 /* FullCalendar 样式覆盖 */
 .fc {
-  height: 100% !important;
+  height: 100% !important; /* 保留这一行，删除后面冲突的设置 */
 }
 
 .fc-theme-standard td, .fc-theme-standard th {
@@ -402,6 +462,7 @@ watch(currentView, (newView) => {
   color: rgba(255, 255, 255, 0.9);
 }
 
+/* 特殊样式:当天高亮 */
 .fc-col-header-cell.fc-day-today {
   background-color: #f0f7ff;
 }
@@ -409,6 +470,31 @@ watch(currentView, (newView) => {
 .fc-col-header-cell.fc-day-today .fc-col-header-cell-cushion {
   color: #2E75B6;
   font-weight: bold;
+}
+
+/* 月视图中的样式调整 */
+.fc-dayGridMonth-view .fc-daygrid-day {
+  height: 80px; /* 增加日期单元格高度 */
+}
+
+.fc-dayGridMonth-view .fc-daygrid-day-number {
+  padding: 4px 8px;
+  font-weight: 500;
+}
+
+.fc-dayGridMonth-view .fc-daygrid-day.fc-day-today {
+  background-color: #f0f7ff;
+}
+
+.fc-dayGridMonth-view .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background-color: #2E75B6;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fc-timegrid-now-indicator-line {
@@ -453,7 +539,7 @@ watch(currentView, (newView) => {
 }
 
 .fc .fc-scroller {
-  overflow: auto !important;
+  overflow: auto; /* 移除 !important，允许 FullCalendar 管理滚动 */
 }
 
 .fc .fc-scroller-harness {
@@ -461,8 +547,30 @@ watch(currentView, (newView) => {
   overflow: hidden;
   direction: ltr;
 }
-.fc{
-  height: 100px;
+
+/* 添加月视图中"更多"按钮的样式 */
+.fc-daygrid-more-link {
+  color: #2E75B6;
+  font-weight: 500;
+}
+
+.fc-daygrid-more-link:hover {
+  text-decoration: underline;
+}
+
+/* 加载状态样式 */
+.el-loading-mask {
+  z-index: 1000;
+}
+
+/* 修复视图按钮组样式 */
+.view-options .el-radio-button__inner {
+  padding: 8px 15px;
+}
+
+/* 确保日视图和月视图下的事件样式保持一致 */
+.fc-daygrid-event {
+  margin-top: 1px;
+  margin-bottom: 1px;
 }
 </style>
-
