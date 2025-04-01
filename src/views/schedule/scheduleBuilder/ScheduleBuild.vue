@@ -2053,7 +2053,7 @@ export default {
     };
 
     const HandleAiClick = () => {
-      bus.emit("showAiScheduleDialog");
+      bus.emit("showAiScheduleDialog",{taskId,currentClassId,currentClassName},);
     };
 
     const HandleWeekSelect = () => {

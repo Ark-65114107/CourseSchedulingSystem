@@ -2,13 +2,13 @@
   <el-header>
     <router-link to="/" class="logotitle">
       <img src="/src/assets/logo.png" alt="" class="logo" />
-      <el-text class="titleText">高校排课系统</el-text>
     </router-link>
 
     <div class="userInfo">
       <el-dropdown size="large">
         <span class="username">
-          <el-icon><User /></el-icon>
+          <img class="userLogo" src="/src/assets/userLogo.png" />
+
           {{ username }}
         </span>
         <template #dropdown>
@@ -64,9 +64,9 @@ export default {
       router.push("/login");
     };
 
-    const handleUsereInfo = ()=>{
-      router.push("/home/user")
-    }
+    const handleUsereInfo = () => {
+      router.push("/home/user");
+    };
 
     return {
       handleLogout,
@@ -100,12 +100,13 @@ export default {
 
 .userInfo {
   height: 100%;
+  width: auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.titleText{
+.titleText {
   color: white;
   font-size: 22px;
   font-weight: bold;
@@ -114,6 +115,12 @@ export default {
 .username {
   margin: 0px 10px;
   color: white;
+}
+.userLogo {
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  background-image: url("/src/assets/userLogo.png");
 }
 
 .ToAccountManage,
