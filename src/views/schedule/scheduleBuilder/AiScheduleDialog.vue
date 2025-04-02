@@ -5,131 +5,152 @@
     width="800px"
     class="dialog"
     :close-on-click-modal="false"
-    :show-close="false"
     @close="ClearInput"
   >
-    <el-text class="taskTitle">任务数:~</el-text>
-    <div class="AiMainDiv">
-      <div class="classTree">
-        <el-text class="classTreeTitle">选择要自动排课的班级</el-text>
-        <el-button
-          class="UniformSettings"
-          type="primary"
-          size="small"
-          @click="UniformSettings"
-          >统一设置</el-button
-        >
+    <div class="scheduleSetting" v-show="!isScheduling">
+      <el-text class="taskTitle">任务数:{{ classListLength }}</el-text>
+      <div class="AiMainDiv">
+        <div class="classTree">
+          <el-text class="classTreeTitle">选择要自动排课的班级</el-text>
 
-        <el-input
-          v-model="treeKeyword"
-          placeholder="搜索班级"
-          size="small"
-          clearable
-        ></el-input>
-        <el-scrollbar
-          class="classTreeScrollBar"
-          height="340px"
-          v-loading="isLoading"
-          always
-        >
-          <el-tree
-            :data="classTree"
-            :filter-node-method="treeFilter"
-            v-loading="isTreeLoading"
-            ref="treeRef"
-            node-key="id"
-            default-expand-all
-            @node-click="HandleTreeNodeClick"
-            @check-change="HandleCheckChange"
-            :props="{ class: nodeClass }"
-            show-checkbox
-            highlight-current
+          <el-input
+            v-model="treeKeyword"
+            placeholder="搜索班级"
+            size="small"
+            clearable
+          ></el-input>
+          <el-scrollbar
+            class="classTreeScrollBar"
+            height="340px"
+            v-loading="isLoading"
+            always
           >
-            <template #default="{ node, data }">
-              <div class="treeNode">
-                <el-text v-if="data.select" style="font-weight: bold">{{
-                  node.label
-                }}</el-text>
-                <el-text v-else>{{ node.label }}</el-text>
-                <el-text v-if="data.select">({{ data.courseNum }})</el-text>
-              </div>
-            </template>
-          </el-tree>
-        </el-scrollbar>
-      </div>
-      <div class="settingMenu" v-loading="isSettingMenuLoading">
-        <el-text class="classTitle">{{ currentClassName }}</el-text>
-        <el-scrollbar height="370px" ref="scrollBarRef">
-          <el-form label-position="">
-            <el-form-item label="是否参与自动排课:"
-              ><el-switch
-                v-model="isAutoSchedulingEnabled"
-                @change="HandleSwitchChange"
-            /></el-form-item>
+            <el-tree
+              :data="classTree"
+              :filter-node-method="treeFilter"
+              v-loading="isTreeLoading"
+              ref="treeRef"
+              node-key="id"
+              default-expand-all
+              @check-change="HandleCheckChange"
+              :props="{ class: nodeClass }"
+              show-checkbox
+            >
+              <template #default="{ node, data }">
+                <div class="treeNode">
+                  <el-text v-if="data.select" style="font-weight: bold">{{
+                    node.label
+                  }}</el-text>
+                  <el-text v-else>{{ node.label }}</el-text>
+                  <el-text v-if="data.select">({{ data.courseNum }})</el-text>
+                </div>
+              </template>
+            </el-tree>
+          </el-scrollbar>
+        </div>
+        <div class="settingMenu" v-loading="isSettingMenuLoading">
+          <el-text class="classTitle">{{ currentClassName }}</el-text>
+          <el-scrollbar height="370px" ref="scrollBarRef">
+            <el-form label-position="left">
+              <el-form-item label="是否参与自动排课:"
+                ><el-switch
+                  v-model="isAutoSchedulingEnabled"
+                  @change="HandleSwitchChange"
+              /></el-form-item>
 
-            <el-form-item>
-              <el-checkbox
-                label="班级排课教室尽量集中:"
-                v-model="isClassroomsConcentratedForClasses"
-                :disabled="!isAutoSchedulingEnabled"
-              />
-            </el-form-item>
+              <el-form-item>
+                <el-checkbox
+                  label="班级排课教室尽量集中:"
+                  v-model="isClassroomsConcentratedForClasses"
+                  :disabled="!isAutoSchedulingEnabled"
+                />
+              </el-form-item>
 
-            <el-form-item
-              ><el-checkbox
-                v-model="isClassroomsConcentratedForTeachers"
-                label="教师排课教室尽量集中"
-                :disabled="!isAutoSchedulingEnabled"
-            /></el-form-item>
-            <el-form-item
-              ><el-checkbox
-                label="同一课程使用相同教室"
-                v-model="isSameClassroomForSameCourse"
-                :disabled="!isAutoSchedulingEnabled"
-            /></el-form-item>
-            <el-form-item
-              ><el-checkbox
-                label="体育课安排是否只能在下午"
-                v-model="allowPEOnlyInAfternoon"
-                :disabled="!isAutoSchedulingEnabled"
-            /></el-form-item>
-            <el-form-item
-              ><el-checkbox
-                label="体育课后是否安排课程"
-                v-model="allowCoursesAfterPE"
-                :disabled="!isAutoSchedulingEnabled"
-            /></el-form-item>
-            <el-form-item
-              ><el-checkbox
-                label="实验课程是否只能安排在晚上"
-                v-model="isLabCourseEveningOnly"
-                :disabled="!isAutoSchedulingEnabled"
-            /></el-form-item>
-            <el-form-item
-              ><el-checkbox
-                label="多学时（理论、实验、上机）类型的课程学时是否连续排"
-                v-model="isContinuousSchedulingForMultiHours"
-                :disabled="!isAutoSchedulingEnabled"
-            /></el-form-item>
-            <el-form-item
-              ><el-checkbox
-                label="自动排课是否需要安排地点"
-                :disabled="!isAutoSchedulingEnabled"
-                v-model="isLocationAssignmentRequired"
-            /></el-form-item>
-            <el-form-item
-              ><el-checkbox
-                label="学校晚上是否上课"
-                :disabled="!isAutoSchedulingEnabled"
-                v-model="isEveningClassesEnabled"
-            /></el-form-item>
-          </el-form>
-        </el-scrollbar>
+              <el-form-item
+                ><el-checkbox
+                  v-model="isClassroomsConcentratedForTeachers"
+                  label="教师排课教室尽量集中"
+                  :disabled="!isAutoSchedulingEnabled"
+              /></el-form-item>
+              <el-form-item
+                ><el-checkbox
+                  label="同一课程使用相同教室"
+                  v-model="isSameClassroomForSameCourse"
+                  :disabled="!isAutoSchedulingEnabled"
+              /></el-form-item>
+              <el-form-item
+                ><el-checkbox
+                  label="体育课安排是否只能在下午"
+                  v-model="allowPEOnlyInAfternoon"
+                  :disabled="!isAutoSchedulingEnabled"
+              /></el-form-item>
+              <el-form-item
+                ><el-checkbox
+                  label="体育课后是否安排课程"
+                  v-model="allowCoursesAfterPE"
+                  :disabled="!isAutoSchedulingEnabled"
+              /></el-form-item>
+              <el-form-item
+                ><el-checkbox
+                  label="实验课程是否只能安排在晚上"
+                  v-model="isLabCourseEveningOnly"
+                  :disabled="!isAutoSchedulingEnabled"
+              /></el-form-item>
+              <el-form-item
+                ><el-checkbox
+                  label="多学时（理论、实验、上机）类型的课程学时是否连续排"
+                  v-model="isContinuousSchedulingForMultiHours"
+                  :disabled="!isAutoSchedulingEnabled"
+              /></el-form-item>
+              <el-form-item
+                ><el-checkbox
+                  label="自动排课是否需要安排地点"
+                  :disabled="!isAutoSchedulingEnabled"
+                  v-model="isLocationAssignmentRequired"
+              /></el-form-item>
+              <el-form-item
+                ><el-checkbox
+                  label="学校晚上是否上课"
+                  :disabled="!isAutoSchedulingEnabled"
+                  v-model="isEveningClassesEnabled"
+              /></el-form-item>
+            </el-form>
+          </el-scrollbar>
+        </div>
       </div>
     </div>
+
+    <div class="scheduling" v-show="isScheduling">
+      <el-text class="schedulingTitle">自动排课中...</el-text><br />
+      <div class="schedulingContent">
+        <el-text class="schedulingText">排课进度</el-text>
+      </div>
+      <el-progress></el-progress>
+      <el-button @click="testimporve">+</el-button>
+      <el-button @click="initAutoScheduleMessage">reset</el-button>
+      <el-text type="info" size="small">AI模型为豆包1.5pro</el-text>
+      <el-scrollbar class="chartScrollBar" height="375px">
+        <div class="chatView">
+              <div
+                class="chatMessage"
+                v-for="msg of autoSchedulingProgressMessage"
+                v-show="msg.isShow"
+              >
+                <img class="chatAvatar" src="@/assets/aiLogo.png" />
+                <div class="chatTextBorder">
+                  <el-text class="chatText">{{ msg.message }}</el-text>
+                  <div class="chatLoading" v-show="msg.isLoading"></div>
+                </div>
+              </div>
+        </div>
+      </el-scrollbar>
+    </div>
+
     <template #footer>
-      <el-button @click="HandleCancelClick" type="danger">取消</el-button>
-      <el-button @click="HandleCancelClick" type="primary"
+      <el-button @click="HandleCancelClick" type="danger" v-show="!isScheduling"
+        >取消</el-button
+      >
+      <el-button @click="HandleStartClick" type="primary" v-show="!isScheduling"
         >开始自动排课</el-button
       >
     </template>
@@ -137,9 +158,12 @@
 </template>
 
 <script>
-import { onMounted, reactive, ref, toRefs, watch } from "vue";
+import { computed, onMounted, reactive, ref, toRefs, watch } from "vue";
 import bus from "@/bus/bus";
 import { getClassTreeApi } from "@/api/schedule/addClass/classTree.api";
+import { getAutoScheduleClassListApi } from "@/api/schedule/aiSchedule/getAutoScheduleClassList.api.js";
+import { setAutoScheduleSettingApi } from "@/api/schedule/aiSchedule/setAutoScheduleSetting.api.js";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   name: "AiScheduleDialog",
@@ -152,9 +176,9 @@ export default {
     });
 
     const formInput = reactive({
-      isAutoSchedulingEnabled: false, //是否参与自动排课
+      isAutoSchedulingEnabled: true, //是否参与自动排课
       isLocationAssignmentRequired: false, //自动排课是否需要安排地点
-      isEveningClassesEnabled: false, //学校晚上是否上课
+      isEveningClassesEnabled: false, //晚上是否上课
       isClassroomsConcentratedForClasses: false, //班级排课教室尽量集中
       isClassroomsConcentratedForTeachers: false, //教师排课教室尽量集中
       isSameClassroomForSameCourse: false, //同一课程是否使用相同教室
@@ -163,9 +187,10 @@ export default {
       isLabCourseEveningOnly: false, //实验课程是否只能安排在晚上
       isContinuousSchedulingForMultiHours: false, //多学时（理论、实验、上机）类型的课程学时是否连续排
       canNotBeEvenlyDivided: 1, //周学时无法被连排节次整除时的安排方式
+      isOverwriteScheduleEnabled: false,
     });
 
-    const currentTab = ref("");
+    const selectedClassList = ref([]);
 
     const taskId = ref("");
 
@@ -175,27 +200,75 @@ export default {
 
     const isTreeLoading = ref(false);
 
-    const currentClassId = ref("");
-
-    const currentClassName = ref("");
-
     const isSettingMenuLoading = ref(false);
 
     const scrollBarRef = ref();
+
     const treeRef = ref();
+
+    const isScheduling = ref(false);
+
+    const autoSchedulingProgress = ref(0);
+
+    const autoSchedulingStage = ref(0);
+
+    const autoSchedulingProgressMessage = reactive([
+      {
+        stage: 1,
+        message: "欢迎使用AI自动排课,正在添加排课任务。",
+        isLoading: false,
+        isShow: false,
+      },
+      {
+        stage: 2,
+        message: "排课任务添加完毕,准备开始排课...",
+        isLoading: false,
+        isShow: false,
+      },
+      {
+        stage: 3,
+        isLoading: false,
+        message: "自动排课中...(排课进度100%)",
+        isShow: false,
+      },
+      {
+        stage: 4,
+        message: "正在等待排课结果。",
+        isLoading: false,
+        isShow: false,
+      },
+      {
+        stage: 5,
+        message: "排课完成!",
+        isLoading: false,
+        isShow: false,
+      },
+      {
+        stage: 6,
+        message: "本次排课结果:",
+
+        isLoading: false,
+        isShow: false,
+      },
+      {
+        stage: 7,
+        errorMessage: "",
+        message: `排课失败! 原因:${{}}`,
+        isLoading: false,
+        isShow: false,
+      },
+    ]);
+
+    const classListLength = computed(() => {
+      return selectedClassList.value.length;
+    });
 
     onMounted(() => {
       bus.on("showAiScheduleDialog", (busData) => {
-        currentClassId.value = busData.currentClassId;
-        currentClassName.value = busData.currentClassName;
         taskId.value = busData.taskId;
         data.isDialogVisiable = true; //List中按下按钮弹窗
         getClassTree();
       });
-    });
-
-    watch(currentClassId, (value) => {
-      console.log(value);
     });
 
     const treeFilter = (value, data) => {
@@ -215,44 +288,91 @@ export default {
       });
     };
 
-    const getClassAiSetting = (classId) => {
-      isSettingMenuLoading.value = true;
-      setTimeout(() => {
-        isSettingMenuLoading.value = false;
-      }, 500);
-    };
-
-    const HandleTreeNodeClick = (node) => {
-      if (node.select) {
-        currentClassName.value = node.label;
-        currentClassId.value = node.id;
-        getClassAiSetting(currentClassId.value);
-      }
-    };
-
     const HandleCancelClick = () => {
       // teachingClassFormRef.value.resetFields();
       data.isDialogVisiable = false;
     };
 
+    //check
     const HandleCheckChange = (node, isChecked) => {
       if (node.select) {
-        console.log(node);
+        let index = selectedClassList.value.findIndex((cl) => cl == node.id);
+        if (index != -1) {
+          if (!isChecked) {
+            selectedClassList.value = selectedClassList.value.filter((cl) => {
+              return cl !== node.id;
+            });
+          }
+        } else {
+          if (isChecked) {
+            selectedClassList.value.push(node.id);
+          }
+        }
       }
     };
 
-    const nodeClass = (node, b) => {
+    const nodeClass = (node) => {
       return "nodeClass";
     };
 
-    const UniformSettings = () => {
-      currentClassName.value = "统一设置";
+    const HandleStartClick = () => {
+      if (selectedClassList.value.length <= 0) {
+        ElMessage.error("请至少选择一个班级!");
+        return;
+      }
+      ElMessageBox.confirm("自动排课是否要覆盖所选班级已有的课表?", "警告", {
+        confirmButtonText: "在已有的课表上继续排课",
+        cancelButtonText: "覆盖课表，重新排课!",
+      })
+        .then(() => {
+          formInput.isOverwriteScheduleEnabled = false;
+        })
+        .catch(() => {
+          formInput.isOverwriteScheduleEnabled = true;
+        })
+        .then(() => {
+          isScheduling.value = true; //!!!!!!!
+          setAutoScheduleSettingApi(selectedClassList.value, formInput).then(
+            (res) => {
+              if (res) {
+                if (res.meta.code) {
+                  // isScheduling.value = true;
+                }
+              }
+            }
+          );
+        });
     };
 
-    const HandleSwitchChange = () => {
-      console.log(currentClassId.value);
-      console.log(formInput.isAutoSchedulingEnabled);
-      treeRef.value.setCheckedKeys([currentClassId.value],formInput.isAutoSchedulingEnabled);
+    const HandleAutoScheduleProgress = () => {
+      if (autoSchedulingStage.value >= 1) {
+        autoSchedulingProgressMessage[
+          autoSchedulingStage.value - 1
+        ].isLoading = false;
+        autoSchedulingProgressMessage[autoSchedulingStage.value].isShow = true;
+        autoSchedulingProgressMessage[
+          autoSchedulingStage.value
+        ].isLoading = true;
+      } else {
+        autoSchedulingProgressMessage[autoSchedulingStage.value].isShow = true;
+        autoSchedulingProgressMessage[
+          autoSchedulingStage.value
+        ].isLoading = true;
+      }
+    };
+
+    const initAutoScheduleMessage = () => {
+      autoSchedulingProgress.value = 0;
+      autoSchedulingStage.value = 0;
+      autoSchedulingProgressMessage.forEach((msg) => {
+        msg.isLoading = false;
+        msg.isShow = false;
+      });
+    };
+
+    const testimporve = () => {
+      autoSchedulingStage.value++;
+      HandleAutoScheduleProgress();
     };
 
     return {
@@ -264,16 +384,18 @@ export default {
       treeFilter,
       isTreeLoading,
       getClassTree,
-      currentTab,
       nodeClass,
-      currentClassName,
-      HandleTreeNodeClick,
       isSettingMenuLoading,
       HandleCheckChange,
-      UniformSettings,
       scrollBarRef,
       treeRef,
-      HandleSwitchChange,
+      selectedClassList,
+      classListLength,
+      isScheduling,
+      HandleStartClick,
+      autoSchedulingProgressMessage,
+      testimporve,
+      initAutoScheduleMessage,
     };
   },
 };
@@ -358,4 +480,98 @@ export default {
   height: auto;
   margin-bottom: 5px;
 }
+
+.scheduling {
+  height: 500px;
+  padding: 10px;
+  border-radius: 8px;
+  border: solid 1px #dcdfe6;
+}
+
+.schedulingTitle {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.schedulingContent {
+  margin: 10px 5px;
+}
+.schedulingText {
+  font-size: 17px;
+  margin-top: 20px;
+}
+
+.chatCollapse {
+  height: 450px;
+}
+
+.chartScrollBar {
+  height: 375px;
+  width: auto;
+  padding: 10px;
+  border-radius: 8px;
+  border: solid 1px #dcdfe6;
+}
+
+.chatView {
+  height: max-content;
+  width: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chatMessage {
+  height: 45px;
+  width: max-content;
+  margin: 15px 10px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: row;
+}
+
+.chatAvatar {
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+}
+
+.chatTextBorder {
+  width: 100%;
+  margin-left: 12px;
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  border-radius: 4px;
+  border: solid 1px #dcdfe6;
+}
+
+.chatText {
+  width: auto;
+  height: max-content;
+  justify-self: flex-start;
+  align-self: center;
+}
+
+.chatLoading {
+  width: 12px;
+  height: 12px;
+  margin-left: 10px;
+  border: 2px solid #c5c4c4;
+  border-top-color: transparent;
+  border-radius: 100%;
+  align-self: center;
+  animation: circle infinite 0.75s linear;
+}
+
+@keyframes circle {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
 </style>
+

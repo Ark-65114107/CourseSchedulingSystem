@@ -112,9 +112,12 @@
                 <span class="teachingClassCellTextSpan">
                   {{ tc.courseName }}
                 </span>
-                <span class="teachingClassCellTextSpan">
-                  {{ teacherNameFormatter(tc.teacherList) }}
-                </span>
+                <span class="teachingClassCellTextSpan">{{
+                  teacherNameFormatter(tc.teacherList)
+                }}</span>
+                <span class="teachingClassCellTextSpan"
+                  >连排节次:{{ tc.consecutiveClassPeriods }}</span
+                >
                 <span class="teachingClassCellTextSpan">{{
                   weeksDataFormatter(tc.weeksData)
                 }}</span>
@@ -771,7 +774,7 @@ export default {
         period: 1,
         cellIndex: 1,
         consecutiveClassPeriods: 2,
-        type:"lab"
+        type: "lab",
       },
       {
         cellId: "c2",
@@ -1740,17 +1743,17 @@ export default {
                 }
               }
 
-              let backgroundcolor
+              let backgroundcolor;
               switch (cell.type) {
                 case "lab":
                   backgroundcolor = "rgb(148.6, 212.3, 117.1)"; //绿色
-                  break
+                  break;
                 case "seminar":
                   backgroundcolor = "#ffca77"; //橙色
-                  break
+                  break;
                 case "exam":
                   backgroundcolor = "#ff9f9f";
-                  break
+                  break;
                 default:
                   backgroundcolor = "rgb(159.5, 206.5, 255)";
               }
@@ -1769,7 +1772,7 @@ export default {
                 periodRange,
                 style: {
                   height: `${cellHeight * cell.consecutiveClassPeriods}px`,
-                  background:backgroundcolor
+                  background: backgroundcolor,
                 },
                 isShow,
               });
@@ -2053,7 +2056,11 @@ export default {
     };
 
     const HandleAiClick = () => {
-      bus.emit("showAiScheduleDialog",{taskId,currentClassId,currentClassName},);
+      bus.emit("showAiScheduleDialog", {
+        taskId,
+        currentClassId:currentClassId.value,
+        currentClassName:currentClassName.value,
+      });
     };
 
     const HandleWeekSelect = () => {
