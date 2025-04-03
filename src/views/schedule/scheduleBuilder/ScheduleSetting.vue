@@ -951,11 +951,11 @@ export default {
           scheduleData.value[cell.rowIndex].cellList[cell.columnIndex - 2].type
         ) {
           case 3:
-            return { background: "#ffa8a8" };
+            return { background: "#ffd479" };
           case 2:
             return { background: "#add8ff" };
           case 1:
-            return { background: "#fffb06" };
+            return { background: "#fdffbf" };
           case 4:
             return { background: "#0065bd" };
           default:
@@ -1066,13 +1066,12 @@ export default {
   height: auto;
   width: auto;
 }
-.formItemTitle {
-  font-weight: bold;
-  margin: 20px 0px;
+
+.formItemTitle .el-text{
+  font-size: 15px;
 }
 .menuTitle {
   font-weight: bold;
-  font-size: 20px;
   margin: 5px 0px;
 }
 
@@ -1106,10 +1105,10 @@ export default {
 }
 
 .color1 {
-  background: #ffa8a8;
+  background: #ffd479;
 }
 .color2 {
-  background: #fffb06;
+  background: #fdffbf;
 }
 .color3 {
   background: #add8ff;

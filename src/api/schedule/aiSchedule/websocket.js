@@ -1,12 +1,11 @@
 import request from "@/utils/request"
 
-export const getClassAiSettingApi = (taskId,classId,cellId) => {
+export const getAutoScheduleClassListApi = (taskId) => {
     return request({
-        url: "/task/getClassAiSetting",
+        url: "/task/getAutoScheduleClassList",
         method: "get",
         params: {
             taskId,
-            classId
         }
     }).catch(() => {})
 }

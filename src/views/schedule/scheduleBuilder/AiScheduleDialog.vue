@@ -120,31 +120,42 @@
       </div>
     </div>
 
-    <div class="scheduling" v-show="isScheduling">
+    <!-- <div class="scheduling" v-show="isScheduling">
       <el-text class="schedulingTitle">自动排课中...</el-text><br />
       <div class="schedulingContent">
         <el-text class="schedulingText">排课进度</el-text>
       </div>
-      <el-progress></el-progress>
       <el-button @click="testimporve">+</el-button>
       <el-button @click="initAutoScheduleMessage">reset</el-button>
       <el-text type="info" size="small">AI模型为豆包1.5pro</el-text>
       <el-scrollbar class="chartScrollBar" height="375px">
         <div class="chatView">
-              <div
-                class="chatMessage"
-                v-for="msg of autoSchedulingProgressMessage"
-                v-show="msg.isShow"
-              >
-                <img class="chatAvatar" src="@/assets/aiLogo.png" />
-                <div class="chatTextBorder">
-                  <el-text class="chatText">{{ msg.message }}</el-text>
-                  <div class="chatLoading" v-show="msg.isLoading"></div>
-                </div>
+          <div
+            class="chatMessage"
+            v-for="msg of autoSchedulingProgressMessage"
+            v-show="msg.isShow"
+          >
+            <img class="chatAvatar" src="@/assets/aiLogo.png" />
+            <div class="chatTextBorder">
+              <el-text class="chatText"
+                >{{ msg.message }}
+                {{msg.errorMessage}}
+                <div class="chatLoading" v-show="msg.isLoading"></div>
+              </el-text>
+              <el-progress
+                class="chatProgress"
+                v-show="msg.isProgressShow"
+                :percentage="100"
+              ></el-progress>
+              <div v-show="msg.isResultShow" class="autoScheduleInfo">
+                qwq
               </div>
+            </div>
+          </div>
         </div>
       </el-scrollbar>
-    </div>
+    </div> -->
+    <aiChatVue :isScheduling="true" />
 
     <template #footer>
       <el-button @click="HandleCancelClick" type="danger" v-show="!isScheduling"
@@ -164,9 +175,12 @@ import { getClassTreeApi } from "@/api/schedule/addClass/classTree.api";
 import { getAutoScheduleClassListApi } from "@/api/schedule/aiSchedule/getAutoScheduleClassList.api.js";
 import { setAutoScheduleSettingApi } from "@/api/schedule/aiSchedule/setAutoScheduleSetting.api.js";
 import { ElMessage, ElMessageBox } from "element-plus";
+import aiChatVue from '@/components/ScheduleManagement/scheduleBuilder/aiChat.vue';
+
 
 export default {
   name: "AiScheduleDialog",
+  components:{aiChatVue},
   setup() {
     const data = reactive({
       isDialogVisiable: false, //是否弹窗
@@ -207,57 +221,6 @@ export default {
     const treeRef = ref();
 
     const isScheduling = ref(false);
-
-    const autoSchedulingProgress = ref(0);
-
-    const autoSchedulingStage = ref(0);
-
-    const autoSchedulingProgressMessage = reactive([
-      {
-        stage: 1,
-        message: "欢迎使用AI自动排课,正在添加排课任务。",
-        isLoading: false,
-        isShow: false,
-      },
-      {
-        stage: 2,
-        message: "排课任务添加完毕,准备开始排课...",
-        isLoading: false,
-        isShow: false,
-      },
-      {
-        stage: 3,
-        isLoading: false,
-        message: "自动排课中...(排课进度100%)",
-        isShow: false,
-      },
-      {
-        stage: 4,
-        message: "正在等待排课结果。",
-        isLoading: false,
-        isShow: false,
-      },
-      {
-        stage: 5,
-        message: "排课完成!",
-        isLoading: false,
-        isShow: false,
-      },
-      {
-        stage: 6,
-        message: "本次排课结果:",
-
-        isLoading: false,
-        isShow: false,
-      },
-      {
-        stage: 7,
-        errorMessage: "",
-        message: `排课失败! 原因:${{}}`,
-        isLoading: false,
-        isShow: false,
-      },
-    ]);
 
     const classListLength = computed(() => {
       return selectedClassList.value.length;
@@ -332,6 +295,7 @@ export default {
         })
         .then(() => {
           isScheduling.value = true; //!!!!!!!
+          bus.emit("startAiSchedule")
           setAutoScheduleSettingApi(selectedClassList.value, formInput).then(
             (res) => {
               if (res) {
@@ -344,36 +308,7 @@ export default {
         });
     };
 
-    const HandleAutoScheduleProgress = () => {
-      if (autoSchedulingStage.value >= 1) {
-        autoSchedulingProgressMessage[
-          autoSchedulingStage.value - 1
-        ].isLoading = false;
-        autoSchedulingProgressMessage[autoSchedulingStage.value].isShow = true;
-        autoSchedulingProgressMessage[
-          autoSchedulingStage.value
-        ].isLoading = true;
-      } else {
-        autoSchedulingProgressMessage[autoSchedulingStage.value].isShow = true;
-        autoSchedulingProgressMessage[
-          autoSchedulingStage.value
-        ].isLoading = true;
-      }
-    };
 
-    const initAutoScheduleMessage = () => {
-      autoSchedulingProgress.value = 0;
-      autoSchedulingStage.value = 0;
-      autoSchedulingProgressMessage.forEach((msg) => {
-        msg.isLoading = false;
-        msg.isShow = false;
-      });
-    };
-
-    const testimporve = () => {
-      autoSchedulingStage.value++;
-      HandleAutoScheduleProgress();
-    };
 
     return {
       ...toRefs(data),
@@ -393,9 +328,7 @@ export default {
       classListLength,
       isScheduling,
       HandleStartClick,
-      autoSchedulingProgressMessage,
-      testimporve,
-      initAutoScheduleMessage,
+
     };
   },
 };
@@ -522,7 +455,7 @@ export default {
 }
 
 .chatMessage {
-  height: 45px;
+  height: max-content;
   width: max-content;
   margin: 15px 10px;
   border-radius: 5px;
@@ -537,20 +470,22 @@ export default {
 }
 
 .chatTextBorder {
-  width: 100%;
+  width: auto;
   margin-left: 12px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  justify-content: left;
   padding: 10px;
   border-radius: 4px;
   border: solid 1px #dcdfe6;
 }
 
 .chatText {
-  width: auto;
+  width: 100%;
   height: max-content;
-  justify-self: flex-start;
-  align-self: center;
+  justify-self: left;
+  display: flex;
+  flex-direction: row;
 }
 
 .chatLoading {
@@ -564,6 +499,21 @@ export default {
   animation: circle infinite 0.75s linear;
 }
 
+.chatProgress {
+  width: auto;
+  min-width: 250px;
+  margin-top: 10px;
+}
+
+.autoScheduleInfo {
+  min-width: 350px;
+  min-height: 100px;
+  height: max-content;
+  margin: 5px 0px;
+  padding: 5px;
+  border-radius: 8px;
+  border: solid 1px #dcdfe6;
+}
 @keyframes circle {
   0% {
     transform: rotate(0);
@@ -572,6 +522,5 @@ export default {
     transform: rotate(360deg);
   }
 }
-
 </style>
 
