@@ -7,6 +7,21 @@
           <el-scrollbar height="345px" style="padding-right: 10px">
             <el-form label-position="left" label-width="auto">
               <div class="formItemTitle">
+                <el-text>周次设置</el-text>
+              </div>
+              <el-form-item class="formItem" label="最大周次：">
+                <el-input-number
+                  class=""
+                  v-model="scheduleConditions.data.maxWeek"
+                  :controls="false"
+                  :max="25"
+                  :min="0"
+                  @change="HandleMaxWeekChange"
+                >
+                </el-input-number>
+              </el-form-item>
+
+              <div class="formItemTitle">
                 <el-text>课程设置</el-text>
               </div>
 
@@ -285,6 +300,7 @@ import {
   updatePeriodApi,
   updatePeriodTimeApi,
   updateRestTimeDurationApi,
+  updateMaxWeekApi,
 } from "@/api/schedule/scheduleSetting/scheduleRoutine.api";
 import {
   getScheduleSettingStructApi,
@@ -301,6 +317,7 @@ export default {
     const isLoading = ref(false);
     const scheduleConditions = reactive({
       data: {
+        maxWeek:18,//最大周次
         courseDuration: 0, //课程时长
         breakDuration: 0, //课间时长
         morningPeriods: 3, //上午节次
@@ -389,6 +406,12 @@ export default {
         });
     };
 
+    const HandleMaxWeekChange = () => {
+      debounce(() => {
+        updateMaxWeekChange();
+      }, 400)();
+    };
+
     const HandleCourseDurationChange = () => {
       debounce(() => {
         updateCourseDuration();
@@ -472,6 +495,20 @@ export default {
             break;
         }
       }, 400)();
+    };
+
+    const updateMaxWeekChange = () => {
+      //更新最大周次
+      updateMaxWeekApi(
+        taskId,
+        scheduleConditions.data.maxWeek
+      ).then((res) => {
+        if (res) {
+          if (res.meta.code == 200) {
+            getScheduleRoutine();
+          }
+        }
+      });
     };
 
     const updateCourseDuration = () => {
@@ -733,6 +770,7 @@ export default {
       currentTab,
       tableHeader,
       setListRowspan,
+      HandleMaxWeekChange,
       HandleCourseDurationChange,
       HandleBreakDurationChange,
       HandleCreateLongBreakClick,

@@ -13,6 +13,17 @@ export const getScheduleRoutineApi = (taskId)=>{
 }
 
 //更新课程时长
+export const updateMaxWeekApi = (taskId,newValue)=>{
+    return request({
+        url:"/task/updateMaxWeek",
+        method:"post",
+        data:{
+            taskId,
+            newValue
+        }
+    }).catch(()=>{})
+}
+//更新课程时长
 export const updateCourseDurationApi = (taskId,newValue)=>{
     return request({
         url:"/task/updateCourseDuration",

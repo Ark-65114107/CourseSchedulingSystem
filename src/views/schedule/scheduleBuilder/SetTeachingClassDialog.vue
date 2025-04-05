@@ -252,7 +252,7 @@ import {
   getSingleTeachingClassApi,
   updateTeachingClassApi,
 } from "@/api/schedule/setTeachingClass/teachingClass.api";
-import { getListTeachingClassbyHourAndCampusApi } from "@/api/schedule/setCourseHour/getListTeachingClassbyHourAndCampus.api";
+import { getListTeachingClassbyHourAndCampusApi } from "@/api/schedule/setTeachingClass/getListTeachingClassbyHourAndCampus.api";
 import { useRoute } from "vue-router";
 import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
 import { ElMessage, ElMessageBox } from "element-plus";

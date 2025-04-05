@@ -3,9 +3,10 @@
     <div class="setCourseHourDiv">
       <div class="scrollbarDiv">
         <div class="courseTitle">
-        <el-text type="info">课程</el-text>
-
+          <el-text type="info" class="courseTitleText">课程</el-text>
         </div>
+        <!-- <el-autocomplete>qwq</el-autocomplete> -->
+
         <el-scrollbar height="290px">
           <el-menu>
             <el-menu-item
@@ -21,16 +22,63 @@
         </el-scrollbar>
       </div>
       <div class="courseHourTableDiv">
-        <el-button class="allsetButton" type="primary" @click="HandleShowDialog">统一设置</el-button>
-        <el-table class="courseHourTable" :data="currentTeachingClassList">
-          <el-table-column prop="name" label="班级名"></el-table-column>
+        <!-- <el-button class="allsetButton" type="primary" @click="HandleShowDialog"
+          >统一设置</el-button
+        > -->
+        <span class="courseNameTitle" v-if="!currentCourse">请先选择课程</span>
+        <span class="courseNameTitle" v-else>{{ currentCourse.name }}</span>
+        <el-input-number
+          class="allsetButton"
+          placeholder="统一设置"
+          controls-position="right"
+          :disabled="!isTeachingClassSelected"
+          v-model="batchUpdateValue"
+          @change="HandleBatchSetting"
+        ></el-input-number>
+        <el-table
+          class="courseHourTable"
+          :data="currentTeachingClassList"
+          @selection-change="HandleSelectionChange"
+          ref="teachingClassTableRef"
+        >
+          <el-table-column
+            type="selection"
+            :selectable="selectable"
+            width="50px"
+          ></el-table-column>
+          <el-table-column
+            prop="name"
+            label="教学班名称"
+            width="300px"
+          ></el-table-column>
+          <el-table-column prop="name" label="班级组成" width="200px">
+            <template #default="scope">
+              <div class="tagContainer">
+                <el-tag class="classTag" v-for="cl of scope.row.classList">
+                  {{ cl.name }}
+                </el-tag>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column width="150px">
+            <template #default="scope">
+              <div class="tagContainer">
+                <el-tag
+                  class="classTag"
+                  type="warning"
+                  v-show="scope.row.isFixedClassroom"
+                >
+                  固定教室
+                </el-tag>
+              </div>
+            </template>
+          </el-table-column>
           <el-table-column label="周学时">
             <template #default="scope">
               <el-input-number
                 class="eduhourInput"
                 :controls="true"
                 controls-position="right"
-                size="small"
                 v-model="scope.row.coursehour"
                 max="168"
                 min="0"
@@ -42,155 +90,283 @@
       </div>
     </div>
   </div>
-  <SetCourseHourDialog/>
 </template>
 
 <script>
-import { computed, ref } from "vue";
-import { updateCourseHour } from "@/api/schedule/setCourseHour/courseHour.api.js";
+import { computed, onMounted, ref, watch } from "vue";
+import {
+  updateCourseHour,
+  batchUpdateCourseHour,
+} from "@/api/schedule/setCourseHour/courseHour.api.js";
+import { getCourseListApi } from "@/api/schedule/setCourseHour/courseList.api.js";
+import { getTeachingClassListApi } from "@/api/schedule/setCourseHour/teachingClassList.api.js";
 import { useRoute } from "vue-router";
-import { ElLoading } from "element-plus";
-import bus from '@/bus/bus';
-import SetCourseHourDialog from './SetCourseHourDialog.vue';
+import { ElLoading, ElMessage } from "element-plus";
 export default {
   name: "SetCourseHour",
-  components:{
-    SetCourseHourDialog
-  },
   setup() {
     const courseTab = ref("");
     const courseList = ref([
       {
         id: "gdsfx1",
         name: "高等数学(一)",
-        classList: [
+        teachingClassList: [
           {
             id: "21rgzb",
             name: "21软件工程中本一体化",
             coursehour: 0,
+            isFixedClassroom: true,
+            classList: [
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+            ],
           },
           {
             id: "21rgzb",
             name: "21软件工程中本一体化",
             coursehour: 0,
+            isFixedClassroom: true,
+            classList: [
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+            ],
           },
           {
             id: "21rgzb",
             name: "21软件工程中本一体化",
             coursehour: 0,
+            isFixedClassroom: true,
+            classList: [
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+            ],
           },
           {
-            id: "wqwqdsadwq",
-            name: "21软件工程1aaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            id: "21rgzb",
+            name: "21软件工程中本一体化",
             coursehour: 0,
+            isFixedClassroom: true,
+            classList: [
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+            ],
           },
           {
-            id: "wqwqswq",
-            name: "22软件工程中本一体化1",
-            coursehour: 2,
-          },
-          {
-            id: "21jw1",
-            name: "21计算机网络技术1",
+            id: "21rgzb",
+            name: "21软件工程中本一体化",
             coursehour: 0,
+            isFixedClassroom: true,
+            classList: [
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+            ],
           },
         ],
       },
       {
-        id: "gdsfx2",
-        name: "高等数学(二)",
-        classList: [
+        id: "gdsfx1",
+        name: "高等数学(一)",
+        teachingClassList: [
           {
             id: "21rgzb",
             name: "21软件工程中本一体化",
             coursehour: 0,
-          },
-          {
-            id: "wqwqdsadwq",
-            name: "21软件工程1aaaaaaaaaaaaaaaaaaaaaaaaaaa",
-            coursehour: 0,
-          },
-          {
-            id: "wqwqswq",
-            name: "22软件工程中本一体化1",
-            coursehour: 0,
-          },
-          {
-            id: "21jw1",
-            name: "21计算机网络技术1",
-            coursehour: 0,
-          },
-          {
-            id: "21jw2",
-            name: "21计算机网络技术2",
+            isFixedClassroom: false,
+            classList: [
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+            ],
           },
         ],
       },
       {
-        id: "c1sfsf",
-        name: "C语言程序基础A",
-        classList: [
+        id: "gdsfx1",
+        name: "高等数学(一)",
+        teachingClassList: [
           {
             id: "21rgzb",
             name: "21软件工程中本一体化",
-          },
-          {
-            id: "wqwqdsadwq",
-            name: "21软件工程1aaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          },
-          {
-            id: "wqwqswq",
-            name: "22软件工程中本一体化1",
+            coursehour: 0,
+            isFixedClassroom: false,
+            classList: [
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+            ],
           },
         ],
       },
       {
-        id: "xxsfsdds",
-        name: "线性代数",
-        classList: [
+        id: "gdsfx1",
+        name: "高等数学(一)",
+        teachingClassList: [
           {
             id: "21rgzb",
-            name: "21软件工程中本一体化11111111111111111111111111111111",
-          },
-          {
-            id: "wqwqdsadwq",
-            name: "21软件工程1aaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          },
-          {
-            id: "wqwqswq",
-            name: "22软件工程中本一体化1",
-          },
-          {
-            id: "21jw1",
-            name: "21计算机网络技术1",
-          },
-          {
-            id: "21jw2",
-            name: "21计算机网络技术2",
-          },
-          {
-            id: "22jw1",
-            name: "22计算机网络技术1",
-          },
-          {
-            id: "21wlwzb",
-            name: "21物联网技术应用中本一体化",
+            name: "21软件工程中本一体化",
+            coursehour: 0,
+            isFixedClassroom: false,
+            classList: [
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+              {
+                id: "qwq",
+                name: "21物联网技术应用",
+              },
+            ],
           },
         ],
       },
     ]);
     const currentCourse = ref("");
-    const currentTeachingClassList = ref([]);
+    const currentTeachingClassList = ref(
+      [
+      {
+        id: "21rgzb",
+        name: "21软件工程中本一体化",
+        coursehour: 0,
+        isFixedClassroom: true,
+        classList: [
+          {
+            id: "qwq",
+            name: "21物联网技术应用",
+          },
+          {
+            id: "qwq",
+            name: "21物联网技术应用",
+          },
+        ],
+      },
+      {
+        id: "21rgzb",
+        name: "21软件工程中本一体化",
+        coursehour: 0,
+        isFixedClassroom: true,
+        classList: [
+          {
+            id: "qwq",
+            name: "21物联网技术应用",
+          },
+          {
+            id: "qwq",
+            name: "21物联网技术应用",
+          },
+        ],
+      },
+      {
+        id: "21rgzb",
+        name: "21软件工程中本一体化",
+        coursehour: 0,
+        isFixedClassroom: true,
+        classList: [
+          {
+            id: "qwq",
+            name: "21物联网技术应用",
+          },
+          {
+            id: "qwq",
+            name: "21物联网技术应用",
+          },
+        ],
+      },
+      {
+        id: "21rgzb",
+        name: "21软件工程中本一体化",
+        coursehour: 0,
+        isFixedClassroom: true,
+        classList: [
+          {
+            id: "qwq",
+            name: "21物联网技术应用",
+          },
+          {
+            id: "qwq",
+            name: "21物联网技术应用",
+          },
+        ],
+      },
+      {
+        id: "21rgzb",
+        name: "21软件工程中本一体化",
+        coursehour: 0,
+        isFixedClassroom: true,
+        classList: [
+          {
+            id: "qwq",
+            name: "21物联网技术应用",
+          },
+          {
+            id: "qwq",
+            name: "21物联网技术应用",
+          },
+        ],
+      },
+    ]);
+    const currentSelectedTeachingClassList = ref([]);
+    const batchUpdateValue = ref();
     const eduHourTemp = ref("");
     const route = useRoute();
     const isNumInputMouseUp = ref();
+    const taskId = useRoute().query.id;
+    const teachingClassTableRef = ref();
+
+    onMounted(() => {
+      currentSelectedTeachingClassList.value = [];
+      getCourseList();
+    });
 
     const HandleCourseClick = (course) => {
-      if (course != currentCourse.value) {
-        currentCourse.value = course;
-        currentTeachingClassList.value = course.classList;
-      }
+      currentSelectedTeachingClassList.value = [];
+      currentCourse.value = course;
     };
+
+    watch(currentCourse, () => {
+      batchUpdateValue.value = "";
+      currentSelectedTeachingClassList.value = [];
+      teachingClassTableRef.value.clearSelection();
+    });
 
     let timer;
     const debounce = function (fun, delay) {
@@ -220,17 +396,75 @@ export default {
         text: "处理中",
         background: "rgba(0, 0, 0, 0.4)",
       });
-      updateCourseHour(taskId, classId, courseId, courseHour).then((res) => {
-        setTimeout(() => {
+      updateCourseHour(taskId, classId, courseId, courseHour)
+        .then((res) => {
+          if (res) {
+            if (res.code === 200) {
+              getTeachingClassList();
+              Loading.close();
+            }
+          }
+        })
+        .finally(() => {
+          getTeachingClassList();
           Loading.close();
-        },200);
+        });
+    };
+
+    //获取课程列表
+    const getCourseList = () => {
+      getCourseListApi(taskId).then((res) => {
+        if (res) {
+          if (res.code === 200) {
+            courseList.value = res.data;
+          }
+        }
       });
     };
 
+    //获取当前课程的教学班列表
+    const getTeachingClassList = () => {
+      getTeachingClassListApi(taskId, currentCourse.value.id).then((res) => {
+        if (res) {
+          if (res.code === 200) {
+            currentTeachingClassList.value = res.data;
+          }
+        }
+      });
+    };
 
-    const HandleShowDialog = ()=>{
-      bus.emit("showSetCourseHourDialog");
-    }
+    //批量设置周学时
+    const HandleBatchSetting = () => {
+      debounce(() => {
+        batchUpdateCourseHour(
+          taskId,
+          currentCourse.value.id,
+          currentSelectedTeachingClassList.value.map((tc) => tc.id),
+          batchUpdateValue.value
+        )
+          .then((res) => {
+            if (res) {
+              if (res.code === 200) {
+                getTeachingClassList();
+                ElMessage.success("修改成功!");
+              }
+            }
+          })
+          .finally(() => {
+            batchUpdateValue.value = "";
+            currentSelectedTeachingClassList.value = [];
+            teachingClassTableRef.value.clearSelection();
+          });
+      }, 100)();
+    };
+
+    const HandleSelectionChange = (selection) => {
+      currentSelectedTeachingClassList.value = selection;
+    };
+
+    const isTeachingClassSelected = computed(() => {
+      return currentSelectedTeachingClassList.value.length > 0;
+    });
 
     return {
       courseTab,
@@ -241,7 +475,13 @@ export default {
       eduHourTemp,
       HandleInputChange,
       isNumInputMouseUp,
-      HandleShowDialog
+      HandleBatchSetting,
+      HandleSelectionChange,
+      currentSelectedTeachingClassList,
+      isTeachingClassSelected,
+      getTeachingClassList,
+      batchUpdateValue,
+      teachingClassTableRef,
     };
   },
 };
@@ -265,12 +505,17 @@ export default {
   overflow: hidden;
 }
 
-.courseTitle{
+.courseTitle {
   height: 40px;
   display: flex;
   justify-content: center;
-  background: #F2F6FC;
-  border-bottom: solid 1px #EBEEF5; 
+  background: #f2f6fc;
+  border-bottom: solid 1px #ebeef5;
+}
+
+.courseTitleText{
+  font-size: 16px;
+  font-weight: bold;
 }
 
 .viewTabs {
@@ -320,6 +565,8 @@ export default {
   border: solid 1px #dcdfe6;
   border-radius: 8px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 .courseHourTable {
   height: 100%;
@@ -335,5 +582,23 @@ export default {
 
 .allsetButton {
   margin: 10px 10px 0px 10px;
+}
+
+.tagContainer {
+  width: min-content;
+  height: max-content;
+  display: flex;
+  flex-direction: column;
+}
+
+.classTag {
+  margin: 5px 10px;
+}
+
+.courseNameTitle {
+  width: 100%;
+  margin: 10px;
+  font-size: 22px;
+  font-weight: bold;
 }
 </style>
