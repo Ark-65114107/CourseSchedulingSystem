@@ -6,20 +6,6 @@
         v-model="keyWord"
         :prefix-icon="Search"
       />
-      <div>
-        <el-button
-          type="primary"
-          @click="HandleSaveClick"
-          :disabled="isResEmpty"
-          >保存</el-button
-        >
-        <el-button
-          type="primary"
-          @click="HandleDoneClick"
-          :disabled="isResEmpty"
-          >完成</el-button
-        >
-      </div>
     </div>
     <el-scrollbar height="300px" v-loading="isLoading">
       <el-tree
@@ -60,12 +46,12 @@ export default {
     let defaultChecked = ref([]);
 
     onMounted(() => {
-      getClassTree()
+      getClassTree();
     });
 
     const setClassTree = () => {
       let id = route.query.id;
-      setClassTreeApi({ id, data: res.value }).then((res) => {
+      setClassTreeApi({ id, classList: res.value }).then((res) => {
         console.log(res);
       });
     };
@@ -143,6 +129,8 @@ export default {
     };
   },
 };
+
+
 </script>
 
 <style scoped>

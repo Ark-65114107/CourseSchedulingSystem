@@ -23,6 +23,13 @@
           <template #description> 选择需要排课的班级 </template>
         </el-step>
         <el-step
+          title="排课设置"
+          :icon="Operation"
+          @click="HandleNavClick('scheduleSetting')"
+        >
+          <template #description> 设置排课条件 </template>
+        </el-step>
+        <el-step
           title="课程选择"
           :icon="Files"
           @click="HandleNavClick('setCourse')"
@@ -50,13 +57,7 @@
         >
           <template #description> 为教学班安排教师 </template>
         </el-step>
-        <el-step
-          title="排课设置"
-          :icon="Operation"
-          @click="HandleNavClick('scheduleSetting')"
-        >
-          <template #description> 设置排课条件 </template>
-        </el-step>
+
         <el-step
           title="课表编辑"
           :icon="Brush"
@@ -140,7 +141,7 @@ import {
   Operation,
   Grid,
   Brush,
-  Printer
+  Printer,
 } from "@element-plus/icons-vue";
 import { computed, reactive, toRefs } from "vue";
 import router from "@/router";
@@ -157,20 +158,20 @@ export default {
       switch (router.currentRoute.value.name) {
         case "addClass":
           return 0;
-        case "setCourse":
-          return 1;
-        case "setCourseHour":
-          return 2;
-        case "setTeachingClass":
-          return 3;
-        case "teacherAssignment":
-          return 4;
         case "scheduleSetting":
+          return 1;
+        case "setCourse":
+          return 2;
+        case "setCourseHour":
+          return 3;
+        case "setTeachingClass":
+          return 4;
+        case "teacherAssignment":
           return 5;
         case "scheduleBuild":
           return 6;
         case "scheduleViewing":
-          return 6;
+          return 7;
         default:
           return -1;
       }
@@ -201,7 +202,7 @@ export default {
       Operation,
       Grid,
       Brush,
-      Printer
+      Printer,
     };
   },
 };
