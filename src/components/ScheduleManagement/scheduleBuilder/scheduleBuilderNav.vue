@@ -68,7 +68,7 @@
         <el-step
           title="课表查看"
           :icon="Printer"
-          @click="HandleNavClick('scheduleViewing')"
+          @click="HandleNavClick('scheduleViewer')"
         >
           <template #description> 查看和导出课表 </template>
         </el-step>
@@ -170,7 +170,7 @@ export default {
           return 5;
         case "scheduleBuild":
           return 6;
-        case "scheduleViewing":
+        case "scheduleViewer":
           return 7;
         default:
           return -1;

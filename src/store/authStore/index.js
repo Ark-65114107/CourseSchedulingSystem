@@ -122,6 +122,26 @@ export const useAuthStore = defineStore('auth', {
                                     requireLogin: true,
                                 },
                             },
+                            {
+                                name: 'scheduleBuild',
+                                path: '/home/task/scheduleBuilder/scheduleBuild',
+                                componentUrl: "/schedule/scheduleBuilder/ScheduleBuild.vue",
+                                meta: {
+                                    title: "课表编辑",
+                                    requiresAuth: false,
+                                    requireLogin: true,
+                                },
+                            },
+                            {
+                                name: 'scheduleViewer',
+                                path: '/home/task/scheduleBuilder/scheduleViewer',
+                                componentUrl: "/schedule/scheduleBuilder/ScheduleViewer.vue",
+                                meta: {
+                                    title: "课表查看",
+                                    requiresAuth: false,
+                                    requireLogin: true,
+                                },
+                            },
                             ]
                         },
                         {

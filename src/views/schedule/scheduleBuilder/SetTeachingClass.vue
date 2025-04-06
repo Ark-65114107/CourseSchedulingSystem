@@ -64,6 +64,7 @@ import { onMounted, ref } from "vue";
 import SetTeachingClassDialog from "./SetTeachingClassDialog.vue";
 import bus from "@/bus/bus";
 import { getListTeachingClassApi } from "@/api/schedule/setTeachingClass/teachingClass.api";
+import { getCourseListApi } from "@/api/schedule/setCourseHour/courseList.api";
 import { useRoute } from "vue-router";
 export default {
   name: "SetTeachingClass",
@@ -131,9 +132,26 @@ export default {
     const taskId = route.query.id;
 
     onMounted(() => {
-      currentCourse.value = courseList.value[0].id;
-      getTeachingClassList.apply();
+      getCourseList().then((res) => {
+        if (res === 200) {
+          if (courseList.value.length) {
+            currentCourse.value = courseList.value[0].id;
+            getTeachingClassList.apply();
+          }
+        }
+      });
     });
+
+    const getCourseList = () => {
+      return getCourseListApi(taskId).then((res) => {
+        if (res) {
+          if (res.code === 200) {
+            courseList.value = res.data;
+            return 200;
+          }
+        }
+      });
+    };
 
     const getTeachingClassList = () => {
       getListTeachingClassApi(taskId, currentCourse.value).then((res) => {
@@ -144,7 +162,7 @@ export default {
     };
 
     const HandleTabChange = () => {
-      getTeachingClassList.apply();
+      getTeachingClassList()
     };
 
     const HandleEditClick = (row) => {
@@ -178,13 +196,13 @@ export default {
       }
     };
 
-    const courseStartWeekHoursFormatter = (row,dom,value)=>{
-      let res = ""
-      value.forEach((time)=>{
+    const courseStartWeekHoursFormatter = (row, dom, value) => {
+      let res = "";
+      value.forEach((time) => {
         res += `${time.courseStartWeeks}-${time.courseEndWeeks}周;`;
-      })
-      return res
-    }
+      });
+      return res;
+    };
 
     return {
       currentCourse,
@@ -193,7 +211,7 @@ export default {
       currentTeachingClassList,
       courseList,
       tableSpan,
-      courseStartWeekHoursFormatter
+      courseStartWeekHoursFormatter,
     };
   },
 };
