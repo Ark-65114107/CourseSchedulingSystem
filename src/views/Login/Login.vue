@@ -66,6 +66,7 @@ import { useAuthStore } from "@/store/authStore/index.js";
 import { setToken } from "@/utils/token/setToken.js";
 import router from "@/router";
 import { getToken } from "@/utils/token/getToken";
+import { errorMessages } from 'vue/compiler-sfc';
 export default {
   name: "Login",
   setup() {
@@ -112,6 +113,7 @@ export default {
             })
             .catch((error) => {
               console.log(error);
+              ElMessage.error()
             });
         }
       });

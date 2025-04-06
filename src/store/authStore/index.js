@@ -20,8 +20,301 @@ export const useAuthStore = defineStore('auth', {
         },
         setRoutes() {
             return getRoutes().then(res => {
-                if (res.meta.code === 200) {
-                    this.routes = res.data.routes
+                // if (res.meta.code === 200) {
+                //     this.routes = res.data.routes
+                // }
+                this.routes = {
+                    path: '/home',
+                    name: 'content',
+                    redirect: "/home/index",
+                    componentUrl: "/layout/content/content.vue",
+                    meta: {
+                        title: "首页",
+                        requiresAuth: false,
+                        requireLogin: true,
+                    },
+                    children: [{
+                        name: "task",
+                        path: '/home/task',
+                        redirect: '/home/task/scheduleManagement',
+                        meta: {
+                            title: "排课管理",
+                            requiresAuth: false,
+                            requireLogin: true,
+                        },
+                        children: [{
+                            name: 'scheduleManagement',
+                            path: '/home/task/scheduleManagement',
+                            componentUrl: "/schedule/ScheduleManagement.vue",
+                            meta: {
+                                title: "排课任务",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+                        {
+                            name: 'scheduleBuilder',
+                            path: '/home/task/scheduleBuilder',
+                            componentUrl: "/schedule/scheduleBuilder/scheduleBuilder.vue",
+                            redirect: "/home/task/scheduleBuilder/addclass",
+                            meta: {
+                                title: "创建排课任务",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                            children: [{
+                                name: 'addClass',
+                                path: '/home/task/scheduleBuilder/addclass',
+                                componentUrl: "/schedule/scheduleBuilder/AddClass.vue",
+                                meta: {
+                                    title: "选择班级",
+                                    requiresAuth: false,
+                                    requireLogin: true,
+                                },
+                            },
+                            {
+                                name: 'setCourse',
+                                path: '/home/task/scheduleBuilder/setcourse',
+                                componentUrl: "/schedule/scheduleBuilder/SetCourse.vue",
+                                meta: {
+                                    title: "课程选择",
+                                    requiresAuth: false,
+                                    requireLogin: true,
+                                },
+                            },
+                            {
+                                name: 'setCourseHour',
+                                path: '/home/task/scheduleBuilder/setcoursehour',
+                                componentUrl: "/schedule/scheduleBuilder/SetCourseHour.vue",
+                                meta: {
+                                    title: "学时设置",
+                                    requiresAuth: false,
+                                    requireLogin: true,
+                                },
+                            },
+                            {
+                                name: 'setTeachingClass',
+                                path: '/home/task/scheduleBuilder/setteachingclass',
+                                componentUrl: "/schedule/scheduleBuilder/SetTeachingClass.vue",
+                                meta: {
+                                    title: "教学班设置",
+                                    requiresAuth: false,
+                                    requireLogin: true,
+                                },
+                            },
+                            {
+                                name: 'teacherAssignment',
+                                path: '/home/task/scheduleBuilder/teacherassignment',
+                                componentUrl: "/schedule/scheduleBuilder/TeacherAssignment.vue",
+                                meta: {
+                                    title: "教师安排",
+                                    requiresAuth: false,
+                                    requireLogin: true,
+                                },
+                            },
+                            {
+                                name: 'scheduleSetting',
+                                path: '/home/task/scheduleBuilder/schedulesetting',
+                                componentUrl: "/schedule/scheduleBuilder/ScheduleSetting.vue",
+                                meta: {
+                                    title: "排课设置",
+                                    requiresAuth: false,
+                                    requireLogin: true,
+                                },
+                            },
+                            ]
+                        },
+                        {
+                            name: 'showSchedule',
+                            path: '/home/task/showSchedule',
+                            componentUrl: "/schedule/ShowSchedule.vue",
+                            meta: {
+                                title: "查看课表",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+
+                        ]
+                    },
+                    {
+                        name: "index",
+                        path: '/home/index',
+                        componentUrl: "/index/index.vue",
+                        meta: {
+                            title: "首页",
+                            requiresAuth: false,
+                            requireLogin: true,
+                        },
+                        children: [{
+                            name: "fillInformation",
+                            path: "/home/index/fillInformation",
+                            componentUrl: "/index/FillInformation.vue",
+                            meta: {
+                                title: "填写信息",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        }],
+
+                    },
+                    {
+                        name: 'management',
+                        path: '/home/management',
+                        redirect: '/home/management/accountManagement',
+                        meta: {
+                            title: "系统管理",
+                            requiresAuth: true,
+                            requireLogin: true,
+                        },
+                        children: [{
+                            name: 'AccountManagement',
+                            path: '/home/management/accountManagement',
+                            componentUrl: "/management/AccountManagement.vue",
+                            meta: {
+                                title: "账号管理",
+                                requiresAuth: true,
+                                requireLogin: true,
+                            },
+                        },
+                        {
+                            name: 'Rolemanagement',
+                            path: '/home/management/rolemanagement',
+                            componentUrl: "/management/Rolemanagement.vue",
+                            meta: {
+                                title: "角色管理",
+                                requiresAuth: true,
+                                requireLogin: true,
+                            },
+                        },
+                        ]
+                    },
+                    {
+                        name: "set",
+                        path: '/home/set',
+                        redirect: '/home/set/campus',
+                        meta: {
+                            title: "数据管理",
+                            requiresAuth: false,
+                            requireLogin: true,
+                        },
+                        children: [{
+                            name: 'campus',
+                            path: '/home/set/campus',
+                            componentUrl: "/basicData/Campus.vue",
+                            meta: {
+                                title: "校区管理",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+                        {
+                            name: 'semester',
+                            path: '/home/set/semester',
+                            componentUrl: "/basicData/Semester.vue",
+                            meta: {
+                                title: "学期管理",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+                        {
+                            name: 'grade',
+                            path: '/home/set/grade',
+                            componentUrl: "/basicData/Grade.vue",
+                            meta: {
+                                title: "年级管理",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+                        {
+                            name: 'classroom',
+                            path: '/home/set/classroom',
+                            componentUrl: "/basicData/Classroom.vue",
+                            meta: {
+                                title: "教室管理",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+                        {
+                            name: 'student',
+                            path: '/home/set/student',
+                            componentUrl: "/basicData/Student.vue",
+                            meta: {
+                                title: "学生管理",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+                        {
+                            name: 'teacher',
+                            path: '/home/set/teacher',
+                            componentUrl: "/basicData/Teacher.vue",
+
+                            meta: {
+                                title: "教师管理",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+                        {
+                            name: 'class',
+                            path: '/home/set/class',
+                            componentUrl: "/basicData/Class.vue",
+                            meta: {
+                                title: "班级管理",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+                        {
+                            name: 'course',
+                            path: '/home/set/course',
+                            componentUrl: "/basicData/Course.vue",
+                            meta: {
+                                title: "课程管理",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+                        {
+                            name: 'department',
+                            path: '/home/set/department',
+                            componentUrl: "/basicData/Department.vue",
+
+                            meta: {
+                                title: "部门管理",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+                        {
+                            name: 'major',
+                            path: '/home/set/major',
+                            componentUrl: "/basicData/Major.vue",
+                            meta: {
+                                title: "专业管理",
+                                requiresAuth: false,
+                                requireLogin: true,
+                            },
+                        },
+
+                        ]
+                    },
+                    {
+                        name: "user",
+                        path: '/home/user',
+                        componentUrl: "/userInfo/userInfo.vue",
+                        meta: {
+                            title: "用户信息",
+                            requiresAuth: false,
+                            requireLogin: true,
+                        },
+                    },
+
+                    ]
                 }
             }).then(() => {
                 const childrens = this.setRouterList(this.routes.children)
@@ -106,12 +399,20 @@ export const useAuthStore = defineStore('auth', {
 
         getUserInfo() {
             return getUserInfo().then(res => {
-                this.userInfo = res.data
+                if (res) {
+                    if (res.code === 200) {
+                        this.userInfo = res.data
+                    }
+                }
             })
         },
         getNavs() {
             return getNavs().then(res => {
-                this.navs = res.data.navs
+                if (res) {
+                    if (res.code === 200) {
+                        this.navs = res.data.navs
+                    }
+                }
             })
         }
     }

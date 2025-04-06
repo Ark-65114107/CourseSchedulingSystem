@@ -3,17 +3,26 @@ import request from "@/utils/request"
 //获取教学楼列表数据
 export const getTeachingBuildingListApi = (parm)=>{
     return request({
-        url:"/teachingbuilding/list",
+        url:"/teachingbuilding/selectPage",
         method:"get",
         params:parm,
         isAbort:true
     }).catch(()=>{})
 }
 
-//获取单个教学楼数据
-export const getCampusByQueryApi = (parm)=>{
+//获取所有教学楼数据
+export const getAllTeachingBuildingApi = ()=>{
     return request({
-        url:"/campuses/search",
+        url:"/building/selectAll",
+        method:"get",
+        isAbort:true
+    }).catch(()=>{})
+}
+
+//筛选
+export const getTeachingBuildingByQueryApi = (parm)=>{
+    return request({
+        url:"/building/selectById",
         method:"post",
         data:parm,
         isAbort:true
@@ -21,7 +30,7 @@ export const getCampusByQueryApi = (parm)=>{
 }
 
 //添加教学楼数据
-export const addCampusApi = (parm)=>{
+export const addTeachingBuildingApi = (parm)=>{
     return request({
         url:"/campuses/create",
         method:"post",
@@ -31,7 +40,7 @@ export const addCampusApi = (parm)=>{
 }
 
 //修改教学楼数据
-export const updateCampusApi = (parm)=>{
+export const updateTeachingClassApi = (parm)=>{
     return request({
         url:"/campuses/update",
         method:"post",
@@ -40,7 +49,7 @@ export const updateCampusApi = (parm)=>{
 }
 
 //删除教学楼数据
-export const deleteCampusApi = (parm)=>{
+export const deleteTeachingClassApi = (parm)=>{
     return request({
         url:"/campuses/delete",
         method:"post",
