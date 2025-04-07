@@ -22,9 +22,23 @@ export const getSingleTeacherTeachingClassApi = (taskId, teacherId) => {
     }).catch(() => { })
 }
 
+//搜索教学班
 export const searchTeachingClassApi = (taskId,keyword) => {
     return request({
         url: "/task/searchListTeachingClass",
+        method: "get",
+        params:{
+            taskId,
+            keyword
+        },
+        isAbort: true
+    }).catch(() => { })
+}
+
+//搜索教师
+export const searchTeacherApi = (taskId,keyword) => {
+    return request({
+        url: "/task/searchListTeacher",
         method: "get",
         params:{
             taskId,

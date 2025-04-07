@@ -37,15 +37,20 @@
               type="primary"
               class="LoginButton"
               @click="handleLogin(loginFormRef)"
-              :loading="isButtonLoading"
               >登录</el-button
             >
           </el-form-item>
 
-          <el-row justify="space-between" class="bottomLink">
-            <el-link :underline="false"> 忘记密码? </el-link>
+          
 
-            <el-link :underline="false" @click="handleRegister"> 注册 </el-link>
+          <el-row justify="space-between" class="bottomLink">
+            <el-link :underline="false">
+              忘记密码?
+            </el-link>
+
+            <el-link :underline="false"  @click="handleRegister">
+              注册
+            </el-link>
           </el-row>
         </el-form>
       </div>
@@ -61,11 +66,9 @@ import { useAuthStore } from "@/store/authStore/index.js";
 import { setToken } from "@/utils/token/setToken.js";
 import router from "@/router";
 import { getToken } from "@/utils/token/getToken";
-import { errorMessages } from "vue/compiler-sfc";
 export default {
   name: "Login",
   setup() {
-    const isButtonLoading = ref(false);
     const authStore = useAuthStore();
     const loginFormRef = ref({});
     const data = reactive({
@@ -82,21 +85,9 @@ export default {
     });
 
     const handleLogin = (formEl) => {
-      //---------------------------------
-      isButtonLoading.value = false;
-      sessionStorage.clear();
-      localStorage.clear();
-      setToken("thisisadmintoken");
-      authStore.getUserInfo();
-      ElMessage.success("登录成功!");
-      router.push("/home/index");
-
-
-
       if (!formEl) return;
       formEl.validate((valid) => {
         if (valid) {
-          isButtonLoading.value = true;
           userLogin({
             username: data.username,
             password: data.password,
@@ -104,7 +95,6 @@ export default {
           })
             .then((res) => {
               if (res.meta.code == 200) {
-                isButtonLoading.value = false;
                 sessionStorage.clear();
                 localStorage.clear();
                 setToken(res.data.token);
@@ -121,11 +111,8 @@ export default {
               }
             })
             .catch((error) => {
+              ElMessage.error
               console.log(error);
-              ElMessage.error();
-            })
-            .finally(() => {
-              isButtonLoading.value = false;
             });
         }
       });
@@ -142,7 +129,6 @@ export default {
       loginFormRef,
       handleLogin,
       handleRegister,
-      isButtonLoading,
     };
   },
 };
@@ -191,11 +177,11 @@ a {
   all: unset;
 }
 
-.bottomLink {
+.bottomLink{
   position: relative;
   bottom: 0px;
 }
-.el-input {
+.el-input{
   width: 100%;
 }
 </style>

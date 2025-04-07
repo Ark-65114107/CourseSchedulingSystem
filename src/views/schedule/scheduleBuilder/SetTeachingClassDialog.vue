@@ -214,13 +214,13 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="指定时间：">
-          <el-time-picker
-            is-range
-            range-separator="到"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-          ></el-time-picker>
+        <el-form-item label="指定节次：">
+          <el-input-number
+            v-model="formInput.assignedPeriod"
+            :min="1"
+            :max="formInput.maxPeriod"
+            controls-position="right"
+          />
         </el-form-item>
 
         <el-form-item label="排课优先级：" prop="priorityLevel">
@@ -257,7 +257,10 @@ import { useRoute } from "vue-router";
 import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { getTeachingBuildingListApi } from "@/api/basicData/teachingbuilding.api";
-import { getClassroomListApi } from "@/api/basicData/classroom.api";
+import {
+  getClassroomListApi,
+  getClassroomTypeApi,
+} from "@/api/basicData/classroom.api";
 
 export default {
   name: "SetTeachingClassDialog",
@@ -295,7 +298,7 @@ export default {
       assignedClassroomType: "",
       assignedClassroom: "",
       assignedBuilding: "",
-      assignedDate: "",
+      assignedPeriod: "",
       priorityLevel: 1,
       teachingClassSize: computed(() => {
         let temp = 0;
@@ -306,6 +309,7 @@ export default {
       }),
       deletedClasses: [],
       mergedTeachingClasses: [],
+      maxPeriod: 8,
     });
 
     const maxClassPeriods = computed(() => {
@@ -329,6 +333,7 @@ export default {
         }
       });
     };
+
     const getClassroomList = (id) => {
       getClassroomListApi(id).then((res) => {
         if (res) {
@@ -338,6 +343,7 @@ export default {
         }
       });
     };
+
     const getBuildingLists = (id) => {
       getTeachingBuildingListApi(id).then((res) => {
         if (res) {
@@ -355,6 +361,10 @@ export default {
           (res) => {
             if (res) {
               if (res.meta.code === 200) {
+                if(!res.data){
+                  ElMessage.error("获取教学班信息失败")
+                  return
+                }
                 currentCourse.value = currentCourseId;
                 formInput.value.name = res.data.name;
                 formInput.value.perWeekCourseHour = res.data.perWeekCourseHour;
@@ -362,7 +372,10 @@ export default {
                 formInput.value.classList = res.data.classList;
                 formInput.value.assignedClassroom = res.data.assignedClassroom;
                 formInput.value.assignedBuilding = res.data.assignedBuilding;
-                formInput.value.assignedDate = res.data.assignedDate;
+                formInput.value.assignedClassroomType =
+                  res.data.assignedClassroomType;
+                formInput.value.assignedPeriod = res.data.assignedPeriod;
+                formInput.value.priorityLevel = res.data.priorityLevel;
               }
             }
           },
@@ -385,7 +398,6 @@ export default {
           }).then((res) => {
             if (res) {
               if (res.meta.code == 200) {
-                console.log(res);
                 ElMessage.success("操作成功!");
                 buttonIsLoading.value = false;
                 teachingClassFormRef.value.resetFields();
@@ -578,23 +590,25 @@ export default {
     };
 
     const classroomRemoteMethod = (keyword) => {
-      getClassroomListApi(keyword).then((res) => {
+      getClassroomListApi({ page: 1, size: 20 }).then((res) => {
         if (res) {
           if (res.meta.code == 200) {
-            classroomList.value = res.data;
+            classroomList.value = res.data.classrooms;
           }
         }
       });
     };
+
     const classroomTypeRemoteMethod = (keyword) => {
-      getClassroomListApi(keyword).then((res) => {
+      getClassroomTypeApi(keyword).then((res) => {
         if (res) {
           if (res.meta.code == 200) {
-            classroomTypeList.value = res.data;
+            classroomTypeList.value = res.data.classrooms;
           }
         }
       });
     };
+
     const buildingRemoteMethod = (keyword) => {
       getTeachingBuildingListApi(keyword).then((res) => {
         if (res) {

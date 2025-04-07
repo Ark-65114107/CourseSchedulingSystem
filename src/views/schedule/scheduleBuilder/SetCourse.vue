@@ -297,7 +297,6 @@ export default {
       currentClassCourseList,
       hasCourse,
       HandleTagClose,
-      HandleSetCourseClick,
       options,
       SelectedOption,
       HandleCellClick,
