@@ -1,62 +1,78 @@
+import axios from 'axios' // 假设你使用axios进行HTTP请求
+
+const API_BASE_URL = 'http://' // 根据你的实际后端URL配置
+
 /**
  * 获取可下载文件列表
  * @returns {Promise<Array>} 文件数组
  */
 export async function fetchDownloadFiles() {
-    // 直接返回模拟数据，不发送实际请求
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            id: 1,
-            name: "教学任务书模板.docx",
-            type: "document",
-          },
-          {
-            id: 2,
-            name: "教师手册2025版.pdf",
-            type: "document",
-          },
-          {
-            id: 3,
-            name: "课程表导入模板.xlsx",
-            type: "spreadsheet",
-          },
-        ])
-      }, 300) // 模拟网络延迟
+  // 替换为实际API调用
+  return axios.get(`${API_BASE_URL}/files/download`)
+    .then(response => response.data)
+    .catch(error => {
+      console.error('获取下载文件列表失败:', error)
+      throw error
     })
-  }
-  
-  /**
-   * 下载指定文件
-   * @param {number} fileId - 文件ID
-   * @returns {Promise<Object>} 下载结果
-   */
-  export async function downloadFile(fileId: number) {
-    // 模拟下载文件
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(`模拟下载文件ID: ${fileId}`)
-        alert(`文件下载已开始，文件ID: ${fileId}`)
-        resolve({ success: true })
-      }, 500)
-    })
-  }
-  
-  /**
-   * 下载课表
-   * @param {string} format - 下载格式，'excel'或'pdf'
-   * @returns {Promise<Object>} 下载结果
-   */
-  export async function downloadSchedule(format = "excel") {
-    // 模拟下载课表
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log(`模拟下载课表，格式: ${format}`)
-        alert(`课表下载已开始，格式: ${format}`)
-        resolve({ success: true })
-      }, 500)
-    })
-  }
-  
-  
+}
+
+/**
+ * 下载指定文件
+ * @param {number} fileId - 文件ID
+ * @returns {Promise<Object>} 下载结果
+ */
+export async function downloadFile(fileId: number) {
+  // 实际下载文件的API调用
+  return axios.get(`${API_BASE_URL}/downloads/file/${fileId}`, {
+    responseType: 'blob' // 指定响应类型为blob
+  }).then(response => {
+    // 创建下载链接
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+
+    // 从响应头获取文件名，如果有的话
+    const contentDisposition = response.headers['content-disposition']
+    let fileName = `file-${fileId}`
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(/filename="(.+)"/)
+      if (fileNameMatch.length === 2) fileName = fileNameMatch[1]
+    }
+
+    link.setAttribute('download', fileName)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    return { success: true, fileName }
+  }).catch(error => {
+    console.error(`下载文件 ${fileId} 失败:`, error)
+    throw error
+  })
+}
+
+/**
+ * 下载课表
+ * @param {string} format - 下载格式，'excel'或'pdf'
+ * @returns {Promise<Object>} 下载结果
+ */
+export async function downloadSchedule(format = "excel") {
+  // 实际下载课表的API调用
+  return axios.get(`${API_BASE_URL}/downloads/schedule`, {
+    params: { format },
+    responseType: 'blob' // 指定响应类型为blob
+  }).then(response => {
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `schedule.${format}`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+
+    return { success: true, format }
+  }).catch(error => {
+    console.error(`下载课表(${format}格式)失败:`, error)
+    throw error
+  })
+}
