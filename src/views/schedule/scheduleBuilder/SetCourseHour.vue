@@ -30,10 +30,10 @@
         <el-input-number
           class="allsetButton"
           placeholder="统一设置"
-          controls-position="right"
           :disabled="!isTeachingClassSelected"
           v-model="batchUpdateValue"
           @change="HandleBatchSetting"
+          :controls="false"
         ></el-input-number>
         <el-table
           class="courseHourTable"
@@ -261,8 +261,7 @@ export default {
       },
     ]);
     const currentCourse = ref("");
-    const currentTeachingClassList = ref(
-      [
+    const currentTeachingClassList = ref([
       {
         id: "21rgzb",
         name: "21软件工程中本一体化",
@@ -436,6 +435,11 @@ export default {
     //批量设置周学时
     const HandleBatchSetting = () => {
       debounce(() => {
+        const Loading = ElLoading.service({
+          lock: true,
+          text: "处理中",
+          background: "rgba(0, 0, 0, 0.4)",
+        });
         batchUpdateCourseHour(
           taskId,
           currentCourse.value.id,
@@ -446,11 +450,13 @@ export default {
             if (res) {
               if (res.code === 200) {
                 getTeachingClassList();
+                Loading.close();
                 ElMessage.success("修改成功!");
               }
             }
           })
           .finally(() => {
+            Loading.close();
             batchUpdateValue.value = "";
             currentSelectedTeachingClassList.value = [];
             teachingClassTableRef.value.clearSelection();
@@ -513,7 +519,7 @@ export default {
   border-bottom: solid 1px #ebeef5;
 }
 
-.courseTitleText{
+.courseTitleText {
   font-size: 16px;
   font-weight: bold;
 }

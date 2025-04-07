@@ -6,7 +6,7 @@ export const getRoutes = () => {
     return request({
         url: "/getRoutes",
         method: "get"
-    }).then(error=>{
+    }).catch(error=>{
         ElMessage.error("网络错误!获取地址失败QAQ")
     })
 }   

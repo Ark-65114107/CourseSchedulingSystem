@@ -28,7 +28,7 @@
               width="250"
               trigger="hover"
             >
-              <el-text> 教学班编号：{{ tc.id }} </el-text><br/>
+              <el-text> 教学班编号：{{ tc.id }} </el-text><br />
               <el-text> 班级： </el-text>
               <el-text v-for="cl of tc.classlist">{{ cl.name }},<br /></el-text>
 
@@ -83,7 +83,7 @@
                 class="teachingClassTable"
                 :data="currentTeachingClassList"
                 :span-method="tableSpan"
-                height="420px"
+                height="385px"
                 max-height="420px"
                 fit
               >
@@ -123,18 +123,21 @@
   </div>
 
   <TeacherAssignmentDialog />
+  <TeacherAssignmentTeachingClassDialog />
 </template>
 
 <script>
 import { onMounted, ref } from "vue";
 import bus from "@/bus/bus";
 import { useRoute } from "vue-router";
+import { getCourseListApi } from "@/api/schedule/setCourseHour/courseList.api";
 import { getListTeacherTeachingClassApi } from "@/api/schedule/teacherAssignment/teacherAssignment.api.js";
 import TeacherAssignmentDialog from "./TeacherAssignmentDialog.vue";
-import { getListTeachingClassApi } from '@/api/schedule/setTeachingClass/teachingClass.api';
+import TeacherAssignmentTeachingClassDialog from "./TeacherAssignmentTeachingClassDialog.vue";
+import { getListTeachingClassApi } from "@/api/schedule/setTeachingClass/teachingClass.api";
 export default {
   name: "TeacherAssignment",
-  components: { TeacherAssignmentDialog },
+  components: { TeacherAssignmentDialog,TeacherAssignmentTeachingClassDialog },
   setup() {
     const teacherList = ref([]);
     const teachingClassList = ref([]);
@@ -198,7 +201,7 @@ export default {
     const currentTeachingClassList = ref([]);
 
     onMounted(() => {
-      getTeacherList()
+      getTeacherList();
     });
 
     const getTeacherList = () => {
@@ -218,13 +221,31 @@ export default {
       bus.emit("showTeacherAssignmentDialog", row);
     };
 
+
+    const getCourseList = () => {
+      return getCourseListApi(taskId).then((res) => {
+        if (res) {
+          if (res.meta.code === 200) {
+            courseList.value = res.data;
+            return 200;
+          }
+        }
+      });
+    };
+
     const HandleViewSwitch = () => {
       viewMode.value = !viewMode.value;
       if (viewMode) {
-        currentCourse.value = courseList.value[0].id;
-        getTeachingClassList.apply();
+        getCourseList().then((res) => {
+          if (res === 200) {
+            if (courseList.value.length) {
+              currentCourse.value = courseList.value[0].id;
+              getTeachingClassList();
+            }
+          }
+        });
       } else {
-        getTeacherList()
+        getTeacherList();
       }
     };
 
@@ -245,8 +266,7 @@ export default {
     };
 
     const HandleTeachingClassEditClick = (row) => {
-      console.log(row);
-      bus.emit("", row, currentCourse.value);
+      bus.emit("showTeacherAssignmentTeachingClassDialog", row);
     };
 
     return {
@@ -287,7 +307,6 @@ export default {
   height: 100%;
 }
 .viewTable {
-  height: 520px;
   width: auto;
   margin: 10px;
   padding: 0px 20px;
@@ -307,7 +326,7 @@ export default {
 }
 
 .setTeachingClassBody {
-  height: 370px;
+  height: 465px;
   display: flex;
   margin: 10px;
   flex-direction: column;
