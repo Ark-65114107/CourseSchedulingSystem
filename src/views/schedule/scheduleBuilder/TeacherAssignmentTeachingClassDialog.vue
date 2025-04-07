@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="isDialogVisiable"
-    title="修改教师任课"
+    title="修改教学班教师"
     width="500px"
     :show-close="false"
     :close-on-click-modal="false"
@@ -13,16 +13,16 @@
       :model="formInput"
       ref="TeacherAssignmentFormRef"
     >
-      <el-form-item label="教师姓名：">
-        <el-text>{{ currentTeacher.name }}</el-text>
+      <el-form-item>
+        <el-text>{{ currentTeachingClass.name }}</el-text>
       </el-form-item>
       <el-form-item class="addTeachingClassFormItem">
         <el-autocomplete
           class="searchInput"
           clearable
-          v-model="teachingClassKeyword"
-          placeholder="搜索教学班"
-          :fetch-suggestions="getTeachingClassSuggestions"
+          v-model="teacherKeyword"
+          placeholder="搜索教师"
+          :fetch-suggestions="getTeacherSuggestions"
           @select="HandleSuggestionSelected"
           @clear="HandleSuggestionClear"
         >
@@ -39,12 +39,12 @@
           <el-text type="info">暂无数据</el-text>
         </div>
         <el-tag
-          class="teachingClassTag"
+          class="teacherClassTag"
           closable
           @close="HandleTagClose(teachingClass)"
           v-else
-          v-for="teachingClass of formInput.teachingClassList"
-          >{{ teachingClass.name }} # {{ teachingClass.id }}</el-tag
+          v-for="teachingClass of formInput.teacherList"
+          >{{ teachingClass.name }} # {{teachingClass.id}}</el-tag
         >
       </el-scrollbar>
     </el-form>
@@ -67,36 +67,39 @@ import { useRoute } from "vue-router";
 import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
 import { ElMessage, ElMessageBox } from "element-plus";
 import {
+  getSingleTeachingClassApi,
+  updateTeachingClassApi,
+} from "@/api/schedule/setTeachingClass/teachingClass.api";
+import {
   getSingleTeacherTeachingClassApi,
   searchTeachingClassApi,
 } from "@/api/schedule/teacherAssignment/teacherAssignment.api";
 
 export default {
-  name: "TeacherAssignmentDialog",
+  name: "TeacherAssignmentTeachingClassDialog",
   setup() {
     const taskId = useRoute().query.id;
-    const teachingClassKeyword = ref("");
+    const teacherKeyword = ref("");
     const selectedTeachingClass = ref("");
     const isDialogVisiable = ref(false);
-    const currentTeacher = ref("");
+    const currentTeachingClass = ref("");
     const TeacherAssignmentFormRef = ref();
     const scrollBarRef = ref();
     const formInput = ref({
-      teachingClassList: [],
+      teacherList: [],
     });
 
     const isTeachingClassListEmpty = computed(() => {
-      return formInput.value.teachingClassList.length == 0;
+      return formInput.value.teacherList.length == 0;
     });
 
     onMounted(() => {
-      bus.on("showTeacherAssignmentDialog", (row) => {
-        currentTeacher.value = row;
-        getSingleTeacherTeachingClassApi(taskId, row.id).then((res) => {
+      bus.on("showTeacherAssignmentTeachingClassDialog", (row) => {
+        currentTeachingClass.value = row;
+        getSingleTeachingClassApi(taskId, row.id).then((res) => {
           if (res) {
             if (res.meta.code === 200) {
-              console.log(res);
-              formInput.value.teachingClassList = res.data.classlist;
+              formInput.value.teacherList = res.data;
             }
           }
         });
@@ -106,25 +109,23 @@ export default {
 
     const HandleClose = (ref) => {
       console.log(ref);
-      clearForm();
       isDialogVisiable.value = false;
     };
 
     const HandleCancel = () => {
-      clearForm();
       isDialogVisiable.value = false;
     };
 
     const HandleTagClose = (item) => {
-      formInput.value.teachingClassList =
-        formInput.value.teachingClassList.filter((tag) => {
+      formInput.value.teacherList =
+        formInput.value.teacherList.filter((tag) => {
           return tag != item;
         });
     };
 
-    const getTeachingClassSuggestions = (keyword, callback) => {
-      searchTeachingClassApi(taskId, keyword).then((res) => {
-        callback(res.data.map((c) => ({ ...c, value: `${c.name}#${c.id}` })));
+    const getTeacherSuggestions = (keyword, callback) => {
+      searchTeacherApi(taskId, keyword).then((res) => {
+        callback(res.data.map((c) => ({ ...c, value: `${c.name}` })));
       });
     };
 
@@ -138,20 +139,12 @@ export default {
 
     const HandleTeachingClassAdd = () => {
       if (
-        selectedTeachingClass.value.length &&
-        !formInput.value.teachingClassList.includes(selectedTeachingClass.value)
+        !formInput.value.teacherList.includes(selectedTeachingClass.value)
       ) {
-        formInput.value.teachingClassList.push(selectedTeachingClass.value);
+        formInput.value.teacherList.push(selectedTeachingClass.value);
         selectedTeachingClass.value = "";
-        teachingClassKeyword.value = "";
+        teacherKeyword.value = "";
       }
-    };
-
-    const clearForm = () => {
-      teachingClassKeyword.value = "";
-      selectedTeachingClass.value = "";
-      currentTeacher.value = "";
-      formInput.value.teachingClassList = [];
     };
 
     return {
@@ -159,10 +152,10 @@ export default {
       isDialogVisiable,
       HandleClose,
       HandleCancel,
-      currentTeacher,
+      currentTeachingClass,
       TeacherAssignmentFormRef,
-      getTeachingClassSuggestions,
-      teachingClassKeyword,
+      getTeacherSuggestions,
+      teacherKeyword,
       HandleSuggestionSelected,
       HandleTeachingClassAdd,
       HandleSuggestionClear,
@@ -210,7 +203,7 @@ export default {
   border-radius: 8px;
 }
 
-.teachingClassTag {
+.teacherClassTag {
   margin: 5px;
 }
 </style>

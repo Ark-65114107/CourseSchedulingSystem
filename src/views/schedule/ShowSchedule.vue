@@ -118,7 +118,7 @@ onMounted(async () => {
     
     console.log('获取学期数据...');
     // 1. 获取学期数据
-    const semesterResponse = await getSemesterListApi({ keyword: '', page: 1, size: 100 });
+    const semesterResponse = await getSemesterListApi({ keyword: '', page: 1, size: 10 });
     console.log('学期API响应结构:', Object.keys(semesterResponse || {}));
     if (semesterResponse?.data) {
       console.log('data属性内容结构:', Object.keys(semesterResponse.data || {}));
@@ -148,7 +148,7 @@ onMounted(async () => {
     
     console.log('获取学院数据...');
     // 2. 获取学院数据
-    const departmentResponse = await getDepartmentListApi({ keyword: '', page: 1, size: 100 });
+    const departmentResponse = await getDepartmentListApi({ keyword: '', page: 1, size: 10 });
     console.log('学院API响应结构:', Object.keys(departmentResponse || {}));
     let departmentList = safeGetArray(departmentResponse);
     
@@ -174,7 +174,7 @@ onMounted(async () => {
     
     console.log('获取专业数据...');
     // 3. 获取专业数据
-    const majorResponse = await getMajorListApi({ keyword: '', page: 1, size: 100 });
+    const majorResponse = await getMajorListApi({ keyword: '', page: 1, size: 10 });
     console.log('专业API响应结构:', Object.keys(majorResponse || {}));
     let majorList = safeGetArray(majorResponse);
     
@@ -201,7 +201,7 @@ onMounted(async () => {
     
     console.log('获取班级数据...');
     // 4. 获取班级数据
-    const classResponse = await getClassListApi({ keyword: '', page: 1, size: 100 });
+    const classResponse = await getClassListApi({ keyword: '', page: 1, size: 10 });
     console.log('班级API响应结构:', Object.keys(classResponse || {}));
     let classList = safeGetArray(classResponse);
     
@@ -250,12 +250,12 @@ onMounted(async () => {
           };
           
           // 筛选该学院下的所有专业
-          const majorsInDepartment = majorList.filter(
-            major => major && major.departmentId === department.id
-          );
+          // const majorsInDepartment = majorList.filter(
+          //   major => major && major.departmentId === department.id
+          // );
           
           // 添加专业选项
-          for (const major of majorsInDepartment) {
+          for (const major of majorList) {
             const majorOption = {
               value: major.id,
               label: major.name || `专业${major.id}`,
@@ -263,11 +263,11 @@ onMounted(async () => {
             };
             
             // 筛选该专业下的所有班级
-            const classesInMajor = classList.filter(
-              cls => cls && cls.majorId === major.id
-            );
+           // const classesInMajor = classList.filter(
+            //  cls => cls && cls.majorId === major.id
+            //);
             // 添加班级选项
-            for (const cls of classesInMajor) {
+            for (const cls of classList) {
               majorOption.children.push({
                 value: cls.id,
                 label: cls.name || `班级${cls.id}`

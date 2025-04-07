@@ -1,45 +1,60 @@
 <template>
   <div class="setCourseBody">
     <el-tabs class="classTabs" v-model="activePane" type="border-card" stretch>
-      <el-tab-pane label="未选课班级" name="unselectedCourse">
+      <el-tab-pane
+        :label="`未选课班级(${unassignedClassNum})`"
+        name="unselectedCourse"
+      >
         <el-menu>
-          <div class="nodata" v-show="!courseUnassignedClasses.length">
+          <div class="nodata" v-show="!assignedClassNum">
             <el-text type="info">暂无数据</el-text>
           </div>
           <el-scrollbar
             height="300px"
             class="ClassSrollBar"
-            v-show="courseUnassignedClasses.length"
+            v-show="assignedClassNum"
           >
             <el-menu-item
               class="classItem"
-              v-for="cl of courseUnassignedClasses"
+              v-for="cl of classList"
               :key="cl.id"
               :index="cl.id"
               @click="HandleCellClick(cl)"
-              >{{ cl.name }}</el-menu-item
+              v-show="!cl.courseList.length"
             >
+              {{ cl.name }}
+              <el-tag class="isFixedClassroomTag" v-show="cl.isFixedClassroom"
+                >固定教室</el-tag
+              >
+            </el-menu-item>
           </el-scrollbar>
         </el-menu>
       </el-tab-pane>
-      <el-tab-pane label="已选课班级" name="selectedCourse">
+      <el-tab-pane
+        :label="`已选课班级(${assignedClassNum})`"
+        name="selectedCourse"
+      >
         <el-menu>
-          <div class="nodata" v-show="!courseAssignedClasses.length">
+          <div class="nodata" v-show="!unAssignedClassNum">
             <el-text type="info">暂无数据</el-text>
           </div>
           <el-scrollbar
             height="300px"
             class="ClassSrollBar"
-            v-show="courseAssignedClasses.length"
+            v-show="unAssignedClassNum"
           >
             <el-menu-item
               class="classItem"
-              v-for="cl of courseAssignedClasses"
+              v-for="cl of classList"
               :key="cl.id"
               :index="cl.id"
               @click="HandleCellClick(cl)"
-              >{{ cl.name }}</el-menu-item
-            >
+              v-show="cl.courseList.length"
+              >{{ cl.name }}
+              <el-tag class="isFixedClassroomTag" v-show="cl.isFixedClassroom"
+                >固定教室</el-tag
+              >
+            </el-menu-item>
           </el-scrollbar>
         </el-menu>
       </el-tab-pane>
@@ -60,6 +75,8 @@
           placeholder="搜索课程"
           v-model="SelectedOption"
           :remote-method="getSuggestions"
+          :loading="isSelectLoading"
+          loading-text="加载中..."
           collapse-tags
           collapse-tags-tooltip
           filterable
@@ -68,16 +85,22 @@
         >
           <el-option
             v-for="option of options"
-            :label="option.name"
-            :value="option.id"
-            :key="option.id"
+            :label="option.courseName"
+            :value="option.courseId"
+            :key="option.courseId"
+            v-infinite-scroll="getSuggestions"
           />
         </el-select>
 
-        <el-button class="AddCourseButton" type="primary" @click="HandleAddClick">添加</el-button>
+        <el-button
+          class="AddCourseButton"
+          type="primary"
+          @click="HandleAddClick"
+          >添加</el-button
+        >
       </div>
 
-      <div class="courseListBorder">
+      <div class="courseListBorder" v-loading="isCourseListLoading">
         <div class="nodata" v-show="!hasCourse">
           <el-text type="info">还没有课程哦,请在上方添加</el-text>
         </div>
@@ -106,66 +129,73 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import bus from "@/bus/bus";
 import { getCoursesApi } from "@/api/basicData/course.api";
 import { getClassListApi } from "@/api/schedule/addClass/classList.api";
-import { getAssignedClassListApi } from "@/api/schedule/setCourse/AssignedClassList.api";
+import {
+  getCourseSuggestions,
+  getClassCourseListApi,
+  addClassCourseApi,
+  deleteClassCourseApi,
+} from "@/api/schedule/setCourse/courseList.api.js";
 import router from "@/router";
 import { useRoute } from "vue-router";
-import { ElMain, ElMessage } from 'element-plus';
+import { ElMain, ElMessage } from "element-plus";
 
 export default {
   name: "SetCourse",
   setup() {
     const activePane = ref("unselectedCourse");
     const classList = ref([]);
-    const courseAssignedClasses = ref([]);
-
-    const courseUnassignedClasses = computed(() => {
-      return classList.value.filter((c) => {
-        return !courseAssignedClasses.value.map(c=>c.id).includes(c.id);
-      });
-    });
-    const currentClass = ref("");//当前选中的班级
-    const currentClassCourseList = ref([]);//当前选中班级的课程列表
-    const SelectedOption = ref([]);//课程多选框选中的值
-    const route = useRoute();//芝士路由
+    const currentClass = ref(""); //当前选中的班级
+    const currentClassCourseList = ref([]); //当前选中班级的课程列表
+    const SelectedOption = ref([]); //课程多选框选中的值
+    const route = useRoute(); //芝士路由
+    const taskId = useRoute().query.id;
+    const suggestionsCounter = ref(0);
     const hasCourse = computed(() => {
-      if(currentClassCourseList.value){
-        return currentClassCourseList.value.length
+      if (currentClassCourseList.value) {
+        return currentClassCourseList.value.length;
       }
-      return false
-    });//判断当前班级有没有课程
+      return false;
+    }); //判断当前班级有没有课程
 
     const options = ref([]);
+    const isSelectLoading = ref(false);
+    const isCourseListLoading = ref(false);
+
+    const assignedClassNum = computed(() => {
+      let counter = 0;
+      for (let i = 0; i < classList.value.length; i++) {
+        if (classList.value[i].courseList.length > 0) {
+          counter++;
+        }
+      }
+      return counter;
+    });
+
+    const unassignedClassNum = computed(() => {
+      console.log(assignedClassNum);
+      return classList.value.length - assignedClassNum.value;
+    });
 
     onMounted(() => {
-      getCoursesApi().then((res) => {
-        options.value = res.data;
+      getClassList().then((res) => {
+        if (res === 200) {
+          if (classList.length) {
+            currentClass.value = classList.value[0];
+          }
+        }
       });
-      if (route.query.id) {
-        getAssignedClassListApi(route.query.id).then((res) => {
-          if (res.meta.code == 200) {
-            console.log(res);
-            courseAssignedClasses.value = res.data;
-          }
-        });
-        getClassListApi(route.query.id).then((res)=>{
-          if(res.meta.code === 200){
-            classList.value = res.data
-          }
-        })
-
-      }
     });
 
     const HandleTagClose = (tag) => {
-      currentClassCourseList.value = currentClassCourseList.value.filter(
-        (course) => {
-          return course != tag;
+      deleteClassCourseApi(taskId, currentClass.value.id, tag.id).then(
+        (res) => {
+          if (res) {
+            if (res.meta.code == 200) {
+              getClassCourseList();
+            }
+          }
         }
       );
-    };
-
-    const HandleSetCourseClick = () => {
-      bus.emit("showSetCourseDialog");
     };
 
     const HandleCellClick = (row) => {
@@ -173,17 +203,91 @@ export default {
       SelectedOption.value = [];
     };
 
-    const HandleAddClick = ()=>{
-      if(SelectedOption.value.length <= 0){
-        ElMessage.warning("请先选择课程!")
-      }else{
-
+    //获取班级列表
+    const getClassList = () => {
+      if (taskId) {
+        return getClassListApi(taskId).then((res) => {
+          if (res.meta.code === 200) {
+            classList.value = res.data;
+            return 200;
+          }
+        });
       }
-      
-    }
+    };
+
+    //搜索课程
+    const getSuggestions = (keyword) => {
+      if (keyword) {
+        isSelectLoading.value = true;
+        suggestionsCounter.value = 0;
+        getCourseSuggestions(taskId, currentClass.value.id, keyword).then(
+          (res) => {
+            if (res) {
+              if (res.meta.code == 200) {
+                options.value = res.data;
+              }
+            }
+          }
+        );
+      } else {
+        getCourseSuggestions(taskId, currentClass.value.id, NULL).then(
+          (res) => {
+            if (res) {
+              if (res.meta.code == 200) {
+                options.value = res.data;
+              }
+            }
+          }
+        );
+      }
+    };
+
+    //获取某个班级的课程列表
+    const getClassCourseList = () => {
+      isCourseListLoading.value = true;
+      if (currentClass.value.id) {
+        getClassCourseListApi(taskId, currentClass.value.id)
+          .then((res) => {
+            if (res) {
+              if (res.meta.code == 200) {
+                currentClassCourseList.value = res.data;
+                isCourseListLoading.value = false;
+                getClassList();
+              }
+            }
+          })
+          .finally(() => {
+            isCourseListLoading.value = false;
+          });
+      }
+    };
+
+    //添加课程
+    const addClassCourse = () => {
+      addClassCourseApi(
+        taskId,
+        currentClass.value.id,
+        currentClassCourseList.value
+      ).then((res) => {
+        if (res) {
+          if (res.meta.code == 200) {
+            getClassCourseList();
+            SelectedOption.value = [];
+          }
+        }
+      });
+    };
+
+    const HandleAddClick = () => {
+      if (SelectedOption.value.length <= 0) {
+        ElMessage.warning("请先选择课程!");
+      } else {
+        addClassCourse();
+      }
+    };
 
     watch(currentClass, () => {
-      currentClassCourseList.value = currentClass.value.courseList;
+      getClassCourseList();
     });
 
     return {
@@ -193,13 +297,16 @@ export default {
       currentClassCourseList,
       hasCourse,
       HandleTagClose,
-      HandleSetCourseClick,
       options,
       SelectedOption,
       HandleCellClick,
-      courseAssignedClasses,
-      courseUnassignedClasses,
+      assignedClassNum,
+      unassignedClassNum,
       HandleAddClick,
+      classList,
+      isSelectLoading,
+      isCourseListLoading,
+      getSuggestions,
     };
   },
 };
@@ -209,7 +316,7 @@ export default {
 .setCourseBody {
   height: 500px;
   display: flex;
-  margin:10px 0px 0px 0px;
+  margin: 10px 0px 0px 0px;
   padding: 10px;
   justify-content: space-between;
   background: white;
@@ -285,7 +392,7 @@ export default {
   padding: 10px;
   height: max-content;
   width: 100%;
-  line-height:normal;
+  line-height: normal;
   white-space: unset !important;
   word-break: break-all;
   border: solid 1px #dcdfe6;
@@ -299,5 +406,9 @@ export default {
 
 .ClassSrollBar {
   width: 100%;
+}
+
+.isFixedClassroomTag {
+  margin-left: 10px;
 }
 </style>

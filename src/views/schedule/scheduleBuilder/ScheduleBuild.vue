@@ -750,7 +750,8 @@ export default {
     ]);
     const scheduleStructTemp = ref([]);
 
-    const scheduleData = ref([
+    const scheduleData = ref(
+      [
       {
         cellId: "c1",
         teachingClassId: "tc1",

@@ -128,6 +128,8 @@ export const useLocationStore = defineStore('location', {
                 return error
             })
         },
+
+
         getClassroomsByCampus(campusId) {
             return this.classrooms.filter((classroom) => {
                 return classroom.campusId == campusId
@@ -155,12 +157,11 @@ export const useLocationStore = defineStore('location', {
             })
         },
 
-
-
         initCampuses() {
             this.initTeachingBuildings()
             this.getCampus()
         },
+
         AddCampus(value, pageInfo) {
             return addCampusApi(value).then(res => {
                 if (res.meta.code === 200) {
@@ -194,6 +195,7 @@ export const useLocationStore = defineStore('location', {
                 return false
             })
         },
+        
         DeleteCampus(value) {
             return deleteCampusApi(value).then(res => {
                 if (res.meta.code === 200) {
@@ -256,6 +258,8 @@ export const useLocationStore = defineStore('location', {
             this.classroomTypeMap = new Map(this.classroomtypes.map(c => [c.id, c]))
             this.classroomTypeNameMap = new Map(this.classroomtypes.map(c => [c.id, c.name]))
         },
+
+
         AddType(value) {
             this.classroomtypes.push(value)
         },

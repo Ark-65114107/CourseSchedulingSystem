@@ -64,6 +64,7 @@ import { onMounted, ref } from "vue";
 import SetTeachingClassDialog from "./SetTeachingClassDialog.vue";
 import bus from "@/bus/bus";
 import { getListTeachingClassApi } from "@/api/schedule/setTeachingClass/teachingClass.api";
+import { getCourseListApi } from "@/api/schedule/setCourseHour/courseList.api";
 import { useRoute } from "vue-router";
 export default {
   name: "SetTeachingClass",
@@ -73,82 +74,50 @@ export default {
   setup() {
     const currentCourse = ref();
     const courseList = ref([
-      {
-        id: "gdsx1",
-        name: "高等数学(一)",
-      },
-      {
-        id: "c1sfsf",
-        name: "C语言程序基础A",
-      },
-      {
-        id: "en4g",
-        name: "英语",
-      },
-      {
-        id: "c42",
-        name: "C语言程序基础B",
-      },
-      {
-        id: "ls5sx",
-        name: "离散数学",
-      },
-      {
-        id: "xx2ds",
-        name: "线性代数",
-      },
-      {
-        id: "Ja4va",
-        name: "Java程序设计",
-      },
-      {
-        id: "mks",
-        name: "马克思主义",
-      },
-      {
-        id: "jds",
-        name: "中国近代史纲要",
-      },
-      {
-        id: "mr1fz",
-        name: "明日方舟",
-      },
-      {
-        id: "jsll",
-        name: "军事理论",
-      },
-      {
-        id: "peclass",
-        name: "体育课",
-      },
-      {
-        id: "acmpro",
-        name: "ACM程序设计竞赛进阶",
-      },
+      
     ]);
     const currentTeachingClassList = ref([]);
     const route = useRoute();
     const taskId = route.query.id;
 
     onMounted(() => {
-      currentCourse.value = courseList.value[0].id;
-      getTeachingClassList.apply();
+      getCourseList().then((res) => {
+        if (res === 200) {
+          if (courseList.value.length) {
+            currentCourse.value = courseList.value[0].id;
+            getTeachingClassList();
+          }
+        }
+      });
     });
 
-    const getTeachingClassList = () => {
-      getListTeachingClassApi(taskId, currentCourse.value).then((res) => {
-        if (res.meta.code === 200) {
-          currentTeachingClassList.value = setListRowspan(res.data);
+    const getCourseList = () => {
+      return getCourseListApi(taskId).then((res) => {
+        if (res) {
+          if (res.meta.code === 200) {
+            courseList.value = res.data;
+            return 200;
+          }
         }
       });
     };
 
+    const getTeachingClassList = () => {
+      getListTeachingClassApi(taskId, currentCourse.value).then((res) => {
+        if (res.meta.code === 200) {
+          currentTeachingClassList.value = setListRowspan(res.data.sort(
+            (a,b)=>a.perWeekCourseHour - b.perWeekCourseHour
+          ));
+        }
+      });
+    };    
+
     const HandleTabChange = () => {
-      getTeachingClassList.apply();
+      getTeachingClassList()
     };
 
     const HandleEditClick = (row) => {
-      bus.emit("showSetTeachingClassDialog", row, currentCourse.value);
+      bus.emit("showSetTeachingClassDialog", row);
     };
 
     const setListRowspan = (teachingClassList) => {
@@ -178,13 +147,13 @@ export default {
       }
     };
 
-    const courseStartWeekHoursFormatter = (row,dom,value)=>{
-      let res = ""
-      value.forEach((time)=>{
+    const courseStartWeekHoursFormatter = (row, dom, value) => {
+      let res = "";
+      value.forEach((time) => {
         res += `${time.courseStartWeeks}-${time.courseEndWeeks}周;`;
-      })
-      return res
-    }
+      });
+      return res;
+    };
 
     return {
       currentCourse,
@@ -193,7 +162,7 @@ export default {
       currentTeachingClassList,
       courseList,
       tableSpan,
-      courseStartWeekHoursFormatter
+      courseStartWeekHoursFormatter,
     };
   },
 };
