@@ -117,7 +117,7 @@ const selectedWeekRange = computed(() => {
   return [monday, sunday]
 })
 
-// 获取课程数据并转换为日历事件
+// 修改 fetchCalendarEvents 函数
 async function fetchCalendarEvents() {
   try {
     const loading = ElLoading.service({
@@ -126,53 +126,77 @@ async function fetchCalendarEvents() {
       background: 'rgba(255, 255, 255, 0.7)'
     })
     
+    // 调用API获取数据，传入当前日期和可能的课表类型
     const courses = await fetchCourseData(currentDate.value)
+    console.log('获取到的课程数据:', courses)
     
     loading.close()
     
-    // 如果是月视图，可能需要更多的课程数据
-    if (currentView.value === 'dayGridMonth') {
-      // 这里可以添加月视图特殊处理逻辑
+    if (!courses || courses.length === 0) {
+      console.log('未获取到课程数据')
+      ElMessage.info('当前没有课程安排')
+      return []
     }
     
     const events: CalendarEvent[] = courses.map((course: any) => {
-      // 获取当前周的日期
-      const weekStart = new Date(selectedWeekRange.value[0])
-      const courseDate = new Date(weekStart)
-      courseDate.setDate(weekStart.getDate() + course.day)
-      
-      // 格式化日期和时间
-      const startDateTime = `${courseDate.toISOString().split('T')[0]}T${course.startTime}:00`
-      const endDateTime = `${courseDate.toISOString().split('T')[0]}T${course.endTime}:00`
-      
-      // 根据课程类型设置颜色
-      let backgroundColor = '#409eff'
-      let borderColor = '#409eff'
-      
-      if (course.type === 'lab') {
-        backgroundColor = '#67c23a'
-        borderColor = '#67c23a'
-      } else if (course.type === 'seminar') {
-        backgroundColor = '#e6a23c'
-        borderColor = '#e6a23c'
-      } else if (course.type === 'exam') {
-        backgroundColor = '#f56c6c'
-        borderColor = '#f56c6c'
-      }
-      
-      return {
-        id: course.id.toString(),
-        title: `${course.name}`,
-        start: startDateTime,
-        end: endDateTime,
-        backgroundColor,
-        borderColor,
-        extendedProps: {
-          location: course.location,
-          type: course.type
+      try {
+        // 获取当前周的日期
+        const weekStart = new Date(selectedWeekRange.value[0])
+        const courseDate = new Date(weekStart)
+        
+        // 确保day是有效值
+        const day = typeof course.day === 'number' ? course.day : 0
+        courseDate.setDate(weekStart.getDate() + day)
+        
+        // 确保时间格式正确
+        const formatTime = (timeStr: string) => {
+          // 如果时间格式已经是HH:MM:SS，直接返回
+          if (/^\d{2}:\d{2}:\d{2}$/.test(timeStr)) return timeStr
+          // 如果时间格式是HH:MM，添加秒
+          if (/^\d{2}:\d{2}$/.test(timeStr)) return `${timeStr}:00`
+          // 其他情况，返回默认值
+          return '08:00:00'
         }
+        
+        const startTime = formatTime(course.startTime || '08:00')
+        const endTime = formatTime(course.endTime || '09:40')
+        
+        // 格式化日期和时间
+        const startDateTime = `${courseDate.toISOString().split('T')[0]}T${startTime}`
+        const endDateTime = `${courseDate.toISOString().split('T')[0]}T${endTime}`
+        
+        // 根据课程类型设置颜色
+        let backgroundColor = '#409eff'
+        let borderColor = '#409eff'
+        
+        if (course.type === 'lab') {
+          backgroundColor = '#67c23a'
+          borderColor = '#67c23a'
+        } else if (course.type === 'seminar') {
+          backgroundColor = '#e6a23c'
+          borderColor = '#e6a23c'
+        } else if (course.type === 'exam') {
+          backgroundColor = '#f56c6c'
+          borderColor = '#f56c6c'
+        }
+        
+        return {
+          id: (course.id || Math.random().toString(36).substr(2)).toString(),
+          title: course.name || '未命名课程',
+          start: startDateTime,
+          end: endDateTime,
+          backgroundColor,
+          borderColor,
+          extendedProps: {
+            location: course.location || '未指定地点',
+            type: course.type || 'lecture'
+          }
+        }
+      } catch (courseError) {
+        console.error('处理单个课程数据时出错:', courseError, course)
+        return null
       }
-    })
+    }).filter(Boolean) // 过滤掉处理失败的课程
     
     return events
   } catch (error) {
@@ -285,7 +309,6 @@ const handleViewChange = (view: string) => {
   currentDate.value = api.getDate() // 更新当前日期，确保日期范围显示正确
   updateCalendarEvents()
 }
-
 // 更新日历事件
 async function updateCalendarEvents() {
   try {
@@ -294,20 +317,16 @@ async function updateCalendarEvents() {
     if (!api) return
     
     api.removeAllEvents()
-    events.forEach(event => {
-      api.addEvent(event)
-    })
-    
-    // 如果没有事件，显示提示
-    if (events.length === 0) {
-      ElMessage.info('当前没有课程安排')
+    if (events && events.length > 0) {
+      events.forEach(event => {
+        api.addEvent(event)
+      })
     }
   } catch (error) {
     console.error('更新日历事件失败:', error)
-    ElMessage.error('加载课表失败')
+    ElMessage.error('加载课表失败，请稍后重试')
   }
 }
-
 // 更新看板数据
 function updateWeekViewData() {
   // 模拟看板数据
