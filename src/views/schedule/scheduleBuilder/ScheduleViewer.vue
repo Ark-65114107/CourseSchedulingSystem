@@ -3,16 +3,18 @@
     <div class="filterContianer">
       <div class="filterItem">
         <el-text class="filterTitle">院系:</el-text>
-       <el-select
+        <el-select
           class="filterSelect"
-          v-model="campusKeyword"
-          filterable
+          v-model="facultyKeyword"
           remote
-          :remote-method="searchCampus"
+          filterable
+          :remote-method="searchFaculty"
+          :loading="isFacultyLoading"
+          @change="HandleFacultyChange"
         >
           <el-scrollbar height="400px">
             <el-option
-              v-for="option of campus"
+              v-for="option of faculty"
               :label="option.name"
               :value="option.id"
               :key="id"
@@ -22,11 +24,36 @@
       </div>
       <div class="filterItem">
         <el-text class="filterTitle">专业:</el-text>
-        <el-select class="filterSelect"></el-select>
+        <el-select
+          class="filterSelect"
+          v-model="majorKeyword"
+          filterable
+          remote
+          :remote-method="searchMajor"
+          :loading="isMajorLoading"
+        >
+          <el-scrollbar height="400px">
+            <el-option
+              v-for="option of major"
+              :label="option.name"
+              :value="option.id"
+              :key="id"
+            />
+          </el-scrollbar>
+        </el-select>
       </div>
       <div class="filterItem">
         <el-text class="filterTitle">年级:</el-text>
-        <el-select class="filterSelect"></el-select>
+        <el-select class="filterSelect" v-model="gradeKeyword">
+          <el-scrollbar height="400px">
+            <el-option
+              v-for="option of grade"
+              :label="option.name"
+              :value="option.id"
+              :key="id"
+            />
+          </el-scrollbar>
+        </el-select>
       </div>
     </div>
 
@@ -43,7 +70,6 @@
           class="classTreeScrollBar"
           height="140px"
           v-loading="isClassTreeLoading"
-          v-infinite-scroll="loadClassList"
           always
         >
           <el-tree
@@ -83,7 +109,7 @@
 <script>
 import { computed, onMounted, reactive, ref, watch, toRefs } from "vue";
 import { Search } from "@element-plus/icons-vue";
-import FullCalendar from '@fullcalendar/vue3' 
+import FullCalendar from "@fullcalendar/vue3";
 import { getClassListApi } from "@/api/schedule/addClass/classList.api.js";
 import { useRoute } from "vue-router";
 import router from "@/router";
@@ -94,75 +120,21 @@ export default {
     const taskId = useRoute().query.id;
 
     const isClassTreeLoading = ref(false);
+    const isFacultyLoading = ref(false);
+    const isMajorLoading = ref(false);
 
     const filterKeywords = reactive({
-      campusKeyword: "",
       facultyKeyword: "",
       majorKeyword: "",
       gradeKeyword: "",
     });
 
     const filterOptions = reactive({
-      campus: [
-        {
-          id: "*",
-          name: "全部",
-        },
-        {
-          id: "nx",
-          name: "南浔校区",
-        },
-        {
-          id: "nx",
-          name: "下沙校区",
-        },
-      ],
-      faculty: [
-        {
-          id: "*",
-          name: "全部",
-        },
-        {
-          id: "jsj",
-          name: "计算机科学与技术学院",
-        },
-        {
-          id: "jx",
-          name: "机械工程学院",
-        },
-        {
-          id: "sl",
-          name: "水利工程学院",
-        },
-        {
-          id: "jz",
-          name: "建筑工程学院",
-        },
-      ],
+      faculty: [],
       major: [
         {
           id: "*",
           name: "全部",
-        },
-        {
-          id: "rg",
-          name: "软件工程",
-        },
-        {
-          id: "rgzb",
-          name: "软件工程(中本)",
-        },
-        {
-          id: "jsjxxgl",
-          name: "计算机软件技术",
-        },
-        {
-          id: "jsjwl",
-          name: "计算机网络",
-        },
-        {
-          id: "wlwjsyy",
-          name: "物联网技术应用",
         },
       ],
       grade: [
@@ -240,15 +212,156 @@ export default {
 
     const HandleTreeNodeClick = () => {};
 
-    const searchCampus = (keyword) => {};
-    const searchFaculty = (keyword) => {};
-    const searchMajor = (keyword) => {};
-    const searchGrade = (keyword) => {};
+    const HandleFacultyChange = () => {};
+
+    const searchFaculty = () => {
+      isFacultyLoading.value = true;
+      setTimeout(() => {
+        filterOptions.faculty = [
+          {
+            id: "*",
+            name: "全部",
+          },
+          {
+            id: "jsj",
+            name: "计算机科学与技术学院",
+          },
+          {
+            id: "jx",
+            name: "机械工程学院",
+          },
+          {
+            id: "sl",
+            name: "水利工程学院",
+          },
+          {
+            id: "jz",
+            name: "建筑工程学院",
+          },
+        ];
+        isFacultyLoading.value = false;
+      }, 500);
+    };
+
+    const searchMajor = (keyword) => {
+      isMajorLoading.value = true;
+      setTimeout(() => {
+        let major = [
+          {
+            id: "rgzb",
+            name: "软件工程（中本）",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+        ];
+        filterOptions.major = [
+          {
+            id: "*",
+            name: "全部",
+          },
+          ...major,
+        ];
+        isMajorLoading.value = false;
+      }, 500);
+    };
+
+    const searchGrade = (keyword) => {
+      isMajorLoading.value = true;
+      setTimeout(() => {
+        let major = [
+          {
+            id: "rgzb",
+            name: "软件工程（中本）",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+          {
+            id: "wlwjsyy",
+            name: " 物联网技术应用",
+          },
+        ];
+        filterOptions.major = [
+          {
+            id: "*",
+            name: "全部",
+          },
+          ...major,
+        ];
+        isMajorLoading.value = false;
+      }, 500);
+    };
+
+    //=======api=========================
+
+    const getFaculty = () => {};
 
     return {
       ...toRefs(filterOptions),
       ...toRefs(filterKeywords),
-      searchCampus,
       treeFilter,
       HandleTreeNodeClick,
       searchFaculty,
@@ -258,6 +371,9 @@ export default {
       treeKeyword,
       isClassTreeLoading,
       loadClassList,
+      isFacultyLoading,
+      isMajorLoading,
+      HandleFacultyChange,
     };
   },
 };

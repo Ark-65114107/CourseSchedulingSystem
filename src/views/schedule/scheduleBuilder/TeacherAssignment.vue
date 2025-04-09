@@ -78,6 +78,13 @@
             :key="course.id"
             :lazy="true"
           >
+            <template #label>
+              <el-badge :is-dot="course.isCourseNoTeacher">
+                <div>
+                  <el-text>{{ course.name }}</el-text>
+                </div>
+              </el-badge>
+            </template>
             <div class="courseTabPaneBody">
               <el-table
                 class="teachingClassTable"
@@ -137,7 +144,7 @@ import TeacherAssignmentTeachingClassDialog from "./TeacherAssignmentTeachingCla
 import { getListTeachingClassApi } from "@/api/schedule/setTeachingClass/teachingClass.api";
 export default {
   name: "TeacherAssignment",
-  components: { TeacherAssignmentDialog,TeacherAssignmentTeachingClassDialog },
+  components: { TeacherAssignmentDialog, TeacherAssignmentTeachingClassDialog },
   setup() {
     const teacherList = ref([]);
     const teachingClassList = ref([]);
@@ -220,7 +227,6 @@ export default {
     const HandleTeacherEditClick = (row) => {
       bus.emit("showTeacherAssignmentDialog", row);
     };
-
 
     const getCourseList = () => {
       return getCourseListApi(taskId).then((res) => {

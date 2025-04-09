@@ -17,7 +17,7 @@
         <el-text>{{ currentTeachingClass.name }}</el-text>
       </el-form-item>
       <el-form-item class="addTeachingClassFormItem">
-        <el-autocomplete
+        <!-- <el-autocomplete
           class="searchInput"
           clearable
           v-model="teacherKeyword"
@@ -32,7 +32,32 @@
           type="primary"
           @click="HandleTeachingClassAdd"
           >添加</el-button
+        > -->
+
+        <el-select
+          filterable
+          remote
+          :remote-method="HandleRemoteSelect"
+          v-model="selectedTeacher"
+          @change="HandleSelectChange"
+          :loading="isOptionLoading"
         >
+          <div
+            class="optionContainer"
+            v-infinite-scroll="loadTeacher"
+            :infinite-scroll-delay="800"
+            :infinite-scroll-immediate="false"
+            style="overflow: hide"
+          >
+            <el-option
+              v-for="teacher of teacherOptions"
+              :value="teacher"
+              :label="teacher.name"
+              :key="teacher.id"
+            />
+            <el-option v-show="isOptionLoading" label="加载中..." disabled />
+          </div>
+        </el-select>
       </el-form-item>
       <el-scrollbar class="teachingClassScrollBar" always ref="scrollBarRef">
         <div class="nodata" v-if="isTeachingClassListEmpty">
@@ -41,10 +66,10 @@
         <el-tag
           class="teacherClassTag"
           closable
-          @close="HandleTagClose(teachingClass)"
+          @close="HandleTagClose(teacher)"
           v-else
-          v-for="teachingClass of formInput.teacherList"
-          >{{ teachingClass.name }} # {{teachingClass.id}}</el-tag
+          v-for="teacher of formInput.teacherList"
+          >{{ teacher.name }}</el-tag
         >
       </el-scrollbar>
     </el-form>
@@ -53,7 +78,7 @@
       <el-button
         type="primary"
         @click="HandleClose(TeacherAssignmentFormRef)"
-        :loading="false"
+        :loading="isButtonLoading"
         >确定</el-button
       >
     </template>
@@ -61,7 +86,7 @@
 </template>
 
 <script>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import bus from "@/bus/bus";
 import { useRoute } from "vue-router";
 import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
@@ -71,9 +96,9 @@ import {
   updateTeachingClassApi,
 } from "@/api/schedule/setTeachingClass/teachingClass.api";
 import {
-  getSingleTeacherTeachingClassApi,
-  searchTeachingClassApi,
+  updateTeachingClassTeacherApi,
 } from "@/api/schedule/teacherAssignment/teacherAssignment.api";
+import { getTeacherListApi } from "@/api/basicData/teacher.api";
 
 export default {
   name: "TeacherAssignmentTeachingClassDialog",
@@ -81,6 +106,16 @@ export default {
     const taskId = useRoute().query.id;
     const teacherKeyword = ref("");
     const selectedTeachingClass = ref("");
+    const selectedTeacher = ref("");
+    const teacherOptions = ref([]);
+    const pageInfo = reactive({
+      page: 1,
+      size: 10,
+    });
+    const total = ref(0);
+    const isOptionLoading = ref(false);
+    const isButtonLoading = ref(false);
+
     const isDialogVisiable = ref(false);
     const currentTeachingClass = ref("");
     const TeacherAssignmentFormRef = ref();
@@ -94,38 +129,117 @@ export default {
     });
 
     onMounted(() => {
+      clearForm();
       bus.on("showTeacherAssignmentTeachingClassDialog", (row) => {
         currentTeachingClass.value = row;
-        getSingleTeachingClassApi(taskId, row.id).then((res) => {
-          if (res) {
-            if (res.meta.code === 200) {
-              formInput.value.teacherList = res.data;
-            }
-          }
-        });
+        getTeachingClassTeacherList();
+        getTeacherList();
         isDialogVisiable.value = true;
       });
     });
 
+    const clearForm = () => {
+      pageInfo.page = 1;
+      pageInfo.size = 10;
+      total.value = 0;
+      isButtonLoading.value = false;
+      selectedTeacher.value = "";
+      formInput.value.teacherList = [];
+      teacherOptions.value = [];
+    };
+
+    const HandleRemoteSelect = (keyword) => {
+      pageInfo.page = 1;
+      pageInfo.size = 10;
+      total.value = 0;
+      teacherOptions.value = [];
+      teacherKeyword.value = keyword
+      getTeacherList(teacherKeyword.value);
+    };
+
+    const loadTeacher = () => {
+      console.log("load!");
+      pageInfo.page++;
+      if (teacherKeyword.value) {
+        if (pageInfo.page * pageInfo.size < total.value) {
+          isOptionLoading.value = true;
+          getTeacherList(teacherKeyword.value);
+        }
+      } else {
+        if (pageInfo.page * pageInfo.size < total.value) {
+          isOptionLoading.value = true;
+          getTeacherList();
+        }
+      }
+    };
+
+    const getTeachingClassTeacherList = () => {
+      getSingleTeachingClassApi(taskId, currentTeachingClass.value.id).then(
+        (res) => {
+          if (res) {
+            if (res.meta.code === 200) {
+              formInput.value.teacherList = res.data.teacherList;
+            }
+          }
+        }
+      );
+    };
+
+    const updateTeachingClassTeacher = () => {
+      isButtonLoading.value = true;
+      return updateTeachingClassTeacherApi()
+        .then((res) => {
+          if (res) {
+            if (res.code === 200) {
+              isButtonLoading.value = false;
+              return 200;
+            }
+          }
+        })
+        .finally(() => {
+          isButtonLoading.value = false;
+        });
+    };
+
     const HandleClose = (ref) => {
-      console.log(ref);
-      isDialogVisiable.value = false;
+      clearForm();
+      updateTeachingClassTeacher().then((res) => {
+        if (res == 200) {
+          isDialogVisiable.value = false;
+        }
+      });
     };
 
     const HandleCancel = () => {
+      clearForm();
       isDialogVisiable.value = false;
     };
 
     const HandleTagClose = (item) => {
-      formInput.value.teacherList =
-        formInput.value.teacherList.filter((tag) => {
-          return tag != item;
-        });
+      formInput.value.teacherList = formInput.value.teacherList.filter(
+        (tag) => {
+          return tag.id != item.id;
+        }
+      );
     };
 
-    const getTeacherSuggestions = (keyword, callback) => {
-      searchTeacherApi(taskId, keyword).then((res) => {
-        callback(res.data.map((c) => ({ ...c, value: `${c.name}` })));
+    const getTeacherList = (keyword) => {
+      getTeacherListApi({
+        page: pageInfo.page,
+        size: pageInfo.size,
+        keyword,
+      }).then((res) => {
+        if (res) {
+          if (res.meta.code === 200) {
+            console.log(res);
+            teacherOptions.value = [
+              ...teacherOptions.value,
+              ...res.data.teachers,
+            ];
+            total.value = res.data.total;
+            isOptionLoading.value = false;
+          }
+        }
       });
     };
 
@@ -133,14 +247,21 @@ export default {
       selectedTeachingClass.value = value;
     };
 
+    const HandleSelectChange = () => {
+      if (formInput.value.teacherList.includes(selectedTeacher.value)) {
+        ElMessage("请勿重复添加!");
+      } else {
+        formInput.value.teacherList.push(selectedTeacher.value);
+        selectedTeacher.value = "";
+      }
+    };
+
     const HandleSuggestionClear = () => {
       selectedTeachingClass.value = "";
     };
 
     const HandleTeachingClassAdd = () => {
-      if (
-        !formInput.value.teacherList.includes(selectedTeachingClass.value)
-      ) {
+      if (!formInput.value.teacherList.includes(selectedTeachingClass.value)) {
         formInput.value.teacherList.push(selectedTeachingClass.value);
         selectedTeachingClass.value = "";
         teacherKeyword.value = "";
@@ -154,13 +275,21 @@ export default {
       HandleCancel,
       currentTeachingClass,
       TeacherAssignmentFormRef,
-      getTeacherSuggestions,
       teacherKeyword,
       HandleSuggestionSelected,
       HandleTeachingClassAdd,
       HandleSuggestionClear,
       isTeachingClassListEmpty,
       HandleTagClose,
+      selectedTeacher,
+      teacherOptions,
+      total,
+      pageInfo,
+      loadTeacher,
+      isOptionLoading,
+      HandleRemoteSelect,
+      HandleSelectChange,
+      isButtonLoading,
     };
   },
 };
@@ -205,5 +334,10 @@ export default {
 
 .teacherClassTag {
   margin: 5px;
+}
+
+.optionContainer {
+  min-height: 300px;
+  background: white;
 }
 </style>
