@@ -17,7 +17,7 @@
         <el-text>{{ currentTeacher.name }}</el-text>
       </el-form-item>
       <el-form-item class="addTeachingClassFormItem">
-        <el-autocomplete
+        <!-- <el-autocomplete
           class="searchInput"
           clearable
           v-model="teachingClassKeyword"
@@ -26,13 +26,31 @@
           @select="HandleSuggestionSelected"
           @clear="HandleSuggestionClear"
         >
-        </el-autocomplete>
-        <el-button
-          class="addButton"
-          type="primary"
-          @click="HandleTeachingClassAdd"
-          >添加</el-button
+        </el-autocomplete> -->
+        <el-select
+          filterable
+          remote
+          :remote-method="HandleRemoteSelect"
+          v-model="selectedTeachingClass"
+          @change="HandleTeachingClassAdd"
+          @visible-change="HandleDropDown"
+          :loading="isOptionLoading"
         >
+          <div
+            v-infinite-scroll="loadTeachingClass"
+            :infinite-scroll-delay="1000"
+            :infinite-scroll-immediate="false"
+            style="overflow: hide"
+          >
+            <el-option
+              v-for="teachingClass of teachingClassOptions"
+              :value="teachingClass"
+              :label="teachingClass.name"
+              :key="teachingClass.id"
+            />
+            <el-option v-show="isOptionLoading" label="加载中..." disabled />
+          </div>
+        </el-select>
       </el-form-item>
       <el-scrollbar class="teachingClassScrollBar" always ref="scrollBarRef">
         <div class="nodata" v-if="isTeachingClassListEmpty">
@@ -61,7 +79,7 @@
 </template>
 
 <script>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch, reactive } from "vue";
 import bus from "@/bus/bus";
 import { useRoute } from "vue-router";
 import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
@@ -81,9 +99,18 @@ export default {
     const currentTeacher = ref("");
     const TeacherAssignmentFormRef = ref();
     const scrollBarRef = ref();
+    const teachingClassOptions = ref([]);
     const formInput = ref({
       teachingClassList: [],
     });
+
+    const pageInfo = reactive({
+      page: 1,
+      size: 10,
+    });
+    const total = ref(0);
+    const isOptionLoading = ref(false);
+    const isButtonLoading = ref(false);
 
     const isTeachingClassListEmpty = computed(() => {
       return formInput.value.teachingClassList.length == 0;
@@ -128,22 +155,19 @@ export default {
       });
     };
 
-    const HandleSuggestionSelected = (value) => {
-      selectedTeachingClass.value = value;
-    };
-
     const HandleSuggestionClear = () => {
       selectedTeachingClass.value = "";
     };
 
     const HandleTeachingClassAdd = () => {
       if (
-        selectedTeachingClass.value.length &&
         !formInput.value.teachingClassList.includes(selectedTeachingClass.value)
       ) {
         formInput.value.teachingClassList.push(selectedTeachingClass.value);
         selectedTeachingClass.value = "";
         teachingClassKeyword.value = "";
+      } else {
+        ElMessage("教学班已存在!");
       }
     };
 
@@ -152,6 +176,54 @@ export default {
       selectedTeachingClass.value = "";
       currentTeacher.value = "";
       formInput.value.teachingClassList = [];
+    };
+
+    const getTeachingClassList = () => {
+      if (teachingClassKeyword.value) {
+        searchTeachingClassApi(
+          taskId,
+          pageInfo.page,
+          pageInfo.size,
+          teachingClassKeyword.value
+        ).then((res) => {
+          if (res) {
+            if (res.meta.code == 200) {
+              total.value = res.data.total;
+              teachingClassOptions.value = [
+                ...teachingClassOptions.value,
+                ...res.data.data,
+              ];
+            }
+          }
+        });
+      }
+    };
+
+    const HandleDropDown = () => {
+      if (teachingClassKeyword.value) {
+        pageInfo.page = 1;
+        total.value = 0;
+        teachingClassOptions.value = [];
+        getTeachingClassList();
+      }
+    };
+
+    const loadTeachingClass = () => {
+      if (teachingClassKeyword.value) {
+        pageInfo.page++;
+        if (pageInfo.page * pageInfo.size < total.value) {
+          isOptionLoading.value = true;
+          getTeachingClassList();
+        }
+      }
+    };
+
+    const HandleRemoteSelect = (keyword) => {
+      pageInfo.page = 1;
+      total.value = 0;
+      teachingClassOptions.value = [];
+      teachingClassKeyword.value = keyword;
+      getTeachingClassList();
     };
 
     return {
@@ -163,11 +235,14 @@ export default {
       TeacherAssignmentFormRef,
       getTeachingClassSuggestions,
       teachingClassKeyword,
-      HandleSuggestionSelected,
       HandleTeachingClassAdd,
       HandleSuggestionClear,
       isTeachingClassListEmpty,
       HandleTagClose,
+      loadTeachingClass,
+      teachingClassOptions,
+      HandleDropDown,
+      HandleRemoteSelect,
     };
   },
 };

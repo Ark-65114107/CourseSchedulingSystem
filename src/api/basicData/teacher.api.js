@@ -35,6 +35,16 @@ export const deleteTeacherApi = (parm)=>{
     })
 }
 
+//查询教师数据
+export const searchTeacherApi = (parm)=>{
+  return request({
+      url:"/teachers",
+      method:"get",
+      params:parm,
+      isAbort:true
+  }).catch(()=>{})
+}
+
 
 
 /**

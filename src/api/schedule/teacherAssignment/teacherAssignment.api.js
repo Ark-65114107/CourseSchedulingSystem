@@ -23,12 +23,14 @@ export const getSingleTeacherTeachingClassApi = (taskId, teacherId) => {
 }
 
 //搜索教学班
-export const searchTeachingClassApi = (taskId,keyword) => {
+export const searchTeachingClassApi = (taskId,page,size,keyword) => {
     return request({
         url: "/task/searchListTeachingClass",
         method: "get",
         params:{
             taskId,
+            page,
+            size,
             keyword
         },
         isAbort: true
@@ -43,6 +45,33 @@ export const searchTeacherApi = (taskId,keyword) => {
         params:{
             taskId,
             keyword
+        },
+        isAbort: true
+    }).catch(() => { })
+}
+
+//更新教师的教教学班列表
+export const updateTeacherTeachingClassApi = (taskId,teacherId,teachingClassList) => {
+    return request({
+        url: "/task/updateTeacherTeachingClass",
+        method: "post",
+        params:{
+            taskId,
+            teacherId,
+            teachingClassList,
+        },
+        isAbort: true
+    }).catch(() => { })
+}
+//更新教学班的教师列表
+export const updateTeachingClassTeacherApi = (taskId,teachingClassId,teacherList) => {
+    return request({
+        url: "/task/updateTeachingClassTeacher",
+        method: "post",
+        params:{
+            taskId,
+            teachingClassId,
+            teacherList
         },
         isAbort: true
     }).catch(() => { })
