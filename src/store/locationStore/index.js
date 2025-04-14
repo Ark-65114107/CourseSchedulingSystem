@@ -97,11 +97,9 @@ export const useLocationStore = defineStore('location', {
         getClassroom(parm = { page: 1, size: 5 }) {
             return getClassroomListApi(parm).then(response => {
                 console.log(response);
-                if (response.meta.code === 200) {
-                    this.classroomNum = response.data.total
-                    this.classrooms = response.data.classrooms
-                    this.classroomNameMap = new Map(this.classrooms.map(c => [c.id, c.name]))
-                    this.classroomMap = new Map(this.classrooms.map(c => [c.id, c]))
+                if (response.code == 200) {
+                    this.classroomNum = 279
+                    this.classrooms = response.data
                     return 200
                 }
             }).catch(error => {

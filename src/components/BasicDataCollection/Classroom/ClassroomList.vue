@@ -77,31 +77,31 @@
       ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="40" />
-      <el-table-column prop="code" label="教室编号" min-width="155px" />
-      <el-table-column prop="name" label="教室名称" min-width="155px" />
+      <el-table-column prop="roomID" label="教室编号" min-width="155px" />
+      <el-table-column prop="roomName" label="教室名称" min-width="155px" />
       <el-table-column
         prop="campus"
         label="所属校区"
         min-width="155px"
       />
       <el-table-column
-        prop="teachingbuilding"
+        prop="building"
         label="教学楼"
         min-width="100px"
       />
       <el-table-column
-        prop="type"
+        prop="roomType"
         label="教室类型"
         min-width="100px"
       />
-      <el-table-column prop="capacity" label="可容纳人数" min-width="100px" />
+      <el-table-column prop="maxHolder" label="可容纳人数" min-width="100px" />
       <el-table-column
         prop="isAssigned"
         :formatter="assignedToYesNo"
         label="固定教室"
       />
       <el-table-column
-        prop="isAvailable"
+        prop="enabled"
         :formatter="availableToYesNo"
         label="是否启用"
       />
@@ -169,6 +169,7 @@ export default {
     const tableRef = ref();
     const { classrooms, teachingbuildings, campuses, classroomtypes } =
       storeToRefs(locationStore);
+    
 
     const data = reactive({
       isDeleteShow: false,

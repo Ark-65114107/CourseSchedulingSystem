@@ -3,19 +3,20 @@ import request from "@/utils/request"
 //获取教室数据
 export const getClassroomListApi = (parm) => {
     return request({
-        url: "/classrooms",
+        url: "/basicData/classroom/showClassroom",
         method: "get",
         params: parm,
         isAbort: true
-    }).catch(() => { })
+    }).catch(() => {})
 }
 //获取教室数据
-export const getSingleClassroomApi = (parm) => {
+export const getSingleClassroomApi = (id) => {
     return request({
-        url: "/classrooms",
-        method: "get",
-        params: parm,
-        isAbort: true
+        url: "/basicData/classroom/searchClassroomByRoomID",
+        method: "post",
+        data:{
+            roomID:id
+        },
     }).catch(() => { })
 }
 
