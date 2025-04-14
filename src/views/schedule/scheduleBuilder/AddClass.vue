@@ -17,7 +17,14 @@
         default-expand-all
         :default-checked-keys="defaultChecked"
         ref="treeRef"
-      />
+      >
+        <template #default="{ node, data }">
+          <span>
+            {{node.label}}
+          </span>
+          <el-tag v-show="node.isFixedRoom">固定教室</el-tag>
+        </template>
+      </el-tree>
     </el-scrollbar>
   </div>
 </template>
@@ -33,6 +40,7 @@ import {
 import { getClassListApi } from "@/api/schedule/addClass/classList.api.js";
 import { useRoute } from "vue-router";
 import router from "@/router";
+import { ElMessage } from "element-plus";
 
 export default {
   name: "AddClass",
@@ -52,7 +60,10 @@ export default {
     const setClassTree = () => {
       let id = route.query.id;
       setClassTreeApi({ id, classList: res.value }).then((res) => {
-        console.log(res);
+        if (res.code === 200) {
+          ElMessage.success("操作成功!");
+        }
+        getClassList();
       });
     };
 
@@ -60,10 +71,13 @@ export default {
       isLoading.value = true;
       getClassTreeApi()
         .then((res) => {
-          if (res.meta.code === 200) {
+          if (res.meta.code == 200) {
             isLoading.value = false;
-            data.value = res.data.tree;
+            data.value = res.data.data;
           }
+        })
+        .catch((error) => {
+          console.log(error);
         })
         .finally(() => {
           isLoading.value = false;
@@ -72,9 +86,20 @@ export default {
     };
 
     const getClassList = () => {
-      getClassListApi(route.query.id).then((res) => {
-        defaultChecked.value = res.data.map((c) => c.id);
-      });
+      isLoading.value = true;
+      getClassListApi(route.query.id)
+        .then((res) => {
+          if (res) {
+            if (res.code == 200) {
+              defaultChecked.value = res.data.map((c) => c.id);
+            }
+          }
+        })
+        .finally(() => {
+          ElMessage.success("操作成功!");
+
+          isLoading.value = false;
+        });
     };
 
     watch(keyWord, (value) => {
@@ -87,16 +112,30 @@ export default {
       return data.label.includes(value);
     };
 
+    let timer;
+
+    const debounce = function (fun, delay) {
+      //防抖函数
+      return function () {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+          fun();
+        }, delay);
+      };
+    };
+
     const HandleCheckChange = (obj, value, isChildrenChecked) => {
       if (obj.select) {
         if (value) {
           res.value.push(obj.id);
+          debounce(setClassTree, 400)();
         } else {
           res.value = res.value.filter((o) => {
             if (o.id == obj.id) {
               return true;
             }
           });
+          debounce(setClassTree, 400)();
         }
       }
     };
@@ -129,8 +168,6 @@ export default {
     };
   },
 };
-
-
 </script>
 
 <style scoped>

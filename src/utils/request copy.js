@@ -14,7 +14,7 @@ function cancelRepeatCache(key){
 
 
 const request = axios.create({
-    baseURL: "https://10.105.187.101:8443",
+    baseURL: "https://10.192.179.178:8443",
     timeout: "3000"
 })
 
@@ -29,14 +29,14 @@ request.interceptors.request.use(
             }   
         }
         //删除重复请求
-        // const { isAbort = false ,url,method } = config
-        // if(isAbort){
-        //     const key = `${url}%%${method}`
-        //     cancelRepeatCache(key)
-        //     const controller = new AbortController()
-        //     config.signal = controller.signal
-        //     requestCache[key] = controller
-        // }
+        const { isAbort = false ,url,method } = config
+        if(isAbort){
+            const key = `${url}%%${method}`
+            cancelRepeatCache(key)
+            const controller = new AbortController()
+            config.signal = controller.signal
+            requestCache[key] = controller
+        }
         return config
     },
     error => {

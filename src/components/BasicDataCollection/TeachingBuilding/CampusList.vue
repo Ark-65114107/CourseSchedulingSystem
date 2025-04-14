@@ -23,7 +23,7 @@
     </div>
 
     <el-table
-      :data="teachingClasses"
+      :data="campuses"
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
       max-height="400px"
@@ -101,6 +101,17 @@ export default {
         size: 5,
       },
     });
+
+    const campuses = ref([
+      {
+        code:"tmg",
+        name:"铁门关校区"
+      },
+      {
+        code:"kel",
+        name:"库尔勒校区"
+      },
+    ])
 
     const HandleSelectChange = (value) => {
       data.deleteValue = value;

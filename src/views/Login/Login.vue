@@ -94,14 +94,15 @@ export default {
             rememberme: data.rememberme,
           })
             .then((res) => {
-              if (res.meta.code == 200) {
+              console.log(res);
+              if (res.code == 200) {
                 sessionStorage.clear();
                 localStorage.clear();
-                setToken(res.data.token);
+                setToken("thisisadmintoken");
                 authStore.getUserInfo();
                 ElMessage.success("登录成功!");
               }
-              if (res.meta.code == 402) {
+              if (res.code == 402) {
                 ElMessage.error("请检查用户名或密码!");
               }
             })

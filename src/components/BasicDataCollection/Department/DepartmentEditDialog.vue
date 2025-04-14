@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     v-model="isDialogFormVisible"
-    :title= 'mode ? "添加":"修改"'
+    :title="mode ? '添加' : '修改'"
     width="450"
     class="dialog"
     :close-on-click-modal="false"
@@ -115,6 +115,7 @@
           type="primary"
           @click="editItem(departmentFormRef)"
           v-show="!mode"
+          :loading="isButtonLoading"
         >
           <span>修改</span>
         </el-button>
@@ -123,6 +124,7 @@
           type="primary"
           @click="addItem(departmentFormRef)"
           v-show="mode"
+          :loading="isButtonLoading"
         >
           <span>添加</span>
         </el-button>
@@ -136,12 +138,12 @@
 </template>
 
 <script>
-
 import { reactive, ref, toRefs } from "vue";
 import { v1 as uuid } from "uuid";
 import bus from "@/bus/bus";
 import { useAcademicStore } from "@/store/academicStore/index.js";
 import { useLocationStore } from "@/store/locationStore/index.js";
+import { getSingleDepartmentApi } from "@/api/basicData/departments.api.js";
 import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
 import { storeToRefs } from "pinia";
 
@@ -149,22 +151,30 @@ export default {
   name: "DepartmentEditDialog",
   mounted() {
     bus.on("showDepartmentEdit", (value) => {
-      this.id = value.id;
+      this.id = value.departmentId;
       this.mode = false;
       this.isDialogFormVisible = true; //List中按下按钮弹窗
-      this.$nextTick(() => {
-        (this.formInput.departmentName = value.name),
-          (this.formInput.departmentEnglishName = value.ename),
-          (this.formInput.departmentAbbr = value.abbr),
-          (this.formInput.departmentCode = value.code),
-          (this.formInput.departmentType = value.type),
-          (this.formInput.teachingbuildingId = value.teachingbuildingId),
-          (this.formInput.isEntity = value.isEntity),
-          (this.formInput.isCourseOffering = value.isCourseOffering),
-          (this.formInput.isTeaching = value.isTeaching),
-          (this.formInput.isEnabled = value.isEnabled),
-          (this.formInput.isTeachingResearchOffice =
-            value.isTeachingResearchOffice);
+      getSingleDepartmentApi(value.departmentId).then((res) => {
+        console.log(res);
+
+        if (res) {
+          if (res.code == 200) {
+            this.$nextTick(() => {
+              (this.formInput.departmentName = res.data.departmentName),
+                (this.formInput.departmentEnglishName = res.data.ename),
+                (this.formInput.departmentAbbr = res.data.abbr),
+                (this.formInput.departmentCode = res.data.departmentId),
+                (this.formInput.departmentType = res.data.type),
+                (this.formInput.teachingbuildingId = res.data.staticBuilding),
+                (this.formInput.isEntity = res.data.entity),
+                (this.formInput.isCourseOffering = res.data.offeringCourseUnit),
+                (this.formInput.isTeaching = res.data.teachingCourse),
+                (this.formInput.isEnabled = res.data.enabled),
+                (this.formInput.isTeachingResearchOffice =
+                  res.data.offeringClassroom);
+            });
+          }
+        }
       });
     });
 
@@ -180,6 +190,7 @@ export default {
     const { departmentTypes } = storeToRefs(academicStore);
     const { teachingbuildings } = storeToRefs(locationStore);
     const departmentFormRef = ref({});
+    const isButtonLoading = ref(false);
     const data = reactive({
       isDialogFormVisible: false, //是否弹窗
       id: "",
@@ -257,27 +268,28 @@ export default {
     };
 
     const addItem = (formEl) => {
-      console.log(formEl);
       if (!formEl) return;
       formEl.validate((validate) => {
         if (validate) {
-          academicStore.AddDepartment({
-            id: uuid(),
-            name: formInput.departmentName,
-            ename: formInput.departmentEnglishName,
-            abbr: formInput.departmentAbbr,
-            code: formInput.departmentCode,
-            type: formInput.departmentType,
-            teachingbuildingId: formInput.teachingbuildingId,
-            teachingbuildingName: locationStore.teachingbuildingNameMap.get(
-              formInput.teachingbuildingId
-            ),
-            isEntity: formInput.isEntity,
-            isCourseOffering: formInput.isCourseOffering,
-            isTeaching: formInput.isTeaching,
-            isEnabled: formInput.isEnabled,
-            isTeachingResearchOffice: formInput.isTeachingResearchOffice,
-          });
+          isButtonLoading.value = true;
+          if (
+            academicStore.AddDepartment({
+              departmentName: formInput.departmentName,
+              departmentEnglishName: formInput.departmentEnglishName,
+              departmentBackName: formInput.departmentAbbr,
+              departmentId: formInput.departmentCode,
+              type: formInput.departmentType,
+              staticBuilding: formInput.teachingbuildingId,
+              entity: formInput.isEntity,
+              offeringCourseUnit: formInput.isCourseOffering,
+              teachingCourse: formInput.isTeaching,
+              enabled: formInput.isEnabled,
+              offeringClassroom: formInput.isTeachingResearchOffice,
+            }) === 200
+          ) {
+            isButtonLoading.value = false;
+            bus.emit("updateDepartment", true);
+          }
           data.isDialogFormVisible = false; //确认后关闭弹窗
           formEl.resetFields();
         }
@@ -290,26 +302,24 @@ export default {
         if (validate) {
           if (
             academicStore.EditDepartment({
-              id: data.id,
-              name: formInput.departmentName,
-              ename: formInput.departmentEnglishName,
-              abbr: formInput.departmentAbbr,
-              code: formInput.departmentCode,
+              departmentName: formInput.departmentName,
+              departmentEnglishName: formInput.departmentEnglishName,
+              departmentBackName: formInput.departmentAbbr,
+              departmentId: formInput.departmentCode,
               type: formInput.departmentType,
-              teachingbuildingId: formInput.teachingbuildingId,
-              teachingbuildingName: locationStore.teachingbuildingNameMap.get(
-                formInput.teachingbuildingId
-              ),
-              isEntity: formInput.isEntity,
-              isCourseOffering: formInput.isCourseOffering,
-              isTeaching: formInput.isTeaching,
-              isEnabled: formInput.isEnabled,
-              isTeachingResearchOffice: formInput.isTeachingResearchOffice,
-            })
+              staticBuilding: formInput.teachingbuildingId,
+              entity: formInput.isEntity,
+              offeringCourseUnit: formInput.isCourseOffering,
+              teachingCourse: formInput.isTeaching,
+              enabled: formInput.isEnabled,
+              offeringClassroom: formInput.isTeachingResearchOffice,
+            }) === 200
           ) {
-            data.isDialogFormVisible = false; //确认后关闭弹窗
-            formEl.resetFields();
+            bus.emit("updateDepartment", false);
+            isButtonLoading.value = false;
           }
+          data.isDialogFormVisible = false; //确认后关闭弹窗
+          formEl.resetFields();
         }
       });
     };
@@ -328,6 +338,7 @@ export default {
       inputRule,
       departmentTypes,
       teachingbuildings,
+      isButtonLoading,
     };
   },
 };

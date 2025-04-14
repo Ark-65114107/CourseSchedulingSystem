@@ -9,6 +9,15 @@ export const getClassroomListApi = (parm) => {
         isAbort: true
     }).catch(() => { })
 }
+//获取教室数据
+export const getSingleClassroomApi = (parm) => {
+    return request({
+        url: "/classrooms",
+        method: "get",
+        params: parm,
+        isAbort: true
+    }).catch(() => { })
+}
 
 //添加教室数据
 export const addClassroomApi = (parm) => {

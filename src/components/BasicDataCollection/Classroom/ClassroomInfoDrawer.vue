@@ -8,11 +8,11 @@
     <el-descriptions :title="datas.name"  :column="1" border>
         <el-descriptions-item  label="教室编号" width="100px">{{datas.id}}</el-descriptions-item>
         <el-descriptions-item  label="教室名称" width="100px" >{{datas.name}}</el-descriptions-item>
-        <el-descriptions-item  label="所属校区" width="100px">{{locationStore.campusNameMap.get(datas.campusId)}}</el-descriptions-item>
-        <el-descriptions-item label="教学楼" width="100px">{{locationStore.teachingbuildingNameMap.get(datas.teachingbuildingId)}}</el-descriptions-item>
+        <el-descriptions-item  label="所属校区" width="100px">{{datas.campus}}</el-descriptions-item>
+        <el-descriptions-item label="教学楼" width="100px">{{datas.teachingbuilding}}</el-descriptions-item>
         <el-descriptions-item label="所在楼层" width="100px">{{datas.floor}}</el-descriptions-item>
         <el-descriptions-item label="教室标签" width="100px">{{datas.tags}}</el-descriptions-item>
-        <el-descriptions-item label="教室类型" width="100px">{{locationStore.classroomTypeNameMap.get(datas.typeId)}}</el-descriptions-item>
+        <el-descriptions-item label="教室类型" width="100px">{{datas.type}}</el-descriptions-item>
         <el-descriptions-item label="可容纳人数" width="100px">{{datas.capacity}}</el-descriptions-item>
         <el-descriptions-item label="是否为固定教室" width="100px">{{boolToYesNo(datas.isAssigned)}}</el-descriptions-item>
         <el-descriptions-item label="是否有空调" width="100px">{{boolToYesNo(datas.hasAirConditioner)}}</el-descriptions-item>

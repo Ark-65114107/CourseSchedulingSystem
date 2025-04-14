@@ -18,9 +18,9 @@ import {
 import getAcademicYears from "@/utils/getAcademicYears";
 import { useLocationStore } from "../locationStore";
 import { getGradeByQueryApi, getGradeListApi } from "@/api/basicData/grade.api";
-import { getDepartmentByQueryApi, getDepartmentListApi } from "@/api/basicData/departments.api";
+import { getDepartmentByQueryApi, getDepartmentListApi, getSingleDepartmentApi, addDepartmentApi, editDepartmentApi } from "@/api/basicData/departments.api";
 import { getMajorListApi } from "@/api/basicData/major.api";
-import { getClassListApi } from "@/api/basicData/class.api";
+import { getClassListApi, addClassListApi, editClassListApi } from "@/api/basicData/class.api";
 import { getSemesterListApi } from "@/api/basicData/semester.api";
 import { getCourseListApi } from "@/api/basicData/course.api";
 
@@ -54,24 +54,6 @@ export const useAcademicStore = defineStore('academic', {
 
         academicYears: [],//学年
 
-        departmentMap: new Map(),
-        departmentNameMap: new Map(),
-        departmentTypeMap: new Map(),
-        majorMap: new Map(),
-        majorNameMap: new Map(),
-        classMap: new Map(),
-        classNameMap: new Map(),
-        courseNameMap: new Map(),
-        courseNatureNameMap: new Map(),
-        courseTypeNameMap: new Map(),
-        courseAttributeNameMap: new Map(),
-        courseCategoryNameMap: new Map(),
-        gradeNameMap: new Map(),
-        gradeMap: new Map(),
-        specializationNameMap: new Map(),
-        educationalLevelMap: new Map(),
-        educationalLevelNameMap: new Map(),
-        semesterNameMap: new Map(),
         AcademicDatainitiate: false
     }),
     getters: {
@@ -85,7 +67,6 @@ export const useAcademicStore = defineStore('academic', {
         initAcademicDatas() {
             if (!this.AcademicDatainitiate) {
                 this.initDepartments()
-                this.initDepartmentTypes()
                 this.initMajors()
                 this.initClasses()
                 this.initCourses()
@@ -104,8 +85,7 @@ export const useAcademicStore = defineStore('academic', {
                 if (res.meta.code == 200) {
                     this.gradeNum = res.data.total
                     this.grades = res.data.grades
-                    this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
-                    this.gradeMap = new Map(this.grades.map(c => [c.id, c]))
+
                     return 200
                 }
             }).catch(error => {
@@ -117,15 +97,12 @@ export const useAcademicStore = defineStore('academic', {
                 if (res.meta.code == 200) {
                     this.grades = res.data
                     this.gradeNum = res.total
-                    this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
-                    this.gradeMap = new Map(this.grades.map(c => [c.id, c]))
+
                     return 200
                 }
                 if (res.meta.code == 400) {
                     this.grades = res.data
                     this.gradeNum = res.total
-                    this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
-                    this.gradeMap = new Map(this.grades.map(c => [c.id, c]))
                     return 400
                 }
             }).catch(error => {
@@ -134,18 +111,14 @@ export const useAcademicStore = defineStore('academic', {
         },
         getGradeByQuery(keyword, page = 1, size = 5) {
             return getDepartmentByQueryApi({ keyword, page, size }).then(res => {
-                if (res.meta.code == 200) {
-                    this.departments = res.data
-                    this.departmentNum = res.total
-                    this.departmentNameMap = new Map(this.departments.map(c => [c.id, c.name]))
-                    this.departmentMap = new Map(this.departments.map(c => [c.id, c]))
+                if (res.code == 200) {
+                    this.departments = res.data.list
+                    this.departmentNum = res.data.total
                     return 200
                 }
-                if (res.meta.code == 400) {
+                if (res.code == 400) {
                     this.departments = res.data
                     this.departmentNum = res.total
-                    this.departmentNameMap = new Map(this.departments.map(c => [c.id, c.name]))
-                    this.departmentMap = new Map(this.departments.map(c => [c.id, c]))
                     return 400
                 }
             }).catch(error => {
@@ -154,9 +127,9 @@ export const useAcademicStore = defineStore('academic', {
         },
         getDepartments(param) {
             return getDepartmentListApi(param).then(res => {
-                if (res.meta.code == 200) {
+                if (res.code == 200) {
                     this.departmentNum = res.data.total
-                    this.departments = res.data.departments
+                    this.departments = res.data.list
                     return 200
                 }
             }).catch(error => {
@@ -176,9 +149,10 @@ export const useAcademicStore = defineStore('academic', {
         },
         getClasses(param = { page: 1, size: 5 }) {
             return getClassListApi(param).then(res => {
-                if (res.meta.code == 200) {
+                console.log(res);
+                if (res.code == 200) {
                     this.classNum = res.data.total
-                    this.classes = res.data.classes
+                    this.classes = res.data.list
                     return 200
                 }
             }).catch(error => {
@@ -232,39 +206,31 @@ export const useAcademicStore = defineStore('academic', {
 
         initDepartments() {
             this.getDepartments({ page: 1, size: 5 });
-            this.initDepartmentTypes()
-            this.departmentMap = new Map(this.departments.map(c => [c.id, c]))
-            this.departmentNameMap = new Map(this.departments.map(c => [c.id, c.name]))
         },
-        AddDepartment(value) {
-
-            this.departments.push(value)
-            this.departmentMap = new Map(this.departments.map(c => [c.id, c]))
-            this.departmentNameMap = new Map(this.departments.map(c => [c.id, c.name]))
-        },
-
-        EditDepartment(obj) {
-            if (obj) {
-                for (const key of Object.keys(obj)) {
-                    if (key == "id") continue
-                    EditArray(this.departments, key, obj[key], obj.id)
+        AddDepartment(data) {
+           return addDepartmentApi(data).then(res=>{
+                if(res){
+                    if(res.code === 200){
+                        return 200
+                    }
                 }
-            }
-            else {
-                return false
-            }
-            this.departmentMap = new Map(this.departments.map(c => [c.id, c]))
-            this.departmentNameMap = new Map(this.departments.map(c => [c.id, c.name]))
-            return true
+            })
+
         },
 
-        initDepartmentTypes() {
-            this.departmentTypes = initialDepartmentTypes;
-            this.departmentTypeMap = new Map(this.departmentTypes.map(c => [c.id, c]))
+        EditDepartment(id,data) {
+            return editDepartmentApi(id,data).then(res=>{
+             if(res){
+                    if(res.code === 200){
+                        return 200
+                    }
+                }
+            })
         },
+
+    
         AddDepartmentType(value) {
             this.departmentTypes.push(value)
-            this.departmentTypeMap = new Map(this.departmentTypes.map(c => [c.id, c]))
         },
 
         EditDepartmentType(obj) {
@@ -277,19 +243,14 @@ export const useAcademicStore = defineStore('academic', {
             else {
                 return false
             }
-            this.departmentTypeMap = new Map(this.departmentTypes.map(c => [c.id, c]))
             return true
         },
         initMajors() {
             this.getMajors({ page: 1, size: 5 })
-            this.majorNameMap = new Map(this.majors.map(c => [c.id, c.name]))
-            this.majorMap = new Map(this.majors.map(c => [c.id, c]))
         },
         AddMajor(value) {
             this.majors.push(value)
-            this.majorNameMap = new Map(this.majors.map(c => [c.id, c.name]))
-            this.majorMap = new Map(this.majors.map(c => [c.id, c]))
-        },
+         },
 
         EditMajor(obj) {
             if (obj) {
@@ -301,18 +262,14 @@ export const useAcademicStore = defineStore('academic', {
             else {
                 return false
             }
-            this.majorNameMap = new Map(this.majors.map(c => [c.id, c.name]))
-            this.majorMap = new Map(this.majors.map(c => [c.id, c]))
-            return true
+               return true
         },
 
         initSpecializations() {
             this.specializations = iniitialSpecializations;
-            this.specializationNameMap = new Map(this.specializations.map(c => [c.id, c.name]))
         },
         AddSpecialization(value) {
             this.specializations.push(value)
-            this.specializationNameMap = new Map(this.specializations.map(c => [c.id, c.name]))
         },
 
         Editspecialization(obj) {
@@ -325,19 +282,14 @@ export const useAcademicStore = defineStore('academic', {
             else {
                 return false
             }
-            this.specializationNameMap = new Map(this.specializations.map(c => [c.id, c.name]))
             return true
         },
         initEducationalLevels() {
             this.educationalLevels = initialEducationalLevels;
-            this.educationalLevelNameMap = new Map(this.educationalLevels.map(c => [c.id, c.name]))
-            this.educationalLevelMap = new Map(this.educationalLevels.map(c => [c.id, c]))
-        },
+         },
         AddEducationalLevel(value) {
             this.educationalLevels.push(value)
-            this.educationalLevelNameMap = new Map(this.educationalLevels.map(c => [c.id, c.name]))
-            this.educationalLevelMap = new Map(this.educationalLevels.map(c => [c.id, c]))
-        },
+         },
 
 
         EditEducationalLevel(obj) {
@@ -346,9 +298,7 @@ export const useAcademicStore = defineStore('academic', {
                     if (key == "id") continue
                     EditArray(this.educationalLevels, key, obj[key], obj.id)
                 }
-                this.educationalLevelNameMap = new Map(this.educationalLevels.map(c => [c.id, c.name]))
-                this.educationalLevelMap = new Map(this.educationalLevels.map(c => [c.id, c]))
-            }
+             }
             else {
                 return false
             }
@@ -362,7 +312,6 @@ export const useAcademicStore = defineStore('academic', {
         },
         AddGrade(value) {
             this.grades.push(value)
-            this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
         },
 
         EditGrade(obj) {
@@ -375,17 +324,14 @@ export const useAcademicStore = defineStore('academic', {
             else {
                 return false
             }
-            this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
             return true
         },
 
         initSemesters() {
             this.getSemesters()
-            this.semesterNameMap = new Map(this.semesters.map(c => [c.id, c.name]))
         },
         AddSemester(value) {
             this.semesters.push(value)
-            this.semesterNameMap = new Map(this.semesters.map(c => [c.id, c.name]))
         },
 
         EditSemester(obj) {
@@ -398,7 +344,6 @@ export const useAcademicStore = defineStore('academic', {
             else {
                 return false
             }
-            this.gradeNameMap = new Map(this.grades.map(c => [c.id, c.name]))
             return true
         },
 
@@ -411,40 +356,34 @@ export const useAcademicStore = defineStore('academic', {
             useLocationStore().initCampuses()
             this.initDepartments()
             this.initEducationalLevels()
-
-
-
-
-            this.classes = initialClassses;
-            this.classNameMap = new Map(this.classes.map(c => [c.id, c.name]))
-            this.classMap = new Map(this.classes.map(c => [c.id, c]))
         },
         AddClass(value) {
-            this.classes.push(value)
-            this.classNameMap = new Map(this.classes.map(c => [c.id, c.name]))
-            this.classMap = new Map(this.classes.map(c => [c.id, c]))
-        },
-
-        EditClass(obj, oldId) {
-            if (obj) {
-                for (const key of Object.keys(obj)) {
-                    if (key == "id") {
-                        if (obj.id != oldId) {
-                            this.classes.filter((c) => {
-                                return c.id == oldId
-                            })[0].id = obj.id
-                            continue
-                        }
-                        continue
+            console.log(value);
+            return addClassListApi(value).then(res => {
+                if (res) {
+                    if (res.code === 200) {
+                        this.classes = res.data
+                        return 200
                     }
-                    EditArray(this.classes, key, obj[key], obj.id)
                 }
             }
-            else {
-                return false
+            ).catch(error => {
+                return error.message
+            })
+        },
+
+        EditClass(id, data) {
+            console.log(data);
+            return addClassListApi(id, data).then(res => {
+                if (res) {
+                    if (res.code === 200) {
+                        return 200
+                    }
+                }
             }
-            this.classNameMap = new Map(this.classes.map(c => [c.id, c.name]))
-            this.classMap = new Map(this.classes.map(c => [c.id, c]))
+            ).catch(error => {
+                return error.message
+            })
             return true
         },
 
@@ -457,15 +396,9 @@ export const useAcademicStore = defineStore('academic', {
             this.courseCategories = initialCourseCategories
             this.courseNatures = initialCourseNatures
             this.courseTypes = initialCourseTypes
-            this.courseNameMap = new Map(this.courses.map(c => [c.id, c.name]))
-            this.courseAttributeNameMap = new Map(this.courseAttributes.map(c => [c.id, c.name]))
-            this.courseCategoryNameMap = new Map(this.courseCategories.map(c => [c.id, c.name]))
-            this.courseNatureNameMap = new Map(this.courseNatures.map(c => [c.id, c.name]))
-            this.courseTypeNameMap = new Map(this.courseTypes.map(c => [c.id, c.name]))
-        },
+          },
         AddCourse(value) {
             this.courses.push(value)
-            this.courseNameMap = new Map(this.courses.map(c => [c.id, c.name]))
         },
 
         EditCourse(obj) {
@@ -478,7 +411,6 @@ export const useAcademicStore = defineStore('academic', {
             else {
                 return false
             }
-            this.courseNameMap = new Map(this.courses.map(c => [c.id, c.name]))
             return true
         },
 

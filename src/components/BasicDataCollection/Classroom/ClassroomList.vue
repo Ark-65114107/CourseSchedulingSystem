@@ -80,20 +80,17 @@
       <el-table-column prop="code" label="教室编号" min-width="155px" />
       <el-table-column prop="name" label="教室名称" min-width="155px" />
       <el-table-column
-        prop="campusId"
-        :formatter="campusFormatter"
+        prop="campus"
         label="所属校区"
         min-width="155px"
       />
       <el-table-column
-        prop="teachingbuildingId"
-        :formatter="teachbuildingFormatter"
+        prop="teachingbuilding"
         label="教学楼"
         min-width="100px"
       />
       <el-table-column
-        prop="typeId"
-        :formatter="typeIdFormatter"
+        prop="type"
         label="教室类型"
         min-width="100px"
       />
@@ -257,13 +254,6 @@ export default {
       }),
     });
 
-    // .value.map((c) => ({
-    //     ...c,
-    //     campus: locationStore.campusMap.get(c.campusId),
-    //     type: locationStore.classroomTypeMap.get(c.typeId),
-    //     teachingbuilding:locationStore.teachingbuildingMap.get(c.teachingbuildingId)
-    //   })),
-
     const HandleSelectChange = (value) => {
       data.deleteValue = value;
       if (value.length === 0) {
@@ -331,19 +321,6 @@ export default {
       return row.isAvailable ? "是" : "否";
     };
 
-    const departmentFormatter = (row) => {
-      return academicStore.departmentNameMap.get(row.departmentId);
-    };
-
-    const campusFormatter = (row) => {
-      return locationStore.campusNameMap.get(row.campusId);
-    };
-    const teachbuildingFormatter = (row) => {
-      return locationStore.teachingbuildingNameMap.get(row.teachingbuildingId);
-    };
-    const typeIdFormatter = (row) => {
-      return locationStore.classroomTypeNameMap.get(row.typeId);
-    };
 
     return {
       ...toRefs(data),
@@ -364,10 +341,6 @@ export default {
       assignedToYesNo,
       airconditionerToYesNo,
       availableToYesNo,
-      departmentFormatter,
-      campusFormatter,
-      teachbuildingFormatter,
-      typeIdFormatter,
       HandlePageChange,
       HandleSizeChange,
       locationStore,

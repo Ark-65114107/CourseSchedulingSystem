@@ -14,17 +14,24 @@
       <el-text class="filterLabel">院系:</el-text>
       <el-select
         v-model="faculty"
-        placeholder="搜索院系"
+        placeholder="选择院系"
         class="filterSelector"
         value-key="id"
-        filterable
+        @visible-change="HandleFaculty"
       >
-        <el-option label="全部" value="*" />
-        <el-option
-          v-for="faculty of faculties"
-          :label="faculty.name"
-          :value="faculty"
-        />
+        <div
+          v-infinite-scroll="getFaculty"
+          :infinite-scroll-delay="1000"
+          :infinite-scroll-immediate="false"
+          style="overflow: hide"
+        >
+          <el-option label="全部" value="*" />
+          <el-option
+            v-for="faculty of faculties"
+            :label="faculty.name"
+            :value="faculty"
+          />
+        </div>
       </el-select>
       <el-text class="filterLabel">专业:</el-text>
       <el-select
@@ -49,29 +56,13 @@
       ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="50" />
+      <el-table-column prop="faculty" label="所属院系" min-width="100px" />
+      <el-table-column prop="admissionYear" label="年级" min-width="100px" />
+      <el-table-column prop="className" label="班级名称" min-width="120px" />
+      <el-table-column prop="lengthOfSchooling" label="学制" min-width="60px" />
       <el-table-column
-        prop="facultyId"
-        :formatter="facultyFormatter"
-        label="所属院系"
-        min-width="100px"
-      />
-      <el-table-column
-        prop="gradeId"
-        label="年级"
-        :formatter="gradeIdFormatter"
-        min-width="100px"
-      />
-      <el-table-column prop="name" label="班级名称" min-width="120px" />
-      <el-table-column
-        prop="gradeId"
-        label="学制"
-        :formatter="durationFormatter"
-        min-width="50px"
-      />
-      <el-table-column
-        prop="gradeId"
+        prop="educationLevel"
         label="培养层次"
-        :formatter="educationalLevelFormatter"
         min-width="80px"
       />
 
@@ -81,7 +72,7 @@
         :formatter="isGraduatedFormatter"
         min-width="90px"
       />
-      <el-table-column prop="size" label="班级人数" min-width="100px" />
+      <el-table-column prop="memberCount" label="班级人数" min-width="100px" />
 
       <el-table-column prop="majorName" label="专业" min-width="100px" />
 
@@ -95,7 +86,7 @@
           <el-button type="primary" @click="HandleEditClick(scope.row)"
             >编辑</el-button
           >
-          <el-button type="danger" @click="HandleSingleDelete(scope.row)"
+          <el-button type="danger" @click="HandleDelete([scope.row])"
             >删除</el-button
           >
         </div>
@@ -107,7 +98,7 @@
       v-model:current-page="pageInfo.page"
       v-model:page-size="pageInfo.size"
       layout=" prev, pager, next,sizes,jumper,total"
-      style="margin: 10px 20px 0px 20px;"
+      style="margin: 10px 20px 0px 20px"
       :total="academicStore.classNum"
       :size="pageInfo.size"
       :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
@@ -121,13 +112,15 @@
 
 <script>
 import bus from "@/bus/bus.js";
-import { computed, reactive, toRefs, ref } from "vue";
+import { computed, reactive, toRefs, ref, onMounted } from "vue";
 import ClassEditDialog from "./ClassEditDialog.vue";
 import { storeToRefs } from "pinia";
 import { useAcademicStore } from "@/store/academicStore";
 import ClassInfoDrawerVue from "./ClassInfoDrawer.vue";
 import { Search } from "@element-plus/icons-vue";
-
+import { deleteClassApi } from "@/api/basicData/class.api.js";
+import { getDepartmentListApi } from "@/api/basicData/departments.api.js";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   name: "ClassList",
@@ -151,6 +144,14 @@ export default {
     });
 
     const faculty = ref("*");
+    const faculties = ref([]);
+    const facultyPageInfo = reactive({
+      page: 0,
+      size: 10,
+      total: 0,
+    });
+
+    const majors = ref([]);
     const major = ref("*");
 
     const filtedArray = computed(() => {
@@ -162,6 +163,28 @@ export default {
         });
       }
     });
+
+    onMounted(() => {
+      updateClassList(1, 5);
+      getFaculty()
+      bus.on("updateClassList", (isInitPage) => {
+        if (isInitPage) {
+          updateClassList(1, 5);
+        } else {
+          updateClassList(data.pageInfo.page, data.pageInfo.size);
+        }
+      });
+    });
+
+    const updateClassList = (page, size) => {
+      data.isLoading = true;
+      academicStore.getClasses({ page, size }).then((res) => {
+        if (res === 200) {
+          data.isLoading = false;
+          tableRef.value.scrollTo(0, 0);
+        }
+      });
+    };
 
     const HandleSelectChange = (value) => {
       data.deleteValue = value;
@@ -217,29 +240,47 @@ export default {
       return row.isExpanding ? "是" : "否";
     };
     const isGraduatedFormatter = (row) => {
-      return { ...academicStore.gradeMap.get(row.gradeId), isGraduated: 0 }
-        .isGraduated
-        ? "是"
-        : "否";
+      return row.isGraduated ? "是" : "否";
     };
-    const facultyIdFormatter = (row) => {
-      return academicStore.departmentNameMap.get(row.facultyId);
+
+    const HandleDelete = (data) => {
+      ElMessageBox.confirm("确认删除吗?", "警告", {
+        confirmButtonText: "确认",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(() => {
+        deleteClass(data.map((c) => c.id));
+      });
     };
-    const gradeIdFormatter = (row) => {
-      return academicStore.gradeNameMap.get(row.gradeId);
+
+    const deleteClass = (classList) => {
+      deleteClassApi(classList).then((res) => {
+        if (res) {
+          if (res.code == 200) {
+            updateClassList(1, data.pageInfo.size);
+            ElMessage.success("操作成功!");
+          }
+        }
+      });
     };
-    const durationFormatter = (row) => {
-      return { ...academicStore.gradeMap.get(row.gradeId), duration: "" }
-        .duration;
-    };
-    const educationalLevelFormatter = (row) => {
-      return academicStore.educationalLevelNameMap.get(
-        { ...academicStore.gradeMap.get(row.gradeId), educationalLevelId: "" }
-          .educationalLevelId
-      );
-    };
-    const facultyFormatter = (row) => {
-      return academicStore.departmentNameMap.get(row.facultyId);
+
+    const getFaculty = () => {
+      if (
+        facultyPageInfo.page == 0 ||
+        facultyPageInfo.page * facultyPageInfo.size < facultyPageInfo.total
+      ) {
+        facultyPageInfo.page++;
+        getDepartmentListApi({ page: facultyPageInfo.page, size: 10 }).then(
+          (res) => {
+            if (res) {
+              if (res.meta.code === 200) {
+                faculties.value = [...faculties.value, ...res.data.departments];
+                facultyPageInfo.total = res.data.total;
+              }
+            }
+          }
+        );
+      }
     };
 
     return {
@@ -253,16 +294,15 @@ export default {
       filtedArray,
       isExpandingFormatter,
       isGraduatedFormatter,
-      facultyIdFormatter,
-      gradeIdFormatter,
-      durationFormatter,
-      educationalLevelFormatter,
-      facultyFormatter,
       tableRef,
       HandlePageChange,
       HandleSizeChange,
       academicStore,
-      Search
+      Search,
+
+      HandleDelete,
+      getFaculty,
+      faculties
     };
   },
 };

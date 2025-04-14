@@ -1,8 +1,9 @@
+import fakeRequest from "@/utils/fakeRequest"
 import request from "@/utils/request"
 
 //获取校区列表数据
 export const getCampusListApi = (parm)=>{
-    return request({
+    return fakeRequest({
         url:"/campuses/list",
         method:"get",
         params:parm,
@@ -12,7 +13,7 @@ export const getCampusListApi = (parm)=>{
 
 //获取单个校区数据
 export const getCampusByQueryApi = (parm)=>{
-    return request({
+    return fakeRequest({
         url:"/campuses/search",
         method:"post",
         data:parm,
@@ -22,7 +23,7 @@ export const getCampusByQueryApi = (parm)=>{
 
 //添加校区数据
 export const addCampusApi = (parm)=>{
-    return request({
+    return fakeRequest({
         url:"/campuses/create",
         method:"post",
         data:parm,
@@ -32,8 +33,8 @@ export const addCampusApi = (parm)=>{
 
 //修改校区数据
 export const updateCampusApi = (parm)=>{
-    return request({
-        url:"/campuses/update",
+    return fakeRequest({
+        url:"/campuses",
         method:"post",
         data:parm
     }).catch(()=>{})
@@ -41,8 +42,8 @@ export const updateCampusApi = (parm)=>{
 
 //删除校区数据
 export const deleteCampusApi = (parm)=>{
-    return request({
-        url:"/campuses/delete",
+    return fakeRequest({
+        url:"/campuses",
         method:"post",
         data:parm
     }).catch(()=>{})

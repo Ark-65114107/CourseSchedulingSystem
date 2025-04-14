@@ -1,4 +1,5 @@
 import request from "@/utils/request"
+import axios from "axios"
 
 //发送登录请求
 export const userLogin = (param)=>{
@@ -14,7 +15,8 @@ export const userRegister = (param)=>{
     })
 }   
 export const getUserInfo = ()=>{
-    return request.get('getUserInfo')
+    // return request.get('getUserInfo')
+    return axios.get("")
 }
 
 export const getNavs = ()=>{

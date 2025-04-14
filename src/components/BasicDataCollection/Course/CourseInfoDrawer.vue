@@ -11,22 +11,6 @@
           data[1]
         }}</el-descriptions-item>
       </template>
-      <!-- <el-descriptions-item  label="课程名称" width="100px" >{{datas.name}}</el-descriptions-item>
-        <el-descriptions-item  label="英文名" width="100px">{{datas.ename}}</el-descriptions-item>
-        <el-descriptions-item label="课程类别" width="100px">{{academicStore.courseCategoryNameMap.get(datas.courseCategoryId)}}</el-descriptions-item>
-        <el-descriptions-item label="课程属性" width="100px">{{academicStore.courseAttributeNameMap.get(datas.courseAttributeId)}}</el-descriptions-item>
-        <el-descriptions-item label="课程类型" width="100px">{{academicStore.courseTypeNameMap.get(datas.courseTypeId)}}</el-descriptions-item>
-        <el-descriptions-item label="课程性质" width="100px">{{academicStore.courseNatureNameMap.get(datas.courseNatureId)}}</el-descriptions-item>
-        <el-descriptions-item label="开课院系" width="100px">{{academicStore.departmentNameMap.get(datas.facultyId)}}</el-descriptions-item>
-        <el-descriptions-item label="是否启用" width="100px">{{boolToYesNo(datas.isEnabled)}}</el-descriptions-item>
-        <el-descriptions-item label="总学时" width="100px">{{datas.totalClassHours}}</el-descriptions-item>
-        <el-descriptions-item label="实验学时" width="100px">{{datas.laboratoryHours}}</el-descriptions-item>
-        <el-descriptions-item label="上机学时" width="100px">{{datas.computerLabHours}}</el-descriptions-item>
-        <el-descriptions-item label="实践学时" width="100px">{{datas.practicalHours}}</el-descriptions-item>
-        <el-descriptions-item label="其它学时" width="100px">{{datas.otherHours}}</el-descriptions-item>
-        <el-descriptions-item label="周学时" width="100px">{{datas.weeklyClassHours}}</el-descriptions-item>
-        <el-descriptions-item label="学分" width="100px">{{datas.credits}}</el-descriptions-item>
-        <el-descriptions-item label="是否纯实践环节" width="100px">{{datas.}}</el-descriptions-item> -->
     </el-descriptions>
   </el-drawer>
 </template>
@@ -53,7 +37,7 @@ export default {
           return d[0] != "id";
         });
         datas.value.forEach((d) => {
-          if (d[0] == "courseCategoryId") {
+          if (d[0] == "courseCategory") {
             d[1] = academicStore.courseCategoryNameMap.get(d[1]);
           }
           if (d[0] == "courseAttributeId") {

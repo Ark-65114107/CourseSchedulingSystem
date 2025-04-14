@@ -5,20 +5,29 @@ import { defineStore } from "pinia";
 export const useScheduleStore = defineStore('schedule', {
     state: () => ({
         tasks: [],
-        taskNum: 0
+        taskNum: 1
     }),
     getters: {},
     actions: {
         getTask(parm = { page: 1, size: 5 }) {
-            return getTaskListApi(parm).then(response => {
-                if (response.meta.code === 200) {
-                    this.taskNum = response.total
-                    this.tasks = response.data
-                    return 200
-                }
-            }).catch(error => {
-                return error
-            })
+            this.tasks = [{
+                id: "dsfdffelpsycongrooghngfh",
+                name: "2024上半学期",
+                semester: "2024-2025-1",
+                creater: "admin",
+                createTime: "2025-3-8-14:10:56",
+                isEnabled: false,
+              },
+            ]
+            // return getTaskListApi(parm).then(response => {
+            //     if (response.meta.code === 200) {
+            //         this.taskNum = response.total
+            //         this.tasks = response.data
+            //         return 200
+            //     }
+            // }).catch(error => {
+            //     return error
+            // })
         },
         getTaskByQuery(keyword, page = 1, size = 5) {
             return getTaskByQueryApi({ keyword, page, size }).then(res => {

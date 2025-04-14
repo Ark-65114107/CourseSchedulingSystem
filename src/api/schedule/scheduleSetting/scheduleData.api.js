@@ -1,7 +1,7 @@
-import request from "@/utils/request"
+import fakeRequest from "@/utils/fakeRequest"
 
 export const getScheduleSettingStructApi = (taskId)=>{
-    return request({
+    return fakeRequest({
         url:"/task/getScheduleSettingStruct",
         method:"get",
         params:{
@@ -11,7 +11,7 @@ export const getScheduleSettingStructApi = (taskId)=>{
 }
 
 export const updateScheduleSettingStructApi = (taskId,period,cellIndex,type)=>{
-    return request({
+    return fakeRequest({
         url:"/task/updateScheduleSettingStructApi",
         method:"post",
         data:{

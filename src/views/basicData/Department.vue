@@ -14,7 +14,6 @@ export default {
   setup() {
     onBeforeMount(() => {
       useAcademicStore().initDepartments();
-      useAcademicStore().initDepartmentTypes();
     });
   },
 };

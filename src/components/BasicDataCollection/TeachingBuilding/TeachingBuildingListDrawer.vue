@@ -16,16 +16,16 @@
         >
       </div>
       <el-table
-        :data="teachingBuildingsOfcampus"
+        :data="buildings"
         :row-style="rowStyle"
         @selection-change="HandleSelectChange"
       >
         <el-table-column type="selection" :selectable="selectable" width="55" />
-        <el-table-column prop="code" label="教学楼编号" />
-        <el-table-column prop="name" label="教学楼名称" />
-        <el-table-column prop="campus.name" label="所属校区" />
+        <el-table-column prop="buildingId" label="教学楼编号" />
+        <el-table-column prop="buildingName" label="教学楼名称" />
+        <el-table-column prop="campus" label="所属校区" />
         <el-table-column
-          prop="isAvailable"
+          prop="enabled"
           label="是否可用"
           :formatter="isAvailable"
         />
@@ -51,11 +51,12 @@ import TeachingBuildingEditDialog from "./TeachingBuildingEditDialog.vue";
 
 import bus from "@/bus/bus.js";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, reactive, toRefs } from "vue";
+import { computed, onMounted, reactive, ref, toRefs } from "vue";
 import { ElMessageBox } from "element-plus";
 import { useLocationStore } from "@/store/locationStore/index.js";
 
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
+import { getAllTeachingBuildingApi } from '@/api/basicData/teachingbuilding.api';
 
 export default {
   name: "TeachingBuildingListDrawer",
@@ -70,8 +71,24 @@ export default {
       bus.on("showTeachingBuildingListDrawer", (value) => {
         data.campusId = value.id;
         data.isDrawerVisible = true; //打开抽屉
+        getBuildings(value.name)
       });
     });
+
+    const buildings = ref([])
+
+    const getBuildings = (name)=>{
+      getAllTeachingBuildingApi().then(res=>{
+        console.log(res);
+        if(res){
+          if(res.code == 200){
+            buildings.value = res.data.filter(b=>{
+              return b.campus == name
+            })
+          }
+        }
+      })
+    }
 
     const data = reactive({
       isDeleteShow: false,
@@ -157,6 +174,7 @@ export default {
       rowStyle,
       isAvailable,
       teachingBuildingsOfcampus,
+      buildings
     };
   },
 };

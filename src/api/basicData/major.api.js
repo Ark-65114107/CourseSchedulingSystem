@@ -7,7 +7,6 @@ export const getMajorListApi = (param)=>{
         method:"get",
         params:param,
         isAbort:true
-
     }).catch(()=>{})
 }
 

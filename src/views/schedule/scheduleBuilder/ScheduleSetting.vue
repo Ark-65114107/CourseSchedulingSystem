@@ -233,7 +233,7 @@
         class="scheduleTable"
         :data="scheduleData"
         :border="true"
-        max-height="400px"
+        max-height="450px"
         :span-method="tableSpan"
         :cell-style="setCellColor"
         @cell-mouse-enter="HandleEnterHover"
@@ -317,7 +317,7 @@ export default {
     const isLoading = ref(false);
     const scheduleConditions = reactive({
       data: {
-        maxWeek:18,//最大周次
+        maxWeek: 18, //最大周次
         courseDuration: 0, //课程时长
         breakDuration: 0, //课间时长
         morningPeriods: 3, //上午节次
@@ -499,10 +499,7 @@ export default {
 
     const updateMaxWeekChange = () => {
       //更新最大周次
-      updateMaxWeekApi(
-        taskId,
-        scheduleConditions.data.maxWeek
-      ).then((res) => {
+      updateMaxWeekApi(taskId, scheduleConditions.data.maxWeek).then((res) => {
         if (res) {
           if (res.meta.code == 200) {
             getScheduleRoutine();
@@ -604,12 +601,14 @@ export default {
       });
     };
 
-    const getScheduleSettingStruct = () => {
+    const getScheduleSettingStruct = (isUpdate) => {
       isLoading.value = true;
       getScheduleSettingStructApi(taskId).then((res) => {
         if (res) {
           if (res.meta.code == 200) {
-            scheduleData.value = res.data;
+            if (!isUpdate) {
+              scheduleData.value = res.data;
+            }
             scheduleData.value = setListRowspan(scheduleData.value);
             isLoading.value = false;
           }
@@ -619,15 +618,18 @@ export default {
 
     const updateScheduleSettingStruct = (period, cellIndex, type) => {
       console.log(taskId, period, cellIndex, type);
-      updateScheduleSettingStructApi(taskId, period, cellIndex, type).then(
-        (res) => {
-          if (res) {
-            if (res.meta.code == 200) {
-              getScheduleSettingStruct();
-            }
-          }
-        }
-      );
+      setTimeout(() => {
+        getScheduleSettingStruct(true);
+      }, Math.random() * 800);
+      // updateScheduleSettingStructApi(taskId, period, cellIndex, type).then(
+      //   (res) => {
+      //     if (res) {
+      //       if (res.meta.code == 200) {
+      //         getScheduleSettingStruct();
+      //       }
+      //     }
+      //   }
+      // );
     };
 
     const periodsFormatter = (input) => {
@@ -693,13 +695,13 @@ export default {
           scheduleData.value[cell.rowIndex].cellList[cell.columnIndex - 2].type
         ) {
           case 3:
-            return { background: "#ffd479" };
+            return { background: "#ffd479",height:"60px"};
           case 2:
-            return { background: "#add8ff" };
+            return { background: "#add8ff",height:"60px" };
           case 1:
-            return { background: "#fdffbf" };
+            return { background: "#fdffbf",height:"60px" };
           case 4:
-            return { background: "#0065bd" };
+            return { background: "#0065bd",height:"60px"};
           default:
             return "";
         }

@@ -1,12 +1,11 @@
 <template>
   <div class="List">
     <div class="buttonMenu">
-      
       <el-button type="primary" @click="HandleAddClick">添加</el-button>
       <el-button type="danger" v-show="isDeleteShow" @click="HandleArrayDelete"
         >删除选中</el-button
       >
-      <el-input v-model="keyWord" :prefix-icon="Search"/>
+      <el-input v-model="keyWord" :prefix-icon="Search" />
       <el-button type="" @click="">搜索</el-button>
     </div>
 
@@ -15,13 +14,14 @@
       :row-style="rowStyle"
       @selection-change="HandleSelectChange"
       height="400"
+      v-loading="isTableLoading"
     >
       <el-table-column type="selection" :selectable="selectable" width="40" />
       <el-table-column prop="username" label="账户名" min-width="155px" />
 
       <el-table-column
         label="角色"
-        prop="roleId"
+        prop="role"
         v-slot="scope"
         min-width="220px"
         fixed="right"
@@ -35,7 +35,12 @@
         min-width="220px"
         fixed="right"
       >
-      <el-switch />
+        <el-switch
+          v-model="scope.row.enabled"
+          @change="
+            HandleUserStatusChange(scope.row.username, scope.row.enabled)
+          "
+        />
       </el-table-column>
 
       <el-table-column
@@ -54,7 +59,7 @@
         </div>
       </el-table-column>
     </el-table>
-    <el-pagination :total="100"  background/>
+    <el-pagination :total="100" background />
   </div>
   <accountEditDialog />
 </template>
@@ -62,12 +67,13 @@
 <script>
 import bus from "@/bus/bus.js";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, onMounted, reactive, toRefs } from "vue";
-import { ElMessageBox, imageProps } from "element-plus";
+import { computed, onBeforeMount, onMounted, reactive, ref, toRefs } from "vue";
+import { ElMessage, ElMessageBox, imageProps } from "element-plus";
 import { ArrayDelete, SingleDelete } from "@/hooks/list/useDelete.js";
-import { useUserManageStore } from "@/store/userManageStore/index.js"
+import { useUserManageStore } from "@/store/userManageStore/index.js";
 import accountEditDialog from "./accountEditDialog.vue";
-import { Search } from "@element-plus/icons-vue"
+import { Search } from "@element-plus/icons-vue";
+import { updateUserStatus } from "@/api/user/userManage.api";
 
 export default {
   name: "AccountList",
@@ -79,11 +85,12 @@ export default {
     const data = reactive({
       isDeleteShow: false,
       deleteValue: [],
-      keyWord:""
+      keyWord: "",
     });
+    const isTableLoading = ref(false);
 
     onMounted(() => {
-      userManageStore.getUsers(1,1)
+      userManageStore.getUsers(1, 1);
     });
 
     const HandleSelectChange = (value) => {
@@ -137,6 +144,31 @@ export default {
         });
     };
 
+    const HandleUserStatusChange = (username, enabled) => {
+      isTableLoading.value = true;
+      updateUserStatus(username, enabled)
+        .then((res) => {
+          console.log(res);
+          if (res) {
+            if (res.code == 200) {
+              ElMessage.success("状态更新成功!");
+              userManageStore.getUsers(1, 1).then((res) => {
+                isTableLoading.value = false;
+              });
+            } else {
+              if (res.code == 500) {
+                ElMessage.error(res.msg);
+              }
+            }
+          }
+        })
+        .finally(() => {
+          userManageStore.getUsers(1, 1).then((res) => {
+            isTableLoading.value = false;
+          });
+        });
+    };
+
     return {
       ...toRefs(data),
       HandleArrayDelete,
@@ -146,7 +178,9 @@ export default {
       HandleEditClick,
       rowStyle,
       userManageStore,
-      Search
+      Search,
+      HandleUserStatusChange,
+      isTableLoading,
     };
   },
 };
@@ -167,7 +201,7 @@ export default {
   flex-wrap: nowrap;
 }
 
-.buttonMenu .el-input{
+.buttonMenu .el-input {
   width: 250px;
   margin: 0px 10px;
 }
@@ -199,7 +233,7 @@ tbody td .cell .RowButtons {
   margin-left: 20px;
 }
 
-.el-pagination{
+.el-pagination {
   margin: 10px 20px 0px 20px;
 }
 </style>

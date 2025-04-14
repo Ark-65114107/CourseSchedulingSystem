@@ -6,45 +6,73 @@
         <el-select
           class="filterSelect"
           v-model="facultyKeyword"
+          size="small"
           remote
           filterable
           :remote-method="searchFaculty"
           :loading="isFacultyLoading"
           @change="HandleFacultyChange"
+          @visible-change="facultyDropDownVisable"
+          :empty-values="[null]"
+          :value-on-clear="null"
+          ref="facultySelectRef"
         >
-          <el-scrollbar height="400px">
-            <el-option
-              v-for="option of faculty"
-              :label="option.name"
-              :value="option.id"
-              :key="id"
-            />
-          </el-scrollbar>
+          <el-option
+            v-for="option of faculty"
+            :label="option.name"
+            :value="option.id"
+            :key="option.id"
+          />
         </el-select>
       </div>
       <div class="filterItem">
         <el-text class="filterTitle">专业:</el-text>
         <el-select
+          size="small"
           class="filterSelect"
           v-model="majorKeyword"
           filterable
           remote
-          :remote-method="searchMajor"
+          :remote-method="
+            (keyword) => {
+              searchMajor(keyword, true);
+            }
+          "
           :loading="isMajorLoading"
+          @visible-change="majorDropDownVisable"
+          ref="majorSelectRef"
+          :empty-values="[null]"
+          :value-on-clear="null"
         >
-          <el-scrollbar height="400px">
+          <div
+            v-infinite-scroll="
+              () => {
+                searchMajor(undefined, false);
+              }
+            "
+            :infinite-scroll-delay="800"
+            :infinite-scroll-immediate="false"
+            style="overflow: hide"
+          >
             <el-option
               v-for="option of major"
               :label="option.name"
               :value="option.id"
-              :key="id"
+              :key="option.id"
             />
-          </el-scrollbar>
+            <el-option label="加载中..." v-show="!isMajorLoading" disabled />
+          </div>
         </el-select>
       </div>
       <div class="filterItem">
         <el-text class="filterTitle">年级:</el-text>
-        <el-select class="filterSelect" v-model="gradeKeyword">
+        <el-select
+          size="small"
+          class="filterSelect"
+          v-model="gradeKeyword"
+          @visible-change="gradeDropDownVisable"
+          ref="gradeSelectRef"
+        >
           <el-scrollbar height="400px">
             <el-option
               v-for="option of grade"
@@ -99,7 +127,58 @@
           >导出</el-button
         >
         <div class="scheduleContainer">
-          <FullCalendar></FullCalendar>
+          <div class="scheduleTableDiv">
+            <!-- <span> </span> -->
+
+            <el-table
+              class="scheduleTable"
+              :data="scheduleStruct"
+              :key="updateKey"
+              :border="true"
+              max-height="390px"
+              :cell-style="setCellColor"
+              header-cell-class-name="headerCell"
+              v-loading="isTableLoading"
+              :fit="false"
+            >
+              <el-table-column label="节次/周次" prop="periodColumn">
+                <template #default="scope">
+                  <span style="display: flex; justify-content: center"
+                    >第{{ scope.row.period }}节</span
+                  >
+                </template>
+              </el-table-column>
+
+              <el-table-column
+                min-width="150px"
+                v-for="item of tableHeader"
+                :label="item.name"
+              >
+                <template #default="scope">
+                  <div class="cellContainer">
+                    <div
+                      class="cellDiv"
+                      v-for="course of scope.row.cellList[scope.column.no - 1]
+                        .courseList"
+                      v-show="course.isShow"
+                      :style="course.style"
+                      :key="course"
+                    >
+                      <span class="cellText">
+                        <span>{{ course.courseName }}</span
+                        ><br />
+                        <span>{{ course.teacherName }}</span
+                        ><br />
+                        <span>{{ course.weeks }}</span
+                        ><br />
+                        <span>{{ course.periodRange }}</span>
+                      </span>
+                    </div>
+                  </div>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
         </div>
       </div>
     </div>
@@ -113,27 +192,525 @@ import FullCalendar from "@fullcalendar/vue3";
 import { getClassListApi } from "@/api/schedule/addClass/classList.api.js";
 import { useRoute } from "vue-router";
 import router from "@/router";
+import { getMajorListApi } from "@/api/basicData/major.api";
+import { getAllDepartmentApi } from "@/api/basicData/departments.api";
+import { getScheduleDataApi } from "@/api/schedule/scheduleBuild/scheduleData.api";
+import { getScheduleStructApi } from "@/api/schedule/scheduleBuild/scheduleStruct.api";
 
 export default {
   name: "scheduleViewer",
   setup() {
+    const cellWidth = 130;
+    const cellHeight = 70;
+
     const taskId = useRoute().query.id;
 
+    const majorPageInfo = reactive({
+      page: 1,
+      size: 10,
+      total: -1,
+    });
+
+    const tableHeader = [
+      { name: "星期一", prop: "MonData" },
+      { name: "星期二", prop: "TueData" },
+      { name: "星期三", prop: "WedData" },
+      { name: "星期四", prop: "ThuData" },
+      { name: "星期五", prop: "FriData" },
+      { name: "星期六", prop: "SatData" },
+      { name: "星期日", prop: "SunData" },
+    ];
+
+    const currentWeek = ref(-1);
+
+    const currentScheduleData = ref([]);
+    const scheduleStruct = ref([
+      {
+        period: 1,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+        ],
+      },
+      {
+        period: 2,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+        ],
+      },
+      {
+        period: 3,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+        ],
+      },
+      {
+        period: 4,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+        ],
+      },
+      {
+        period: 5,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+        ],
+      },
+      {
+        period: 6,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+        ],
+      },
+      {
+        period: 7,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+        ],
+      },
+      {
+        period: 8,
+        isClassBreak: false,
+        isLunchBreak: false,
+        isAfternoonBreak: false,
+        cellList: [
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: true,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+          {
+            hasCourse: false,
+            isAvailable: false,
+            weeksDataList: [],
+            courseList: [],
+            courseNum: 0,
+          },
+        ],
+      },
+    ]);
+    const scheduleStructTemp = ref();
     const isClassTreeLoading = ref(false);
     const isFacultyLoading = ref(false);
     const isMajorLoading = ref(false);
 
+    const majorSelectRef = ref();
+    const facultySelectRef = ref();
+    const gradeSelectRef = ref();
+
     const filterKeywords = reactive({
       facultyKeyword: "",
       majorKeyword: "",
+      majorKeywordTemp: "",
       gradeKeyword: "",
     });
 
     const filterOptions = reactive({
-      faculty: [],
+      faculty: [
+        {
+          id: "",
+          name: "全部",
+        },
+      ],
       major: [
         {
-          id: "*",
+          id: "",
           name: "全部",
         },
       ],
@@ -210,93 +787,131 @@ export default {
 
     const currentClass = ref({});
 
-    const HandleTreeNodeClick = () => {};
+    onMounted(() => {
+      searchMajor();
+      scheduleStructTemp.value = JSON.stringify(scheduleStruct.value);
+    });
+
+    const HandleTreeNodeClick = (node) => {
+      if (!scheduleStruct.value.length) {
+        getScheduleStruct().then((res) => {
+          if (res === 200) {
+            getScheduleData(node.id);
+            scheduleStructTemp.value = JSON.stringify(scheduleStruct.value);
+          }
+        });
+      } else {
+        getScheduleData(node.id);
+      }
+    };
+
+    const getScheduleData = (classId) => {
+      getScheduleDataApi(taskId, classId)
+        .then((res) => {
+          if (res) {
+            if (res.meta.code === 200) {
+              currentScheduleData.value = res.data;
+            }
+          }
+        })
+        .then(() => {
+          updateScheduleStruct();
+        });
+    };
+
+    const getScheduleStruct = () => {
+      return getScheduleStructApi(taskId).then((res) => {
+        if (res) {
+          console.log(res);
+          if (res.meta.code === 200) {
+            scheduleStruct.value = res.data;
+            console.log(res.data);
+            scheduleStructTemp.value = JSON.stringify(res.data);
+            return 200;
+          }
+        }
+      });
+    };
 
     const HandleFacultyChange = () => {};
 
     const searchFaculty = () => {
       isFacultyLoading.value = true;
-      setTimeout(() => {
-        filterOptions.faculty = [
-          {
-            id: "*",
-            name: "全部",
-          },
-          {
-            id: "jsj",
-            name: "计算机科学与技术学院",
-          },
-          {
-            id: "jx",
-            name: "机械工程学院",
-          },
-          {
-            id: "sl",
-            name: "水利工程学院",
-          },
-          {
-            id: "jz",
-            name: "建筑工程学院",
-          },
-        ];
-        isFacultyLoading.value = false;
-      }, 500);
+      getAllDepartmentApi()
+        .then((res) => {
+          if (res) {
+            if (res.code === 200) {
+              filterOptions.faculty = [{ id: "", name: "全部" }, ...res.data];
+            }
+          }
+        })
+        .finally(() => {
+          isFacultyLoading.value = false;
+        });
     };
 
-    const searchMajor = (keyword) => {
-      isMajorLoading.value = true;
-      setTimeout(() => {
-        let major = [
-          {
-            id: "rgzb",
-            name: "软件工程（中本）",
-          },
-          {
-            id: "wlwjsyy",
-            name: " 物联网技术应用",
-          },
-          {
-            id: "wlwjsyy",
-            name: " 物联网技术应用",
-          },
-          {
-            id: "wlwjsyy",
-            name: " 物联网技术应用",
-          },
-          {
-            id: "wlwjsyy",
-            name: " 物联网技术应用",
-          },
-          {
-            id: "wlwjsyy",
-            name: " 物联网技术应用",
-          },
-          {
-            id: "wlwjsyy",
-            name: " 物联网技术应用",
-          },
-          {
-            id: "wlwjsyy",
-            name: " 物联网技术应用",
-          },
-          {
-            id: "wlwjsyy",
-            name: " 物联网技术应用",
-          },
-          {
-            id: "wlwjsyy",
-            name: " 物联网技术应用",
-          },
-        ];
+    const searchMajor = (keyword, isKeywordChange) => {
+      if (isKeywordChange) {
+        filterKeywords.majorKeywordTemp = keyword;
+        majorPageInfo.page = 1;
+        majorPageInfo.size = 10;
+        majorPageInfo.total = -1;
         filterOptions.major = [
           {
             id: "*",
             name: "全部",
           },
-          ...major,
         ];
-        isMajorLoading.value = false;
-      }, 500);
+      }
+      console.log(filterKeywords.majorKeywordTemp);
+      if (majorPageInfo.total === -1) {
+        isMajorLoading.value = true;
+        getMajorListApi({
+          page: majorPageInfo.page,
+          size: majorPageInfo.size,
+          keyword: filterKeywords.majorKeywordTemp,
+          faculty: filterKeywords.facultyKeyword,
+        })
+          .then((res) => {
+            if (res) {
+              if (res.meta.code === 200) {
+                filterOptions.major = [
+                  ...filterOptions.major,
+                  ...res.data.majors,
+                ];
+                majorPageInfo.total = res.data.total;
+              }
+            }
+          })
+          .finally(() => {
+            isMajorLoading.value = false;
+          });
+      } else {
+        majorPageInfo.page++;
+        if (majorPageInfo.page * majorPageInfo.size < majorPageInfo.total) {
+          isMajorLoading.value = true;
+          getMajorListApi({
+            page: majorPageInfo.page,
+            size: majorPageInfo.size,
+            keyword: filterKeywords.majorKeywordTemp,
+            faculty: filterKeywords.facultyKeyword,
+          })
+            .then((res) => {
+              if (res) {
+                if (res.meta.code === 200) {
+                  filterOptions.major = [
+                    ...filterOptions.major,
+                    ...res.data.majors,
+                  ];
+                  majorPageInfo.total = res.data.total;
+                }
+              }
+            })
+            .finally(() => {
+              isMajorLoading.value = false;
+            });
+        }
+      }
     };
 
     const searchGrade = (keyword) => {
@@ -355,10 +970,161 @@ export default {
       }, 500);
     };
 
+    const majorDropDownVisable = () => {
+      majorSelectRef.value.scrollbarRef.scrollTo(0, 0);
+    };
+    const gradeDropDownVisable = () => {
+      gradeSelectRef.value.scrollbarRef.scrollTo(0, 0);
+    };
+    const faciltyDropDownVisable = () => {
+      facultySelectRef.value.scrollbarRef.scrollTo(0, 0);
+    };
     //=======api=========================
 
     const getFaculty = () => {};
 
+    const setCellColor = ({ row, column, rowIndex, columnIndex }) => {
+      if (columnIndex > 0 && columnIndex < 8) {
+        if (row.cellList[columnIndex - 1].isAvailable) {
+          return {
+            padding: "0px",
+            height: `${cellHeight}px`,
+            width: `${cellWidth}px`,
+          };
+        } else {
+          return {
+            background: "#DCDFE6",
+            padding: "0px",
+            height: `${cellHeight}px`,
+            width: `${cellWidth}px`,
+          };
+        }
+      }
+    };
+
+    const isWeekConflict = (firstWeeks, secondWeeks) => {
+      for (let i = 0; i < firstWeeks.length; i++) {
+        for (let j = 0; j < secondWeeks.length; j++) {
+          if (
+            firstWeeks[i].courseStartWeek <= secondWeeks[j].courseEndWeek &&
+            secondWeeks[j].courseStartWeek <= firstWeeks[i].courseEndWeek
+          ) {
+            return true;
+          }
+        }
+      }
+      return false;
+    };
+
+    const updateScheduleStruct = () => {
+      scheduleStruct.value = JSON.parse(scheduleStructTemp.value);
+      if (currentScheduleData.value.length > 0) {
+        currentScheduleData.value.forEach((cell) => {
+          //遍历教学班数组
+          if (scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]) {
+            if (
+              scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]
+                .isAvailable
+            ) {
+              let teacherName = "";
+              cell.teacherList.forEach((teacher) => {
+                teacherName += `#${teacher.teacherName}`;
+              });
+
+              let weeks = "";
+
+              cell.weeksData.forEach((time) => {
+                weeks += `${time.courseStartWeek}-${time.courseEndWeek}周;`;
+              });
+
+              let periodRange = "";
+
+              if (cell.consecutiveClassPeriods == 1) {
+                periodRange = `第${cell.period}节`;
+              } else {
+                periodRange = `第${cell.period}节-第${
+                  cell.period + cell.consecutiveClassPeriods - 1
+                }节`;
+              }
+
+              let isShow = true;
+              if (currentWeek.value != -1) {
+                if (
+                  !isWeekConflict(
+                    [
+                      {
+                        courseStartWeek: currentWeek.value,
+                        courseEndWeek: currentWeek.value,
+                      },
+                    ],
+                    cell.weeksData
+                  )
+                ) {
+                  isShow = false;
+                }
+              }
+
+              let backgroundcolor;
+              switch (cell.type) {
+                case "lab":
+                  backgroundcolor = "rgb(148.6, 212.3, 117.1)"; //绿色
+                  break;
+                case "seminar":
+                  backgroundcolor = "#ffca77"; //橙色
+                  break;
+                case "exam":
+                  backgroundcolor = "#ff9f9f";
+                  break;
+                default:
+                  backgroundcolor = "rgb(159.5, 206.5, 255)";
+              }
+
+              //更新scheduleStruct
+              scheduleStruct.value[cell.period - 1].cellList[
+                cell.cellIndex
+              ].courseList.push({
+                cellId: cell.cellId,
+                teachingClassId: cell.teachingClassId,
+                courseName: cell.teachingClassName,
+                teacherName,
+                weeks,
+                weeksData: cell.weeksData,
+                consecutiveClassPeriods: cell.consecutiveClassPeriods,
+                periodRange,
+                style: {
+                  height: `${cellHeight * cell.consecutiveClassPeriods}px`,
+                  background: backgroundcolor,
+                },
+                isShow,
+              });
+
+              //添加宽度样式
+              scheduleStruct.value[cell.period - 1].cellList[
+                cell.cellIndex
+              ].courseList.sort(
+                (a, b) => a.consecutiveClassPeriods - b.consecutiveClassPeriods
+              );
+
+              scheduleStruct.value[cell.period - 1].cellList[
+                cell.cellIndex
+              ].courseList.forEach((course) => {
+                course.style.width = `${
+                  cellWidth /
+                  scheduleStruct.value[cell.period - 1].cellList[cell.cellIndex]
+                    .courseNum
+                }px`;
+              });
+            } else {
+              ElMessage.error(
+                `${cell.teachingClassName} 与排课设置冲突! 请修改排课设置后重试！`
+              );
+            }
+          }
+        });
+        // scheduleStruct.value = setListRowspan(scheduleStruct.value);
+        // updateKey.value += 1;
+      }
+    };
     return {
       ...toRefs(filterOptions),
       ...toRefs(filterKeywords),
@@ -374,6 +1140,17 @@ export default {
       isFacultyLoading,
       isMajorLoading,
       HandleFacultyChange,
+      majorPageInfo,
+      majorSelectRef,
+      facultySelectRef,
+      gradeSelectRef,
+      majorDropDownVisable,
+      gradeDropDownVisable,
+      faciltyDropDownVisable,
+      currentScheduleData,
+      scheduleStruct,
+      tableHeader,
+      setCellColor,
     };
   },
 };
@@ -401,7 +1178,6 @@ export default {
 
 .filterItem {
   width: max-content;
-  height: max-content;
   margin: 0px 10px;
   display: flex;
   flex-direction: row;
@@ -428,9 +1204,8 @@ export default {
 }
 
 .mainContainer {
-  height: 100%;
   width: auto;
-  display: flex;
+  display: inline-flex;
   margin: 10px;
   flex-direction: row;
   background: white;
@@ -450,12 +1225,14 @@ export default {
 
 .scheduleViewerContainer {
   width: 80%;
+  height: 440px;
   display: inline-flex;
   margin: 10px;
   flex-direction: column;
   background: white;
   border: solid 1px #dcdfe6;
   border-radius: 8px;
+  overflow: hidden;
 }
 
 .classTreeDiv {
@@ -479,7 +1256,7 @@ export default {
 
 .exportButton {
   width: 80px;
-  margin: 10px;
+  margin: 10px 10px 0px 10px;
 }
 
 .scheduleContainer {
@@ -487,7 +1264,69 @@ export default {
   margin: 10px;
   display: inline-flex;
   background: white;
+}
+
+:deep(.scheduleTable.el-table--enable-row-hover .el-table__body tr:hover) > td {
+  background-color: initial;
+}
+
+.scheduleTable {
+  height: auto;
+  width: 100%;
+}
+
+:deep(.cellDiv) {
+  width: 100%;
+  height: 100%;
+  background: rgb(159.5, 206.5, 255);
   border: solid 1px #dcdfe6;
-  border-radius: 8px;
+  box-sizing: border-box;
+  z-index: 999;
+  display: flex;
+  position: relative;
+  left: 0px;
+}
+
+:deep(.cellContainer) {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  z-index: 10;
+  position: absolute;
+}
+
+:deep(.cell:has(.cellDiv)) {
+  height: 100%;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  z-index: -1;
+  line-height: 16px !important;
+}
+.cell:has(.cellContainer) {
+  height: 100%;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  z-index: -1;
+}
+
+.cellText {
+  font-size: 10px;
+  height: 100%;
+  width: 100%;
+  text-align: left;
+  align-content: flex-start;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: white;
+  z-index: 1000;
+}
+.cellText * {
+  margin: 5px 5px 0px 5px;
+  line-height: 10px !important;
 }
 </style>

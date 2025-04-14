@@ -32,7 +32,6 @@
         />
         <el-table-column
           prop="majorId"
-          :formatter="majorCodeFormatter"
           label="专业编号"
           width="120"
         />

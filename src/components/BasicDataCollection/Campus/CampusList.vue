@@ -33,8 +33,7 @@
       ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="55" />
-      <el-table-column prop="id" label="id" />
-      <el-table-column prop="name" label="校区" />
+      <el-table-column prop="name" label="校区名称" />
       <el-table-column label="教学楼" v-slot="scope">
         <div class="RowButtons">
           <el-link type="primary" @click="HandleDrawerClick(scope.row)"
@@ -94,7 +93,6 @@ export default {
   },
   setup() {
     const locationStore = useLocationStore();
-    const { campuses } = storeToRefs(locationStore);
     const tableRef = ref();
 
     const data = reactive({
@@ -109,6 +107,17 @@ export default {
         size: 5,
       },
     });
+
+    const campuses = ref([
+      {
+        code: "tmg",
+        name: "铁门关校区",
+      },
+      {
+        code: "kel",
+        name: "库尔勒校区",
+      },
+    ]);
 
     const HandleSelectChange = (value) => {
       data.deleteValue = value;

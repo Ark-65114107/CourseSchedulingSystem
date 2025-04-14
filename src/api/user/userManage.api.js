@@ -1,13 +1,18 @@
 import request from "@/utils/request"
 
 
-export const getUserList = (page, size) => {
-    return request.get("getuserList", {
-        params: {
-            pageNum: page,
-            size: size,
-            isAbort: true
-
-        }
+export const getUserList = () => {
+    return request.get("showUserList", {
     })
 }
+
+export const updateUserStatus = (username,enabled) => {
+    return request("updateUserStatus", {
+        method:"post",
+        data:{
+            username,
+            enabled
+        },
+    })
+}
+

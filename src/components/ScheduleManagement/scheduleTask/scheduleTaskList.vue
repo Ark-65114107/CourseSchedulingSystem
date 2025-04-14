@@ -63,7 +63,6 @@
       v-model:current-page="pageInfo.page"
       v-model:page-size="pageInfo.size"
       layout=" prev, pager, next,sizes,jumper,total"
-      :total="scheduleStore.taskNum"
       :size="pageInfo.size"
       :page-sizes="[5, 10, 20, 50, 100, 200, 300]"
       :default-page-size="5"
@@ -120,131 +119,131 @@ export default {
       }
     };
 
-    const HandlePageChange = (page) => {
-      data.isLoading = true;
-      if (data.keyWord) {
-        scheduleStore
-          .getTaskByQuery(data.keyWord, page, data.pageInfo.size)
-          .then((res) => {
-            if (res === 200) {
-              data.refreshLoading = false;
-              data.isLoading = false;
-              tableRef.value.scrollTo(0, 0);
-            }
-          });
-      } else {
-        scheduleStore
-          .getTask({ page, size: data.pageInfo.size })
-          .then((res) => {
-            if (res === 200) {
-              tableRef.value.scrollTo(0, 0);
-              data.isLoading = false;
-              data.refreshLoading = false;
-            }
-          });
-      }
-    };
-    const HandleSizeChange = (size) => {
-      data.isLoading = true;
-      data.pageInfo.page = 1;
-      if (data.keyWord) {
-        scheduleStore
-          .getTaskByQuery(data.keyWord, data.pageInfo.page, size)
-          .then((res) => {
-            if (res === 200) {
-              data.pageInfo.page = 1;
-              data.refreshLoading = false;
-              data.isLoading = false;
-              tableRef.value.scrollTo(0, 0);
-            }
-            if (res === 400) {
-              data.isLoading = false;
-            }
-          });
-      } else {
-        scheduleStore
-          .getTask({ page: data.pageInfo.page, size })
-          .then((res) => {
-            if (res === 200) {
-              data.isLoading = false;
-              tableRef.value.scrollTo(0, 0);
-            }
-            if (res === 400) {
-              data.isLoading = false;
-            }
-          });
-      }
-    };
+    // const HandlePageChange = (page) => {
+    //   data.isLoading = true;
+    //   if (data.keyWord) {
+    //     scheduleStore
+    //       .getTaskByQuery(data.keyWord, page, data.pageInfo.size)
+    //       .then((res) => {
+    //         if (res === 200) {
+    //           data.refreshLoading = false;
+    //           data.isLoading = false;
+    //           tableRef.value.scrollTo(0, 0);
+    //         }
+    //       });
+    //   } else {
+    //     scheduleStore
+    //       .getTask({ page, size: data.pageInfo.size })
+    //       .then((res) => {
+    //         if (res === 200) {
+    //           tableRef.value.scrollTo(0, 0);
+    //           data.isLoading = false;
+    //           data.refreshLoading = false;
+    //         }
+    //       });
+    //   }
+    // };
+    // const HandleSizeChange = (size) => {
+    //   data.isLoading = true;
+    //   data.pageInfo.page = 1;
+    //   if (data.keyWord) {
+    //     scheduleStore
+    //       .getTaskByQuery(data.keyWord, data.pageInfo.page, size)
+    //       .then((res) => {
+    //         if (res === 200) {
+    //           data.pageInfo.page = 1;
+    //           data.refreshLoading = false;
+    //           data.isLoading = false;
+    //           tableRef.value.scrollTo(0, 0);
+    //         }
+    //         if (res === 400) {
+    //           data.isLoading = false;
+    //         }
+    //       });
+    //   } else {
+    //     scheduleStore
+    //       .getTask({ page: data.pageInfo.page, size })
+    //       .then((res) => {
+    //         if (res === 200) {
+    //           data.isLoading = false;
+    //           tableRef.value.scrollTo(0, 0);
+    //         }
+    //         if (res === 400) {
+    //           data.isLoading = false;
+    //         }
+    //       });
+    //   }
+    // };
 
-    const HandleSearchClick = () => {
-      if (data.keyWordTemp) {
-        data.pageInfo.page = 1;
-        data.isLoading = true;
-        data.keyWord = data.keyWordTemp;
-        scheduleStore
-          .getTaskByQuery(data.keyWord, data.pageInfo.page, data.pageInfo.size)
-          .then((res) => {
-            if (res === 200) {
-              data.pageInfo.page = 1;
-              data.isLoading = false;
-              tableRef.value.scrollTo(0, 0);
-            }
-            if (res === 400) {
-              data.isLoading = false;
-            }
-          });
-      } else {
-        ElMessage.warning("请输入关键词!");
-      }
-    };
+    // const HandleSearchClick = () => {
+    //   if (data.keyWordTemp) {
+    //     data.pageInfo.page = 1;
+    //     data.isLoading = true;
+    //     data.keyWord = data.keyWordTemp;
+    //     scheduleStore
+    //       .getTaskByQuery(data.keyWord, data.pageInfo.page, data.pageInfo.size)
+    //       .then((res) => {
+    //         if (res === 200) {
+    //           data.pageInfo.page = 1;
+    //           data.isLoading = false;
+    //           tableRef.value.scrollTo(0, 0);
+    //         }
+    //         if (res === 400) {
+    //           data.isLoading = false;
+    //         }
+    //       });
+    //   } else {
+    //     ElMessage.warning("请输入关键词!");
+    //   }
+    // };
 
-    const HandleClear = () => {
-      data.keyWord = "";
-      (data.pageInfo.page = 1), (data.isLoading = true);
-      scheduleStore
-        .getTask({ page: 1, size: data.pageInfo.size })
-        .then((res) => {
-          if (res === 200) {
-            data.pageInfo.page = 1;
-            data.refreshLoading = false;
-            data.isLoading = false;
-            tableRef.value.scrollTo(0, 0);
-          }
-        });
-    };
+    // const HandleClear = () => {
+    //   data.keyWord = "";
+    //   (data.pageInfo.page = 1), (data.isLoading = true);
+    //   scheduleStore
+    //     .getTask({ page: 1, size: data.pageInfo.size })
+    //     .then((res) => {
+    //       if (res === 200) {
+    //         data.pageInfo.page = 1;
+    //         data.refreshLoading = false;
+    //         data.isLoading = false;
+    //         tableRef.value.scrollTo(0, 0);
+    //       }
+    //     });
+    // };
 
-    const HandleRefreshClick = () => {
-      data.pageInfo.page = 1;
-      data.isLoading = true;
-      data.refreshLoading = true;
-      if (data.keyWord) {
-        scheduleStore
-          .getTaskByQuery(data.keyWord, data.pageInfo.page, data.pageInfo.size)
-          .then((res) => {
-            if (res === 200) {
-              data.pageInfo.page = 1;
-              data.refreshLoading = false;
-              data.isLoading = false;
-              tableRef.value.scrollTo(0, 0);
-            }
-            if (res === 400) {
-              data.isLoading = false;
-              data.refreshLoading = false;
-            }
-          });
-      } else {
-        scheduleStore
-          .getTask({ page: 1, size: data.pageInfo.size })
-          .then((res) => {
-            if (res === 200) {
-              data.pageInfo.page = 1;
-              data.refreshLoading = false;
-              data.isLoading = false;
-              tableRef.value.scrollTo(0, 0);
-            }
-          });
-      }
-    };
+    // const HandleRefreshClick = () => {
+    //   data.pageInfo.page = 1;
+    //   data.isLoading = true;
+    //   data.refreshLoading = true;
+    //   if (data.keyWord) {
+    //     scheduleStore
+    //       .getTaskByQuery(data.keyWord, data.pageInfo.page, data.pageInfo.size)
+    //       .then((res) => {
+    //         if (res === 200) {
+    //           data.pageInfo.page = 1;
+    //           data.refreshLoading = false;
+    //           data.isLoading = false;
+    //           tableRef.value.scrollTo(0, 0);
+    //         }
+    //         if (res === 400) {
+    //           data.isLoading = false;
+    //           data.refreshLoading = false;
+    //         }
+    //       });
+    //   } else {
+    //     scheduleStore
+    //       .getTask({ page: 1, size: data.pageInfo.size })
+    //       .then((res) => {
+    //         if (res === 200) {
+    //           data.pageInfo.page = 1;
+    //           data.refreshLoading = false;
+    //           data.isLoading = false;
+    //           tableRef.value.scrollTo(0, 0);
+    //         }
+    //       });
+    //   }
+    // };
 
     const rowStyle = ({ row, rowIndex }) => {
       return {
@@ -302,21 +301,21 @@ export default {
     return {
       ...toRefs(data),
       tasks,
-      HandleArrayDelete,
-      HandleSingleDelete,
-      HandleSelectChange,
-      HandleAddClick,
-      HandleEditClick,
-      HandleUploadClick,
-      rowStyle,
-      scheduleStore,
-      HandleRefreshClick,
-      HandlePageChange,
-      HandleSizeChange,
-      tableRef,
-      Search,
-      HandleSearchClick,
-      HandleClear,
+      // HandleArrayDelete,
+      // HandleSingleDelete,
+      // HandleSelectChange,
+      // HandleAddClick,
+      // HandleEditClick,
+      // HandleUploadClick,
+      // rowStyle,
+      // scheduleStore,
+      // HandleRefreshClick,
+      // HandlePageChange,
+      // HandleSizeChange,
+      // tableRef,
+      // Search,
+      // HandleSearchClick,
+      // HandleClear,
       HandleScheduleClick,
     };
   },

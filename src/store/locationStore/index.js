@@ -11,7 +11,6 @@ import { addCampusApi, deleteCampusApi, getCampusByQueryApi, getCampusListApi, u
 import { ElMessage } from "element-plus";
 import { getClassroomListApi } from "@/api/basicData/classroom.api";
 import { getGradeByQueryApi } from "@/api/basicData/grade.api";
-import { getAllTeachingBuildingApi, getTeachingBuildingByQueryApi } from "@/api/basicData/teachingbuilding.api";
 
 
 
@@ -20,7 +19,6 @@ export const useLocationStore = defineStore('location', {
         campuses: [],
         campusNum: 0,
         teachingbuildings: [],
-        teachingbuildingNum:0,
         classrooms: [],
         classroomNum: 0,
         classroomtypes: [],
@@ -37,7 +35,7 @@ export const useLocationStore = defineStore('location', {
     actions: {
         initLocationDatas() {
             if (!this.locationDataInitiate) {
-                this.getCampus()
+                this.initCampuses()
                 this.initTeachingBuildings()
                 this.initClassrooms()
                 this.initClassroomTypes()
@@ -46,45 +44,27 @@ export const useLocationStore = defineStore('location', {
         },
 
 
-        getCampus() {
-            getAllTeachingBuildingApi().then(res => {
-                if (res) {
-                    if(res.meta.code == 200) {
-                        let teachingbuildings = res.data;
-                        teachingbuildings.foreach((teachingbuilding)=>{
-                            if(!this.campuses.includes(teachingbuilding.campusId))[
-                                this.campuses.push(teachingbuilding.campusId)
-                            ]
-                        })
-                    }
-                }
-            })
-        },
-
-        getTeachingBuilding(parm = { page: 1, size: 5 }) {
-            return getTeachingBuildingListApi(parm).then(res => {
-                if (res.meta.code === 200) {
-                    this.teachingbuildingNum = res.total
-                    this.teachingbuildings = res.data
+        getCampus(parm = { page: 1, size: 5 }) {
+            return getCampusListApi(parm).then(response => {
+                if (response.meta.code === 200) {
+                    this.campusNum = response.data.total
+                    this.campuses = response.data.campuses
+                    this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
+                    this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
                     return 200
                 }
             }).catch(error => {
                 return error
             })
         },
-
-        //查询keyword对象,如{keyName1:keyValue1,keyName2:keyValue2}...]
-        getTeachingBuildingByQuery(keyword, page = 1, size = 5) {
-            return getTeachingBuildingByQueryApi({ keyword, page, size }).then(res => {
-                if (res.meta.code == 200) {
-                    this.teachingbuildings = res.data
-                    this.teachingbuildingNum = res.total
+        getTeachingBuilding(parm = { page: 1, size: 5 }) {
+            return getCampusListApi(parm).then(response => {
+                if (response.meta.code === 200) {
+                    this.campusNum = response.data.total
+                    this.campuses = response.data.campuses
+                    this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
+                    this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
                     return 200
-                }
-                if (res.meta.code == 400) {
-                    this.teachingbuildings = res.data
-                    this.teachingbuildingNum = res.total
-                    return 400
                 }
             }).catch(error => {
                 return error
@@ -92,22 +72,22 @@ export const useLocationStore = defineStore('location', {
         },
         //查询keyword对象,如{keyName1:keyValue1,keyName2:keyValue2}...]
         getCampusByQuery(keyword, page = 1, size = 5) {
-            return getCampusByQueryApi({ keyword, page, size }).then(res => {
-                if (res.meta.code == 200) {
+            return getCampusByQueryApi({keyword, page, size }).then(res => {
+                if(res.meta.code == 200){
                     this.campuses = res.data.res
                     this.campusNum = res.data.total
                     this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
                     this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
                     return 200
                 }
-                if (res.meta.code == 400) {
+                if(res.meta.code == 400){
                     this.campuses = res.data.res
                     this.campusNum = res.data.total
                     this.campusNameMap = new Map(this.campuses.map(c => [c.id, c.name]))
                     this.campusMap = new Map(this.campuses.map(c => [c.id, c]))
                     return 400
                 }
-
+                
             }).catch(error => {
                 return error
             })
@@ -128,8 +108,6 @@ export const useLocationStore = defineStore('location', {
                 return error
             })
         },
-
-
         getClassroomsByCampus(campusId) {
             return this.classrooms.filter((classroom) => {
                 return classroom.campusId == campusId
@@ -145,7 +123,11 @@ export const useLocationStore = defineStore('location', {
                 return classroom.typeId == TypeId
             })
         },
-
+        getBuildingsByCampus(campusId) {
+            return this.teachingbuildings.filter((building) => {
+                return building.campusId == campusId
+            })
+        },
         getClassroomsByBuildingAndType(BuildingId, typeId) {
             return this.classrooms.filter((classroom) => {
                 return classroom.teachingbuildingId == BuildingId && classroom.typeId == typeId
@@ -157,11 +139,12 @@ export const useLocationStore = defineStore('location', {
             })
         },
 
+
+
         initCampuses() {
             this.initTeachingBuildings()
             this.getCampus()
         },
-
         AddCampus(value, pageInfo) {
             return addCampusApi(value).then(res => {
                 if (res.meta.code === 200) {
@@ -195,7 +178,6 @@ export const useLocationStore = defineStore('location', {
                 return false
             })
         },
-        
         DeleteCampus(value) {
             return deleteCampusApi(value).then(res => {
                 if (res.meta.code === 200) {
@@ -215,8 +197,9 @@ export const useLocationStore = defineStore('location', {
 
         initTeachingBuildings() {
             this.teachingbuildings = initialTeachingBuildings;
+            this.teachingbuildingMap = new Map(this.teachingbuildings.map(t => [t.id, t]))
+            this.teachingbuildingNameMap = new Map(this.teachingbuildings.map(t => [t.id, t.name]))
         },
-
         AddTeachingBuilding(value) {
             this.teachingbuildings.push(value)
         },
@@ -258,8 +241,6 @@ export const useLocationStore = defineStore('location', {
             this.classroomTypeMap = new Map(this.classroomtypes.map(c => [c.id, c]))
             this.classroomTypeNameMap = new Map(this.classroomtypes.map(c => [c.id, c.name]))
         },
-
-
         AddType(value) {
             this.classroomtypes.push(value)
         },

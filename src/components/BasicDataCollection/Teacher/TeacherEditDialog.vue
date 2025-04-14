@@ -234,9 +234,6 @@ export default {
             ename: formInput.teacherEname,
             ethnicityId: formInput.teacherEthnicityId,
             titleName: formInput.teachertitleId,
-            departmentName: personnelStore.teacherNameMap.get(
-              formInput.teacherDepartmentId
-            ),
             departmentId: formInput.teacherDepartmentId,
             isExternal: formInput.isExternal,
             facultyTypeId: formInput.facultyTypeId,
@@ -260,9 +257,6 @@ export default {
               ename: formInput.teacherEname,
               ethnicityId: formInput.teacherEthnicityId,
               titleName: formInput.teachertitleId,
-              departmentName: personnelStore.teacherNameMap.get(
-                formInput.teacherDepartmentId
-              ),
               departmentId: formInput.teacherDepartmentId,
               isExternal: formInput.isExternal,
               facultyTypeId: formInput.facultyTypeId,

@@ -13,12 +13,12 @@ function cancelRepeatCache(key){
 }
 
 
-const request = axios.create({
-    baseURL: "https://10.105.187.101:8443",
+const fakeRequest = axios.create({
+    baseURL: "https://mock.presstime.cn/mock/679a2d5fb365a6d86942118b/testapi",
     timeout: "3000"
 })
 
-request.interceptors.request.use(
+fakeRequest.interceptors.request.use(
     config => {
         //在这里给header加token
         const token = getToken()
@@ -29,21 +29,21 @@ request.interceptors.request.use(
             }   
         }
         //删除重复请求
-        // const { isAbort = false ,url,method } = config
-        // if(isAbort){
-        //     const key = `${url}%%${method}`
-        //     cancelRepeatCache(key)
-        //     const controller = new AbortController()
-        //     config.signal = controller.signal
-        //     requestCache[key] = controller
-        // }
+        const { isAbort = false ,url,method } = config
+        if(isAbort){
+            const key = `${url}%%${method}`
+            cancelRepeatCache(key)
+            const controller = new AbortController()
+            config.signal = controller.signal
+            requestCache[key] = controller
+        }
         return config
     },
     error => {
         return Promise.reject(error)
     }
 )
-request.interceptors.response.use(
+fakeRequest.interceptors.response.use(
     response => {
         console.log(response);
         //在这里处理响应码
@@ -69,4 +69,4 @@ request.interceptors.response.use(
     }
 )
 
-export default request
+export default fakeRequest

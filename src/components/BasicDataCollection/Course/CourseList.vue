@@ -59,33 +59,28 @@
       <el-table-column prop="code" label="课程编号" min-width="100px" />
       <el-table-column prop="name" label="课程名称" min-width="155px" />
       <el-table-column
-        prop="courseCategoryId"
+        prop="courseCategory"
         label="课程类别"
         min-width="155px"
-        :formatter="courseCategoryFormatter"
       />
       <el-table-column
-        prop="courseAttributeId"
+        prop="courseAttribute"
         label="课程属性"
         min-width="100px"
-        :formatter="courseAttributeFormatter"
       />
       <el-table-column
-        prop="courseTypeId"
+        prop="courseType"
         label="课程类型"
         min-width="100px"
-        :formatter="courseTypeFormatter"
       />
       <el-table-column
-        prop="courseNatureId"
+        prop="courseNature"
         label="课程性质"
         min-width="100px"
-        :formatter="courseNatureFormatter"
       />
       <el-table-column
-        prop="facultyId"
+        prop="faculty"
         label="开课院系"
-        :formatter="departmentFormatter"
       />
       <el-table-column
         prop="isEnabled"
@@ -169,12 +164,6 @@ export default {
       type: "*",
     });
 
-    // .value.map((c) => ({
-    //     ...c,
-    //     campus: locationStore.campusMap.get(c.campusId),
-    //     type: locationStore.classroomTypeMap.get(c.typeId),
-    //     teachingbuilding:locationStore.teachingbuildingMap.get(c.teachingbuildingId)
-    //   })),
 
     const HandleSelectChange = (value) => {
       data.deleteValue = value;
@@ -256,21 +245,6 @@ export default {
       return row.isAvailable ? "是" : "否";
     };
 
-    const departmentFormatter = (row) => {
-      return academicStore.departmentNameMap.get(row.departmentId);
-    };
-    const courseCategoryFormatter = (row) => {
-      return academicStore.courseCategoryNameMap.get(row.courseCategoryId);
-    };
-    const courseAttributeFormatter = (row) => {
-      return academicStore.courseAttributeNameMap.get(row.courseAttributeId);
-    };
-    const courseTypeFormatter = (row) => {
-      return academicStore.courseTypeNameMap.get(row.courseTypeId);
-    };
-    const courseNatureFormatter = (row) => {
-      return academicStore.courseNatureNameMap.get(row.courseNatureId);
-    };
 
     return {
       ...toRefs(data),
@@ -284,11 +258,6 @@ export default {
       rowStyle,
       filterCriteria,
       isEnableFormatter,
-      departmentFormatter,
-      courseCategoryFormatter,
-      courseAttributeFormatter,
-      courseTypeFormatter,
-      courseNatureFormatter,
       HandlePageChange,
       HandleSizeChange,
       academicStore,

@@ -55,8 +55,7 @@
       />
       <el-table-column prop="titleName" label="职称" min-width="100px" />
       <el-table-column
-        prop="departmentName"
-        :formatter="departmentFormatter"
+        prop="department"
         label="单位"
         min-width="100px"
       />
@@ -198,9 +197,6 @@ export default {
     const ethnicityFormatter = (row) => {
       return personnelStore.ethnicityNameMap.get(row.ethnicityId);
     };
-    const departmentFormatter = (row) => {
-      return useAcademicStore().departmentNameMap.get(row.departmentId );
-    };
     const externalFormatter = (row) => {
       return row.isExternal ? "是" : "否";
     };
@@ -216,7 +212,6 @@ export default {
       genderFormatter,
       ethnicityFormatter,
       externalFormatter,
-      departmentFormatter,
       HandlePageChange,
       HandleSizeChange,
       personnelStore,

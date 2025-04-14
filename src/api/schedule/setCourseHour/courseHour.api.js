@@ -1,8 +1,9 @@
+import fakeRequest from "@/utils/fakeRequest"
 import request from "@/utils/request"
 
 //更新指定课程的指定班级的课时数据 参数:任务id,班级id,课程id,新值
 export const updateCourseHour = (taskId,teachingClassId,courseId,courseHour) => {
-    return request({
+    return fakeRequest({
         url: "/task/updateCourseHour",
         method: "post",
         data: {

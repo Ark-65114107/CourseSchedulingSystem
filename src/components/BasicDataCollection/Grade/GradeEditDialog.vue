@@ -32,7 +32,6 @@
           placeholder="请选择学制类型"
           filterable
           value-key="id"
-          @change="getDuration"
         >
           <el-option
             v-for="f of educationalLevels"
@@ -140,7 +139,7 @@ export default {
     const formInput = reactive({
       gradeName: computed(() => {
         if (formInput.enrollmentYear && formInput.educationalLevelId) {
-          return `${formInput.enrollmentYear}级-${academicStore.educationalLevelNameMap.get(formInput.educationalLevelId)}`;
+          return `${formInput.enrollmentYear}级-${formInput.educationalLevel}`;
         } else {
           return "";
         }
@@ -234,10 +233,6 @@ export default {
     };
 
 
-    const getDuration = ()=>{
-      formInput.duration = academicStore.educationalLevelMap.get(formInput.educationalLevelId).max+1
-    }
-
     const ClearInput = () => {
       gradeFormRef.value.resetFields();
     };
@@ -251,7 +246,6 @@ export default {
       gradeFormRef,
       inputRule,
       educationalLevels,
-      getDuration,
     };
   },
 };

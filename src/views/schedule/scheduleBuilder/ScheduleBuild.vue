@@ -171,7 +171,6 @@
             </el-table-column>
 
             <el-table-column
-              class="courseColumn"
               min-width="150px"
               v-for="item of tableHeader"
               :label="item.name"

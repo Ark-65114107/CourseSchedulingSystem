@@ -11,7 +11,7 @@
       <el-button
         type="danger"
         v-show="isDeleteShow"
-        @click="HandleArrayDelete(deleteValue)"
+        @click="HandleDelete(deleteValue.map((d) => d.id))"
         >删除选中</el-button
       >
       <el-input
@@ -33,33 +33,32 @@
       ref="tableRef"
     >
       <el-table-column type="selection" :selectable="selectable" width="55" />
-      <el-table-column prop="id" label="id" />
-      <el-table-column prop="code" label="部门代码" />
-      <el-table-column prop="name" label="部门名称" />
+      <el-table-column prop="departmentId" label="部门代码" />
+      <el-table-column prop="departmentName" label="部门名称" />
       <el-table-column prop="type" label="单位类别" width="90" />
-      <el-table-column prop="teachingbuildingName" label="固定教学楼" />
+      <el-table-column prop="staticBuilding" label="固定教学楼" />
       <el-table-column
-        prop="isEntity"
+        prop="entity"
         label="是否为实体"
         :formatter="isEntityToYesNo"
       />
       <el-table-column
-        prop="isEnabled"
+        prop="enabled"
         label="是否启用"
         :formatter="isEnabledToYesNo"
       />
       <el-table-column
-        prop="isCourseOffering"
+        prop="offeringCourseUnit"
         label="是否开课"
         :formatter="isCourseOfferingToYesNo"
       />
       <el-table-column
-        prop="isTeaching"
+        prop="teachingCourse"
         label="是否上课"
         :formatter="isTeachingToYesNo"
       />
       <el-table-column
-        prop="isTeachingResearchOffice"
+        prop="offeringClassroom"
         label="是否开课教研室"
         :formatter="isTeachingResearchOfficeToYesNo"
       />
@@ -68,7 +67,7 @@
           <el-button type="primary" @click="HandleEditClick(scope.row)"
             >编辑</el-button
           >
-          <el-button type="danger" @click="HandleSingleDelete(scope.row)"
+          <el-button type="danger" @click="HandleDelete([scope.row.id])"
             >删除</el-button
           >
         </div>
@@ -99,7 +98,8 @@ import DepartmentEditDialog from "./DepartmentEditDialog.vue";
 import { useAcademicStore } from "@/store/academicStore/index.js";
 import { storeToRefs } from "pinia";
 import { Search } from "@element-plus/icons-vue";
-
+import { deleteDepartmentApi } from "@/api/basicData/departments.api";
+import { ElMessage, ElMessageBox } from "element-plus";
 
 export default {
   name: "DepartmentList",
@@ -123,6 +123,45 @@ export default {
         size: 5,
       },
     });
+
+    onMounted(() => {
+      bus.on("updateDepartment", (isInitPage) => {
+        updateDepartment(isInitPage);
+      });
+    });
+
+    const updateDepartment = (isInitPage) => {
+      data.isLoading = true;
+      if (isInitPage) {
+        data.pageInfo.page = 1;
+        data.pageInfo.size = 5;
+        data.keyWord = "";
+        data.keyWordTemp = "";
+      }
+      if (data.keyWord) {
+        data.isLoading = true;
+        academicStore
+          .getGradeByQuery(data.keyWord, page, data.pageInfo.size)
+          .then((res) => {
+            if (res === 200) {
+              data.isLoading = false;
+              tableRef.value.scrollTo(0, 0);
+            }
+            if (res === 400) {
+              data.isLoading = false;
+            }
+          });
+      } else {
+        academicStore
+          .getDepartments({ page, size: data.pageInfo.size })
+          .then((res) => {
+            if (res === 200) {
+              data.isLoading = false;
+              tableRef.value.scrollTo(0, 0);
+            }
+          });
+      }
+    };
 
     const HandlePageChange = (page) => {
       data.isLoading = true;
@@ -168,7 +207,7 @@ export default {
           });
       } else {
         academicStore
-          .getDepartments({ page, size: data.pageInfo.size })
+          .getDepartments({ page: data.pageInfo.page, size })
           .then((res) => {
             if (res === 200) {
               data.isLoading = false;
@@ -275,20 +314,38 @@ export default {
         return row.isAssigned ? "是" : "否";
       },
       isTeachingToYesNo: (row) => {
-        return row.isTeaching ? "是" : "否";
+        return row.teachingCourse ? "是" : "否";
       },
       isEnabledToYesNo: (row) => {
-        return row.isEnabled ? "是" : "否";
+        return row.enabled   ? "是" : "否";
       },
       isTeachingResearchOfficeToYesNo: (row) => {
-        return row.isTeachingResearchOffice ? "是" : "否";
+        return row.offeringClassroom ? "是" : "否";
       },
       isCourseOfferingToYesNo: (row) => {
-        return row.isCourseOffering ? "是" : "否";
+        return row.offeringCourseUnit ? "是" : "否";
       },
       isEntityToYesNo: (row) => {
-        return row.isEntity ? "是" : "否";
+        return row.entity ? "是" : "否";
       },
+    };
+
+    const HandleDelete = (list) => {
+      ElMessageBox.confirm("确认删除吗?", "警告", {
+        confirmButtonText: "确认",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(() => {
+        deleteDepartmentApi(list).then((res) => {
+          if (res) {
+            if (res.code === 200) {
+              ElMessage.success("操作成功!");
+              data.pageInfo.page = 1;
+              HandleRefreshClick();
+            }
+          }
+        });
+      });
     };
 
     return {
@@ -298,7 +355,7 @@ export default {
       HandleSelectChange,
       HandleAddClick,
       HandleEditClick,
-      rowStyle, 
+      rowStyle,
       HandlePageChange,
       HandleSizeChange,
       HandleSearchClick,
@@ -306,7 +363,8 @@ export default {
       HandleRefreshClick,
       academicStore,
       tableRef,
-      Search
+      Search,
+      HandleDelete,
     };
   },
 };

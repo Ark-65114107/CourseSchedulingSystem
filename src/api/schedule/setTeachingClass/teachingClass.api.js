@@ -1,7 +1,8 @@
+import fakeRequest from "@/utils/fakeRequest"
 import request from "@/utils/request"
 
 export const getListTeachingClassApi = (taskId,courseId,)=>{
-    return request({
+    return fakeRequest({
         url:"/task/getListTeachingClassByCourse",
         method:"get",
         params:{
@@ -13,7 +14,7 @@ export const getListTeachingClassApi = (taskId,courseId,)=>{
 
 //获取指定教学班数据 参数:任务id,课程id,教学班Id
 export const getSingleTeachingClassApi = (taskId,teachingClassId)=>{
-    return request({
+    return fakeRequest({
         url:"/task/getSingleTeachingClass",
         method:"get",
         isAbort:true,
@@ -25,7 +26,7 @@ export const getSingleTeachingClassApi = (taskId,teachingClassId)=>{
 }
 
 export const updateTeachingClassApi = (taskId,teachingClassId,teachingClass)=>{
-    return request({
+    return fakeRequest({
         url:"/task/updateTeachingClass",
         method:"post",
         isAbort:true,

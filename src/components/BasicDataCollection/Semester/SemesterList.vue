@@ -102,12 +102,7 @@ export default {
       type: "*",
     });
 
-    // .value.map((c) => ({
-    //     ...c,
-    //     campus: locationStore.campusMap.get(c.campusId),
-    //     type: locationStore.classroomTypeMap.get(c.typeId),
-    //     teachingbuilding:locationStore.teachingbuildingMap.get(c.teachingbuildingId)
-    //   })),
+
 
     const HandleSelectChange = (value) => {
       data.deleteValue = value;

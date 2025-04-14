@@ -35,13 +35,13 @@
         name="selectedCourse"
       >
         <el-menu>
-          <div class="nodata" v-show="!unAssignedClassNum">
+          <div class="nodata" v-show="!assignedClassNum">
             <el-text type="info">暂无数据</el-text>
           </div>
           <el-scrollbar
             height="300px"
             class="ClassSrollBar"
-            v-show="unAssignedClassNum"
+            v-show="assignedClassNum"
           >
             <el-menu-item
               class="classItem"
@@ -172,7 +172,6 @@ export default {
     });
 
     const unassignedClassNum = computed(() => {
-      console.log(assignedClassNum);
       return classList.value.length - assignedClassNum.value;
     });
 

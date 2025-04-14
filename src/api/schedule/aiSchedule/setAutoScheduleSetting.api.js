@@ -1,7 +1,8 @@
 import request from "@/utils/request"
+import fakeRequest from "@/utils/fakeRequest"
 
 export const setAutoScheduleSettingApi = (classList,settings) => {
-    return request({
+    return fakeRequest({
         url: "/task/getAutoScheduleClassList",
         method: "post",
         data: {

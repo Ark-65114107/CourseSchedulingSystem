@@ -1,7 +1,7 @@
-import request from "@/utils/request"
+import fakeRequest from "@/utils/fakeRequest"
 
 export const getAutoScheduleClassListApi = (taskId) => {
-    return request({
+    return fakeRequest({
         url: "/task/getAutoScheduleClassList",
         method: "get",
         params: {

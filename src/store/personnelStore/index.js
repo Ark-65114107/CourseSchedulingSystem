@@ -16,10 +16,7 @@ export const usePersonnelStore = defineStore('personnel', {
         teacherNum:0,
         facultyTypes: [],
         ethnicities: [],
-        teacherMap: new Map(),
-        teacherNameMap: new Map(),
-        facultyTypeMap: new Map(),
-        ethnicityNameMap: new Map(),
+
         PersonnelDataInitiate: false
     }),
     actions: {
@@ -56,8 +53,6 @@ export const usePersonnelStore = defineStore('personnel', {
         initTeachers() {
             this.initEthnicities()
             this.getTeachers({page:1,size:5})
-            this.teacherMap = new Map(this.teachers.map(c => [c.id, c]))
-            this.teacherNameMap = new Map(this.teachers.map(c => [c.id, c.name]))
         },
         AddTeacher(value) {
             this.teachers.push(value)
@@ -78,7 +73,6 @@ export const usePersonnelStore = defineStore('personnel', {
 
         initEthnicities() {
             this.ethnicities = initialEthnicities;
-            this.ethnicityNameMap = new Map(this.ethnicities.map(c => [c.id, c.name]))
         },
         AddEthnicity(value) {
             this.ethnicities.push(value)
@@ -98,7 +92,6 @@ export const usePersonnelStore = defineStore('personnel', {
         },
         initinitialFacultyTypes() {
             this.facultyTypes = initialFacultyTypes;
-            this.facultyTypeMap = new Map(this.facultyTypes.map(c => [c.id, c.name]))
         },
         AddFacultyType(value) {
             this.facultyTypes.push(value)

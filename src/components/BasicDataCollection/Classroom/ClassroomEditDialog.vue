@@ -313,7 +313,7 @@ export default {
 
     const filtedArray = reactive({
       filtedTeachingBuildingOptions: computed(() => {
-        return locationStore.getBuildingsByCampus(formInput.classroomCampusId);
+        return 
       }),
     });
 

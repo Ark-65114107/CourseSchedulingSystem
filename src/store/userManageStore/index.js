@@ -4,22 +4,25 @@ import { roles } from "@/data/auth.js"
 
 
 
-export const useUserManageStore = defineStore('userManageStore',{
-    state:()=>({
-        users:[],
-        roles:[],
+export const useUserManageStore = defineStore('userManageStore', {
+    state: () => ({
+        users: [],
+        roles: [],
     }),
-    actions:{
-        getUsers(page,size){
-            getUserList(page,size).then(res=>{
-                this.users = res.data.users
+    actions: {
+        getUsers(page, size) {
+            return  getUserList().then(res => {
+                if (res.code == 200) {
+                    this.users = res.data
+                    return 200
+                }
             })
         },
         initRoles() {
             this.roles = roles
         },
         AddRole(value) {
-            this.roles.push(value)
+
         },
         EditRole(obj) {
             if (obj) {
@@ -34,5 +37,5 @@ export const useUserManageStore = defineStore('userManageStore',{
             return true
         }
     },
-    
+
 })

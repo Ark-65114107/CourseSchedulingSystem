@@ -68,14 +68,6 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item label="班级编号:" prop="id">
-            <el-input
-              v-model="formInput.id"
-              maxlength="50"
-              class="inputs"
-              placeholder="请输入班级编号"
-            />
-          </el-form-item>
           <el-form-item label="班级名:" prop="className">
             <el-input
               v-model="formInput.className"
@@ -93,7 +85,11 @@
               filterable
               @change="formInput.gradeId = ''"
             >
-              <el-option v-for="e of educationalLevels" :label="e.name" :value="e.id" />
+              <el-option
+                v-for="e of educationalLevels"
+                :label="e.name"
+                :value="e.id"
+              />
             </el-select>
           </el-form-item>
 
@@ -104,7 +100,11 @@
               placeholder="请选择年级"
               filterable
             >
-              <el-option v-for="g of filtedGrades" :label="g.name" :value="g.id" />
+              <el-option
+                v-for="g of filtedGrades"
+                :label="g.name"
+                :value="g.id"
+              />
             </el-select>
           </el-form-item>
 
@@ -292,7 +292,12 @@
           <span>修改</span>
         </el-button>
 
-        <el-button type="primary" @click="addItem(classFormRef)" v-show="mode">
+        <el-button
+          type="primary"
+          @click="addItem(classFormRef)"
+          v-show="mode"
+          :loading="isButtonLoading"
+        >
           <span>添加</span>
         </el-button>
 
@@ -305,50 +310,63 @@
 </template>
 
 <script>
-
 import { computed, reactive, ref, toRefs } from "vue";
-import { v1 as uuid } from "uuid";
 import bus from "@/bus/bus";
 import nonEmptyValidator from "@/hooks/validator/useNonEmpty";
 import { storeToRefs } from "pinia";
 import { useAcademicStore } from "@/store/academicStore";
 import { useLocationStore } from "@/store/locationStore";
 import { usePersonnelStore } from "@/store/personnelStore";
+import { ElMessage } from "element-plus";
+import { getSingleClassApi } from "@/api/basicData/class.api.js";
 
 export default {
   name: "ClassEditDialog",
   mounted() {
     bus.on("showClassEdit", (value) => {
       this.mode = false;
+      getSingleClassApi(value.id)
+        .then((res) => {
+          if (res) {
+            if (res.code == 200) {
+              this.$nextTick(() => {
+                this.id = res.data.id;
+                this.formInput.id = res.data.id;
+                this.formInput.className = res.data.name;
+                this.formInput.classAbbr = res.data.abbr;
+                this.formInput.classDuration = res.data.duration;
+                this.formInput.educationalLevel = res.data.educationalLevel;
+                this.formInput.classType = res.data.classType;
+                this.formInput.counsellorName = res.data.counsellorName;
+                this.formInput.headTeacherName = res.data.headTeacherName;
+                this.formInput.monitorName = res.data.monitorName;
+                this.formInput.gradeId = res.data.gradeId;
+                this.formInput.classAssistantName = res.data.classAssistantName;
+                this.formInput.classSize = res.data.size;
+                this.formInput.classMaxSize = res.data.maxSize;
+                this.formInput.genderDistribution = res.data.genderDistribution;
+                this.formInput.facultyId = res.data.facultyId;
+                this.formInput.majorId = res.data.majorId;
+                this.formInput.majorName = res.data.majorName;
+                this.formInput.SpecializationId = res.data.SpecializationId;
+                this.formInput.campusName = res.data.campusName;
+                this.formInput.hasAssignedClassroom =
+                  res.data.hasAssignedClassroom;
+                this.formInput.remark = res.data.remark;
+                this.formInput.headTeacherPhoneNumber =
+                  res.data.headTeacherPhoneNumber;
+                this.formInput.graduationYearSemester =
+                  res.data.graduationYearSemester;
+                this.formInput.isExpanding = res.data.isExpanding;
+                this.formInput.mentorId = res.data.mentorId;
+              });
+            }
+          }
+        })
+        .catch((error) => {
+          ElMessage.error(error.message);
+        });
       this.isDialogFormVisible = true; //List中按下按钮弹窗
-      this.$nextTick(() => {
-        this.id = value.id;
-        this.formInput.id = value.id;
-        this.formInput.className = value.name;
-        this.formInput.classAbbr = value.abbr;
-        this.formInput.classDuration = value.duration;
-        this.formInput.educationalLevel = value.educationalLevel;
-        this.formInput.classType = value.classType;
-        this.formInput.counsellorName = value.counsellorName;
-        this.formInput.headTeacherName = value.headTeacherName;
-        this.formInput.monitorName = value.monitorName;
-        this.formInput.gradeId = value.gradeId;
-        this.formInput.classAssistantName = value.classAssistantName;
-        this.formInput.classSize = value.size;
-        this.formInput.classMaxSize = value.maxSize;
-        this.formInput.genderDistribution = value.genderDistribution;
-        this.formInput.facultyId = value.facultyId;
-        this.formInput.majorId = value.majorId;
-        this.formInput.majorName = value.majorName;
-        this.formInput.SpecializationId = value.SpecializationId;
-        this.formInput.campusName = value.campusName;
-        this.formInput.hasAssignedClassroom = value.hasAssignedClassroom;
-        this.formInput.remark = value.remark;
-        this.formInput.headTeacherPhoneNumber = value.headTeacherPhoneNumber;
-        this.formInput.graduationYearSemester = value.graduationYearSemester;
-        this.formInput.isExpanding = value.isExpanding;
-        this.formInput.mentorId = value.mentorId;
-      });
     });
 
     bus.on("showClassAdd", () => {
@@ -362,6 +380,7 @@ export default {
     const locationStore = useLocationStore();
     const personnelStore = usePersonnelStore();
 
+    const isButtonLoading = ref(false);
     const { faculties, majors, educationalLevels, classTypies, grades } =
       storeToRefs(academicStore);
     const { campuses } = storeToRefs(locationStore);
@@ -407,37 +426,17 @@ export default {
       mentorName: "",
     });
 
-    const filtedGrades = computed(()=>{
-      if(formInput.educationalLevelId){
-        return academicStore.getGradesByEducationId(formInput.educationalLevelId)
-      }else{
-        return ''
+    const filtedGrades = computed(() => {
+      if (formInput.educationalLevelId) {
+        return academicStore.getGradesByEducationId(
+          formInput.educationalLevelId
+        );
+      } else {
+        return "";
       }
-    })
+    });
 
     const inputRule = reactive({
-      id: [
-        {
-          required: true,
-          validator: nonEmptyValidator,
-          message: "请输入班级编号!",
-          trigger: "blur",
-        },
-        {
-          validator: (rule, value, callback) => {
-            if (
-              academicStore.classMap.get(value) != undefined &&
-              value != data.id
-            ) {
-              callback(new Error());
-            } else {
-              callback();
-            }
-          },
-          message: "该班级编号已存在!",
-          trigger: "blur",
-        },
-      ],
       className: [
         {
           required: true,
@@ -585,48 +584,44 @@ export default {
     });
 
     const addItem = (formEl) => {
-      console.log(formEl);
       if (!formEl) return;
       formEl.validate((validate) => {
         if (validate) {
-          academicStore.AddClass({
-            id: formInput.id,
-            name: formInput.className,
-            abbr: formInput.classAbbr,
-            educationalLevelId: formInput.educationalLevelId,
-            gradeId: formInput.gradeId,
-            classType: formInput.classType,
-            counsellorId: formInput.counsellorId,
-            counsellorName: personnelStore.teacherNameMap.get(
-              formInput.counsellorId
-            ),
-            headTeacherName: personnelStore.teacherNameMap.get(
-              formInput.headTeacherId
-            ),
-            headTeacherId: formInput.headTeacherId,
-            monitorName: formInput.monitorName,
-            classAssistantName: formInput.classAssistantName,
-            size: formInput.classSize,
-            maxSize: formInput.classMaxSize,
-            genderDistribution: formInput.genderDistribution,
-            facultyId: formInput.facultyId,
-            facultyName: academicStore.departmentNameMap.get(
-              formInput.facultyId
-            ),
-            majorId: formInput.majorId,
-            majorName: academicStore.majorNameMap.get(formInput.majorId),
-            SpecializationName: formInput.SpecializationName,
-            campusName: formInput.campusName,
-            hasAssignedClassroom: formInput.hasAssignedClassroom,
-            classroomId: formInput.Classroom,
-            remark: formInput.remark,
-            headTeacherPhoneNumber: formInput.headTeacherPhoneNumber,
-            graduationYearSemester: formInput.graduationYearSemester,
-            isExpanding: formInput.isExpanding,
-            mentorId: formInput.mentorId,
-            mentorName: personnelStore.teacherNameMap.get(formInput.mentorId),
-          });
-          data.isDialogFormVisible = false; //确认后关闭弹窗
+          isButtonLoading.value = true;
+          if (
+            academicStore.AddClass({
+              name: formInput.className,
+              abbr: formInput.classAbbr,
+              educationalLevelId: formInput.educationalLevelId,
+              gradeId: formInput.gradeId,
+              classType: formInput.classType,
+              counsellorId: formInput.counsellorId,
+              headTeacherId: formInput.headTeacherId,
+              monitorName: formInput.monitorName,
+              classAssistantName: formInput.classAssistantName,
+              size: formInput.classSize,
+              maxSize: formInput.classMaxSize,
+              genderDistribution: formInput.genderDistribution,
+              facultyId: formInput.facultyId,
+              majorId: formInput.majorId,
+              SpecializationName: formInput.SpecializationName,
+              campusName: formInput.campusName,
+              hasAssignedClassroom: formInput.hasAssignedClassroom,
+              classroomId: formInput.Classroom,
+              remark: formInput.remark,
+              headTeacherPhoneNumber: formInput.headTeacherPhoneNumber,
+              graduationYearSemester: formInput.graduationYearSemester,
+              isExpanding: formInput.isExpanding,
+              mentorId: formInput.mentorId,
+            }) === 200
+          ) {
+            ElMessage.success("添加成功!");
+            isButtonLoading.value = false;
+            data.isDialogFormVisible = false; //确认后关闭弹窗
+          } else {
+            isButtonLoading.value = false;
+            ElMessage.error(res);
+          }
           formEl.resetFields();
         }
       });
@@ -646,12 +641,6 @@ export default {
                 gradeId: formInput.gradeId,
                 classType: formInput.classType,
                 counsellorId: formInput.counsellorId,
-                counsellorName: personnelStore.teacherNameMap.get(
-                  formInput.counsellorId
-                ),
-                headTeacherName: personnelStore.teacherNameMap.get(
-                  formInput.headTeacherId
-                ),
                 headTeacherId: formInput.headTeacherId,
                 monitorName: formInput.monitorName,
                 classAssistantName: formInput.classAssistantName,
@@ -659,11 +648,7 @@ export default {
                 maxSize: formInput.classMaxSize,
                 genderDistribution: formInput.genderDistribution,
                 facultyId: formInput.facultyId,
-                facultyName: academicStore.departmentNameMap.get(
-                  formInput.facultyId
-                ),
                 majorId: formInput.majorId,
-                majorName: academicStore.majorNameMap.get(formInput.majorId),
                 SpecializationName: formInput.SpecializationName,
                 campusName: formInput.campusName,
                 hasAssignedClassroom: formInput.hasAssignedClassroom,
@@ -673,16 +658,19 @@ export default {
                 graduationYearSemester: formInput.graduationYearSemester,
                 isExpanding: formInput.isExpanding,
                 mentorId: formInput.mentorId,
-                mentorName: personnelStore.teacherNameMap.get(
-                  formInput.mentorId
-                ),
               },
               data.id
-            )
+            ) == 200
           ) {
+            ElMessage.success("操作成功!");
+            isButtonLoading.value = false;
+            bus.emit("updateClassList", false);
             data.isDialogFormVisible = false; //确认后关闭弹窗
-            formEl.resetFields();
+          } else {
+            isButtonLoading.value = false;
+            ElMessage.error(res);
           }
+          formEl.resetFields();
         }
       });
     };

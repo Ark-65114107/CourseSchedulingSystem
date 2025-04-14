@@ -1,8 +1,9 @@
+import fakeRequest from "@/utils/fakeRequest"
 import request from "@/utils/request"
 
 //获取作息表单数据
 export const getScheduleRoutineApi = (taskId)=>{
-    return request({
+    return fakeRequest({
         url:"/task/getScheduleRoutine",
         method:"get",
         params:{
@@ -14,7 +15,7 @@ export const getScheduleRoutineApi = (taskId)=>{
 
 //更新课程时长
 export const updateMaxWeekApi = (taskId,newValue)=>{
-    return request({
+    return fakeRequest({
         url:"/task/updateMaxWeek",
         method:"post",
         data:{
@@ -25,7 +26,7 @@ export const updateMaxWeekApi = (taskId,newValue)=>{
 }
 //更新课程时长
 export const updateCourseDurationApi = (taskId,newValue)=>{
-    return request({
+    return fakeRequest({
         url:"/task/updateCourseDuration",
         method:"post",
         data:{
@@ -37,7 +38,7 @@ export const updateCourseDurationApi = (taskId,newValue)=>{
 
 //更新课间时长
 export const updateBreakDurationApi = (taskId,newValue)=>{
-    return request({
+    return fakeRequest({
         url:"/task/updateBreakDuration",
         method:"post",
         data:{
@@ -49,7 +50,7 @@ export const updateBreakDurationApi = (taskId,newValue)=>{
 
 //更新节次
 export const updatePeriodApi = (taskId,daytime,newValue)=>{
-    return request({
+    return fakeRequest({
         url:"/task/updatePeriod",
         method:"post",
         data:{
@@ -62,7 +63,7 @@ export const updatePeriodApi = (taskId,daytime,newValue)=>{
 
 //更新节次时间
 export const updatePeriodTimeApi = (taskId,period,newValue)=>{
-    return request({
+    return fakeRequest({
         url:"/task/updatePeriodTime",
         method:"post",
         data:{
@@ -75,7 +76,7 @@ export const updatePeriodTimeApi = (taskId,period,newValue)=>{
 
 //更新午休/晚休时长
 export const updateRestTimeDurationApi = (taskId,index,newValue)=>{
-    return request({
+    return fakeRequest({
         url:"/task/updateRestTimeDuration",
         method:"post",
         data:{

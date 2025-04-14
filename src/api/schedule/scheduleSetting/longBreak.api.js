@@ -1,8 +1,9 @@
+import fakeRequest from "@/utils/fakeRequest"
 import request from "@/utils/request"
 
 //添加新大课间
 export const createLongBreakApi = (taskId)=>{
-    return request({
+    return fakeRequest({
         url:"/task/createLongBreak",
         method:"post",
         data:{
@@ -13,7 +14,7 @@ export const createLongBreakApi = (taskId)=>{
 
 //更新大课间
 export const updateLongBreakApi = (taskId,index,period=1,duration=15)=>{
-    return request({
+    return fakeRequest({
         url:"/task/updateLongBreak",
         method:"post",
         data:{
@@ -27,7 +28,7 @@ export const updateLongBreakApi = (taskId,index,period=1,duration=15)=>{
 
 //删除大课间
 export const deleteLongBreakApi = (taskId,index)=>{
-    return request({
+    return fakeRequest({
         url:`/task/longBreak/${index}`,
         method:"delete",
         params:{

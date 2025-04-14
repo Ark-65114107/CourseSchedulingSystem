@@ -1,7 +1,9 @@
+import fakeRequest from "@/utils/fakeRequest"
 import request from "@/utils/request"
 
+
 export const cellCreateApi = (taskId,classId,teachingClassId,period,cellIndex) => {
-    return request({
+    return fakeRequest({
         url: "/task/cellCreate",
         method: "post",
         data: {
