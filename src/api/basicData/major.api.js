@@ -3,7 +3,7 @@ import request from "@/utils/request"
 //获取专业数据
 export const getMajorListApi = (param)=>{
     return request({
-        url:"/majors",
+        url:"/basicData/major/getMajor",
         method:"get",
         params:param,
         isAbort:true

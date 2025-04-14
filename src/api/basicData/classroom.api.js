@@ -15,7 +15,7 @@ export const getSingleClassroomApi = (id) => {
         url: "/basicData/classroom/searchClassroomByRoomID",
         method: "post",
         data:{
-            roomID:id
+            RoomID:id
         },
     }).catch(() => { })
 }

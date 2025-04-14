@@ -78,7 +78,7 @@ export default {
 
     onMounted(() => {
       bus.on("showClassroomInfoDrawer", (value) => {
-        getClassroomInfo(value.roomId);
+        getClassroomInfo(value.roomID);
         isDrawerVisible.value = true;
       });
     });

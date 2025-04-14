@@ -138,9 +138,9 @@ export const useAcademicStore = defineStore('academic', {
         },
         getMajors(param) {
             return getMajorListApi(param).then(res => {
-                if (res.meta.code == 200) {
+                if (res.code == 200) {
                     this.majorNum = res.data.total
-                    this.majors = res.data.majors
+                    this.majors = res.data
                     return 200
                 }
             }).catch(error => {
